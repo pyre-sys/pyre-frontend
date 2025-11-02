@@ -359,4 +359,9 @@ export class HerramientaService {
   getHerramientasEnPrestamoByUsuario(idUsuarioResponsable: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/prestamo/usuario/${idUsuarioResponsable}`);
   }
+
+  // [HttpGet("reparacion/proveedor/{idProveedor}")]
+  getHerramientasEnReparacionByProveedor(idProveedor: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/reparacion/proveedor/${idProveedor}`);
+  }
 }
