@@ -1,0 +1,437 @@
+.dashboard-container {
+    /* Ocupa la altura disponible menos la altura del topbar (ajusta la variable si tu topbar tiene otra altura) */
+    min-height: calc(95vh - var(--topbar-height, 70px));
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 1.2rem 1rem;
+    background-color: #f8f9fa;
+    width: 100%;
+    max-width: 1200px;
+    max-height: none;
+    margin: 0 auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    border-radius: 8px;
+    box-shadow: 0 6px 32px 0 rgba(44, 44, 44, 0.07);
+}
+
+/* Eliminado: reglas que forzaban que la fila de gráficos y las columnas
+   usen todo el alto disponible (se revierte el cambio solicitado) */
+
+/* Restauración: estilos originales de chart-card y recent-activity (alturas fijas) */
+.chart-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(44, 44, 44, 0.06);
+    height: 220px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e0e0e0;
+}
+
+.chart-card h4 {
+    color: #222;
+    margin-bottom: 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-placeholder {
+    flex: 1;
+    background: #f5f6fa;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 1rem;
+    border: 1.5px dashed #bdbdbd;
+    min-height: 60px;
+    margin-top: 0.2rem;
+    transition: background 0.2s;
+}
+
+/* Recent activity restaurado a comportamiento original (altura fija) */
+.recent-activity {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1rem 0.7rem;
+    box-shadow: 0 2px 8px rgba(44, 44, 44, 0.06);
+    border: 1px solid #e0e0e0;
+    height: 220px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* La lista de actividad debe poder scrollear dentro del panel */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* Si necesitas que el contenido interior llene verticalmente, permitir que el wrapper principal crezca */
+.dashboard-container>.row,
+.dashboard-container>.stats-row,
+.dashboard-container .chart-card,
+.dashboard-container .recent-activity {
+    /* permiten que las zonas puedan expandirse dentro del contenedor */
+    flex: 0 0 auto;
+}
+
+/* Ajuste en pantallas pequeñas: restar un poco más para el topbar y barras móviles */
+@media (max-width: 768px) {
+    .dashboard-container {
+        min-height: calc(100vh - var(--topbar-height-mobile, 110px));
+        padding: 0.7rem;
+    }
+}
+
+.dashboard-header {
+    margin-bottom: 0.7rem;
+}
+
+.dashboard-title {
+    color: #222;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.stats-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1rem;
+    overflow-x: auto;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.2rem;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 0.9rem 0.7rem;
+    box-shadow: 0 2px 8px rgba(44, 44, 44, 0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: 160px;
+    flex: 0 0 auto;
+    border: 1px solid #f0f0f0;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 4px 12px rgba(44, 44, 44, 0.10);
+}
+
+.stat-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    background: #e9ecef;
+    color: #2c2c2c;
+}
+
+.stat-icon.primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: #fff;
+}
+
+.stat-icon.success {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: #fff;
+}
+
+.stat-icon.info {
+    background: linear-gradient(135deg, #17a2b8, #117a8b);
+    color: #fff;
+}
+
+.stat-icon.warning {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: #fff;
+}
+
+.stat-icon.alert {
+    background: linear-gradient(135deg, #ffe082, #ffc107);
+    color: #856404;
+}
+
+.stat-icon.danger {
+    background: linear-gradient(135deg, #dc3545, #b21f2d);
+    color: #fff;
+}
+
+.stat-card-alerta {
+    /* Usar misma sombra que .stat-card */
+    box-shadow: 0 2px 8px rgba(44, 44, 44, 0.06);
+    border-color: #f0f0f0;
+    /* coherente con .stat-card */
+}
+
+/* Neutralizar cualquier glow aplicado con :has() y forzar la misma sombra */
+.stat-card-alerta:has(.stat-icon.alert),
+.stat-card-alerta:has(.stat-icon.danger) {
+    box-shadow: 0 2px 8px rgba(44, 44, 44, 0.06);
+    border-color: #f0f0f0;
+}
+
+/* Hover: igualar al hover de .stat-card */
+.stat-card-alerta:hover,
+.stat-card-alerta:has(.stat-icon.alert):hover,
+.stat-card-alerta:has(.stat-icon.danger):hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(44, 44, 44, 0.10) !important;
+    border-color: #f0f0f0 !important;
+}
+
+/* Pendientes: ámbar suave y texto oscuro */
+.stat-card-alerta .stat-icon.alert {
+    background: linear-gradient(135deg, #fff6e6, #fff1d9);
+    color: #6a4f00;
+    border-color: rgba(255, 193, 7, 0.12);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.03) inset;
+}
+
+/* Vencidas: rojo suave pero legible */
+.stat-card-alerta .stat-icon.danger {
+    background: linear-gradient(135deg, #fff0f1, #ffe6e8);
+    color: #8a1f28;
+    border-color: rgba(220, 53, 69, 0.10);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.03) inset;
+}
+
+/* Badges dentro de las tarjetas de alerta: diseño más elegante */
+.stat-card-alerta .badge-warning,
+.stat-card-alerta .badge-danger {
+    position: static;
+    margin-left: 0.6rem;
+    font-size: 0.9em;
+    padding: 0.2em 0.65em;
+    border-radius: 999px;
+    box-shadow: none;
+    letter-spacing: 0.2px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* Estética específica para cada badge */
+.stat-card-alerta .badge-warning {
+    background: linear-gradient(135deg, #fff0d6, #ffe1a8);
+    color: #5a4200;
+    font-weight: 700;
+}
+
+.stat-card-alerta .badge-danger {
+    background: linear-gradient(135deg, #ffe8ea, #ffcfd3);
+    color: #7a1a22;
+    font-weight: 700;
+}
+
+/* Texto e información dentro de la tarjeta */
+.stat-card-alerta .stat-info {
+    width: auto;
+    text-align: left;
+    margin-top: 0;
+    flex: 1;
+}
+
+.stat-card-alerta .stat-info h3 {
+    font-size: 1.02rem;
+    color: #222532;
+    margin: 0 0 0.06rem 0;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.stat-card-alerta .stat-info p {
+    color: #6b6f74;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-top: 0.03rem;
+    margin-bottom: 0;
+}
+
+/* Colores cuando el icono es danger (ajuste de textos) */
+.stat-card-alerta .stat-icon.danger+.stat-info h3,
+.stat-card-alerta .stat-icon.danger+.stat-info p {
+    /* ligeramente más serio para vencidas */
+    color: #2b2b2b;
+}
+
+/* Hover: sutil elevación y color de borde más vivo */
+.stat-card-alerta:hover {
+    box-shadow: 0 14px 40px rgba(34, 49, 63, 0.10);
+    transform: translateY(-3px);
+    border-color: rgba(33, 37, 41, 0.12);
+}
+
+.stats-row-alertas {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-content: flex-start;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.stats-row-alertas .stat-card-alerta {
+    flex: 1 1 0;
+    min-width: 140px;
+    max-width: 100%;
+}
+
+.stats-row-resto {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.2rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.stats-row-resto .stat-card {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Elimina el overflow-x para stats-row-resto */
+.stats-row-resto {
+    overflow-x: unset;
+}
+
+/* Evitar scrollbar horizontal al hacer hover en las tarjetas de alertas */
+.stats-row-alertas {
+    overflow-x: hidden;
+    /* evita que el ligero crecimiento muestre barra horizontal */
+}
+
+/* Anular el scale heredado de .stat-card:hover para las alertas.
+   Usar sólo translateY para la elevación y la misma sombra que .stat-card:hover */
+.stat-card-alerta:hover {
+    transform: translateY(-2px) !important;
+    /* sin scale */
+    box-shadow: 0 4px 12px rgba(44, 44, 44, 0.10) !important;
+    border-color: #f0f0f0 !important;
+}
+
+/* Asegurar también que las variantes con :has() no reintroduzcan glow/scale en hover */
+.stat-card-alerta:has(.stat-icon.alert):hover,
+.stat-card-alerta:has(.stat-icon.danger):hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(44, 44, 44, 0.10) !important;
+    border-color: #f0f0f0 !important;
+}
+
+/* Responsive: en pantallas pequeñas, las tarjetas se apilan verticalmente ocupando todo el ancho */
+@media (max-width: 992px) {
+    .stats-row-alertas {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.7rem;
+    }
+
+    .stats-row-alertas .stat-card-alerta {
+        min-width: 120px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .stats-row-resto {
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .stats-row-resto .stat-card {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 0.7rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.1rem;
+    }
+
+    .stats-row {
+        gap: 0.5rem;
+    }
+
+    .stat-card {
+        min-width: 110px;
+        padding: 0.5rem 0.3rem;
+    }
+
+    .stat-card-alerta {
+        min-width: 110px;
+        width: 100%;
+        max-width: 100%;
+        padding: 0.5rem 0.3rem;
+    }
+
+    .stats-row-resto {
+        gap: 0.5rem;
+    }
+
+    .stats-row-resto .stat-card {
+        min-width: 80px;
+        padding: 0.5rem 0.3rem;
+    }
+
+    .row {
+        flex-direction: column;
+    }
+
+    .chart-card,
+    .recent-activity {
+        height: auto;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Evita padding excesivo en móvil */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 0.5rem;
+    }
+
+    .stats-row,
+    .stats-row-alertas,
+    .stats-row-resto {
+        gap: 0.3rem;
+        padding-bottom: 0;
+    }
+}

@@ -13,8 +13,8 @@
             </h5>
             <div class="form-progress">
               <span class="badge bg-light text-dark border">
-                <i class="bi bi-check-circle-fill text-success me-1" *ngIf="prestamoForm.valid"></i>
-                <i class="bi bi-hourglass-split text-warning me-1" *ngIf="!prestamoForm.valid"></i>
+                <i class="bi bi-check-circle-fill text-success me-1" *ngIf="isFormValid()"></i>
+                <i class="bi bi-hourglass-split text-warning me-1" *ngIf="!isFormValid()"></i>
                 {{ getFormCompletionPercentage() }}% completado
               </span>
             </div>
@@ -29,43 +29,85 @@
 
         <div class="card-body p-4 d-flex flex-column">
           <form [formGroup]="prestamoForm" (ngSubmit)="onSubmit()" class="flex-grow-1">
-            <!-- SECCIÓN 1: Selección de Herramienta y Responsable -->
+            <!-- SECCIÓN 1: Selección de Herramientas -->
             <div class="mb-4">
               <h6 class="form-section-title">
                 <i class="bi bi-1-circle-fill text-primary me-2"></i>
-                Herramienta y Responsable
+                Selección de Herramientas
               </h6>
-              <div class="row g-3">
-                <!-- Label -->
+
+              <!-- Selector de herramienta + botón agregar -->
+              <div class="row g-3 mb-3">
                 <div class="col-12">
                   <label class="form-label soft-label">
-                    Seleccionar Herramienta y Responsable
+                    Agregar Herramientas
                     <span class="text-danger">*</span>
                   </label>
                 </div>
-              </div>
-              <div class="row g-3">
-                <!-- Herramienta -->
-                <div class="col-md-6">
-                  <div class="form-field-wrapper" [class.has-value]="prestamoForm.get('herramientaId')?.value"
-                    [class.has-error]="
-                      prestamoForm.get('herramientaId')?.invalid &&
-                      prestamoForm.get('herramientaId')?.touched
-                    ">
+                <div class="col-md-10">
+                  <div class="form-field-wrapper">
                     <app-cbo-herramientas [isId]="'herramientaSelect'" [idDisponibilidad]="1"
-                      [objectErrors]="prestamoForm.get('herramientaId')?.errors"
-                      [isTouched]="!!prestamoForm.get('herramientaId')?.touched" formControlName="herramientaId"
-                      (herramientaSelected)="onHerramientaSelected($event)">
+                      formControlName="herramientaId" (herramientaSelected)="onHerramientaSelected($event)">
                     </app-cbo-herramientas>
-                    <span class="field-check-icon" *ngIf="prestamoForm.get('herramientaId')?.valid">
-                      <i class="bi bi-check-circle-fill text-success"></i>
-                    </span>
                   </div>
                   <small class="text-muted">Solo se muestran herramientas disponibles</small>
                 </div>
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-outline-primary w-100" (click)="addHerramienta()"
+                    [disabled]="!currentHerramientaSelection">
+                    <i class="bi bi-plus-lg"></i>
+                    <span class="d-none d-md-inline ms-1">Agregar</span>
+                  </button>
+                </div>
+              </div>
 
-                <!-- Responsable -->
+              <!-- Lista de herramientas seleccionadas -->
+              <div *ngIf="selectedHerramientas.length > 0" class="selected-tools-container">
+                <label class="form-label soft-label">
+                  Herramientas Seleccionadas ({{selectedHerramientas.length}})
+                  <span class="field-check-icon ms-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                  </span>
+                </label>
+                <div class="selected-tools-list">
+                  <div *ngFor="let herramienta of selectedHerramientas; let i = index" class="selected-tool-item"
+                    @fadeIn>
+                    <div class="tool-info">
+                      <div class="tool-primary">
+                        <strong>{{herramienta.codigo}}</strong> - {{herramienta.nombre}}
+                      </div>
+                      <div class="tool-secondary text-muted">
+                        <small>{{herramienta.marca}}</small>
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeHerramienta(i)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mensaje cuando no hay herramientas -->
+              <div *ngIf="selectedHerramientas.length === 0" class="alert alert-info d-flex align-items-center">
+                <i class="bi bi-info-circle me-2"></i>
+                <div>Seleccione al menos una herramienta para continuar con el préstamo</div>
+              </div>
+            </div>
+
+            <hr class="soft-divider" />
+
+            <!-- SECCIÓN 2: Responsable -->
+            <div class="mb-4">
+              <h6 class="form-section-title">
+                <i class="bi bi-2-circle-fill text-primary me-2"></i>
+                Responsable del Préstamo
+              </h6>
+              <div class="row g-3">
                 <div class="col-md-6">
+                  <label class="form-label soft-label">
+                    Responsable
+                    <span class="text-danger">*</span>
+                  </label>
                   <div class="form-field-wrapper" [class.has-value]="prestamoForm.get('responsableId')?.value"
                     [class.has-error]="
                       prestamoForm.get('responsableId')?.invalid &&
@@ -86,7 +128,7 @@
 
             <hr class="soft-divider" />
 
-            <!-- SECCIÓN 2: Fechas -->
+            <!-- SECCIÓN 3: Fechas -->
             <div class="mb-4">
               <h6 class="form-section-title">
                 <i class="bi bi-2-circle-fill text-primary me-2"></i>
@@ -134,7 +176,7 @@
 
             <hr class="soft-divider" />
 
-            <!-- SECCIÓN 3: Obra y Observaciones -->
+            <!-- SECCIÓN 4: Obra y Observaciones -->
             <div class="mb-4">
               <h6 class="form-section-title">
                 <i class="bi bi-3-circle-fill text-primary me-2"></i>
@@ -178,7 +220,7 @@
                 <span>Limpiar</span>
               </button>
               <button type="submit" class="btn btn-success d-flex align-items-center gap-2"
-                [disabled]="prestamoForm.invalid || isLoading">
+                [disabled]="!isFormValid() || isLoading">
                 <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status"
                   aria-hidden="true"></span>
                 <i *ngIf="!isLoading" class="bi bi-check-circle-fill"></i>
@@ -194,60 +236,47 @@
 
     <!-- PANEL LATERAL DE INFORMACIÓN -->
     <div class="col-lg-4">
-      <!-- Información de la Herramienta -->
-      <div class="info-card herramienta-card card mb-3 shadow-sm" [class.card-skeleton]="!selectedHerramientaInfo"
-        [class.card-filled]="selectedHerramientaInfo" @fadeIn>
+      <!-- Información de las Herramientas -->
+      <div class="info-card herramienta-card card mb-3 shadow-sm"
+        [class.card-skeleton]="selectedHerramientas.length === 0" [class.card-filled]="selectedHerramientas.length > 0"
+        @fadeIn>
         <div class="card-header bg-gradient-primary text-white">
           <h6 class="card-title mb-0 d-flex align-items-center">
             <i class="bi bi-tools me-2"></i>
-            Herramienta a Prestar
+            Herramientas a Prestar
+            <span class="badge bg-white text-primary ms-auto" *ngIf="selectedHerramientas.length > 0">
+              {{selectedHerramientas.length}}
+            </span>
           </h6>
         </div>
         <div class="card-body">
           <!-- Estado sin selección -->
-          <div *ngIf="!selectedHerramientaInfo" class="empty-state-herramienta text-center text-muted py-4">
+          <div *ngIf="selectedHerramientas.length === 0" class="empty-state-herramienta text-center text-muted py-4">
             <div class="empty-state-icon mb-3">
               <i class="bi bi-tools" style="font-size: 3rem"></i>
             </div>
             <p class="mb-0 small">
-              Seleccione una herramienta para el préstamo
+              Seleccione herramientas para el préstamo
             </p>
           </div>
 
-          <!-- Estado con herramienta seleccionada -->
-          <div *ngIf="selectedHerramientaInfo" class="info-content-herramienta">
+          <!-- Estado con herramientas seleccionadas -->
+          <div *ngIf="selectedHerramientas.length > 0" class="info-content-herramienta">
             <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
               <i class="bi bi-check-circle-fill me-2"></i>
               <div>
-                <strong>Disponible para Préstamo</strong>
-                <small class="d-block text-muted">Herramienta en buen estado</small>
+                <strong>{{selectedHerramientas.length}} Herramienta{{selectedHerramientas.length > 1 ? 's' : ''}}
+                  Seleccionada{{selectedHerramientas.length > 1 ? 's' : ''}}</strong>
+                <small class="d-block text-muted">Todas disponibles para préstamo</small>
               </div>
             </div>
 
-            <div class="info-list-herramienta">
-              <div class="info-item-herramienta">
-                <span class="info-label-herramienta">
-                  <i class="bi bi-hash text-primary"></i> Código:
-                </span>
-                <span class="info-value-herramienta">{{
-                  selectedHerramientaInfo.codigo
-                  }}</span>
-              </div>
-              <div class="info-item-herramienta">
-                <span class="info-label-herramienta">
-                  <i class="bi bi-wrench text-primary"></i> Herramienta:
-                </span>
-                <span class="info-value-herramienta">{{
-                  selectedHerramientaInfo.nombre
-                  }}</span>
-              </div>
-              <div class="info-item-herramienta">
-                <span class="info-label-herramienta">
-                  <i class="bi bi-tag text-primary"></i> Marca:
-                </span>
-                <span class="info-value-herramienta">{{
-                  selectedHerramientaInfo.marca
-                  }}</span>
+            <div class="herramientas-summary">
+              <div *ngFor="let herramienta of selectedHerramientas; let i = index"
+                class="herramienta-summary-item mb-2 p-2 border rounded">
+                <div class="fw-bold">{{herramienta.codigo}}</div>
+                <div class="small text-muted">{{herramienta.nombre}}</div>
+                <div class="small text-muted">{{herramienta.marca}}</div>
               </div>
             </div>
           </div>
@@ -330,6 +359,56 @@
 
     .form-actions {
       margin-top: auto;
+    }
+
+    .selected-tools-container {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 1rem;
+    }
+
+    .selected-tools-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .selected-tool-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 0.375rem;
+      transition: all 0.2s ease;
+    }
+
+    .selected-tool-item:hover {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .tool-info {
+      flex-grow: 1;
+    }
+
+    .tool-primary {
+      font-size: 0.9rem;
+      color: #495057;
+    }
+
+    .tool-secondary {
+      font-size: 0.8rem;
+    }
+
+    .herramientas-summary {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .herramienta-summary-item {
+      background: rgba(255, 255, 255, 0.8);
     }
   </style>
 </div>

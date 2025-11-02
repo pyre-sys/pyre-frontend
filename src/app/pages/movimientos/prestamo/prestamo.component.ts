@@ -35,15 +35,16 @@ import { AlertaService } from '../../../services/alerta.service';
 })
 export class PrestamoComponent implements OnInit {
   prestamoForm!: FormGroup;
-  selectedHerramientaInfo: HerramientaOption | null = null;
+  selectedHerramientas: HerramientaOption[] = [];
   selectedUsuarioInfo: UsuarioOption | null = null;
   selectedObraInfo: ObraOption | null = null;
+  currentHerramientaSelection: HerramientaOption | null = null;
 
   isLoading = false;
   isLoadingMovimiento = false;
 
   // Campos requeridos para calcular el progreso
-  private requiredFields = ['herramientaId', 'responsableId', 'fechaEstimadaDevolucion', 'obraId'];
+  private requiredFields = ['responsableId', 'fechaEstimadaDevolucion', 'obraId'];
 
   // Placeholder original para observaciones
   private originalPlaceholder: string = 'Agregue cualquier detalle adicional sobre el préstamo... (Opcional)';
@@ -73,7 +74,7 @@ export class PrestamoComponent implements OnInit {
 
   private buildForm(): void {
     this.prestamoForm = this.fb.group({
-      herramientaId: ['', Validators.required],
+      herramientaId: [''], // Solo para selección temporal
       responsableId: ['', Validators.required],
       fechaEstimadaDevolucion: ['', Validators.required],
       obraId: ['', Validators.required],
@@ -106,7 +107,12 @@ export class PrestamoComponent implements OnInit {
    */
   getFormCompletionPercentage(): number {
     let filledFields = 0;
-    const totalFields = this.requiredFields.length;
+    let totalFields = this.requiredFields.length + 1; // +1 for herramientas array
+
+    // Check herramientas
+    if (this.selectedHerramientas.length > 0) {
+      filledFields++;
+    }
 
     this.requiredFields.forEach(field => {
       const control = this.prestamoForm.get(field);
@@ -119,30 +125,45 @@ export class PrestamoComponent implements OnInit {
   }
 
   onHerramientaSelected(herramienta: HerramientaOption | null): void {
-    this.selectedHerramientaInfo = herramienta;
-
-    if (herramienta) {
-      console.log('Herramienta seleccionada:', herramienta);
-    }
+    this.currentHerramientaSelection = herramienta;
   }
 
-  onUsuarioSelected(usuario: UsuarioOption | null): void {
-    this.selectedUsuarioInfo = usuario;
-
-    if (usuario) {
-      console.log('Usuario seleccionado:', usuario);
+  addHerramienta(): void {
+    if (!this.currentHerramientaSelection) {
+      this.alertService.error('Debe seleccionar una herramienta primero', 'Selección requerida');
+      return;
     }
+
+    // Verificar si la herramienta ya está en la lista
+    const exists = this.selectedHerramientas.some(h => h.id === this.currentHerramientaSelection!.id);
+    if (exists) {
+      this.alertService.error('Esta herramienta ya está en la lista', 'Herramienta duplicada');
+      return;
+    }
+
+    // Agregar herramienta a la lista
+    this.selectedHerramientas.push(this.currentHerramientaSelection);
+
+    // Limpiar selección temporal
+    this.prestamoForm.get('herramientaId')?.setValue('');
+    this.currentHerramientaSelection = null;
   }
 
-  onObraSelected(obra: ObraOption | null): void {
-    this.selectedObraInfo = obra;
+  removeHerramienta(index: number): void {
+    this.selectedHerramientas.splice(index, 1);
+  }
 
-    if (obra) {
-      console.log('Obra seleccionada:', obra);
-    }
+  isFormValid(): boolean {
+    return this.prestamoForm.valid && this.selectedHerramientas.length > 0;
   }
 
   onSubmit(): void {
+    // Validar herramientas seleccionadas
+    if (this.selectedHerramientas.length === 0) {
+      this.alertService.error('Debe seleccionar al menos una herramienta', 'Herramientas requeridas');
+      return;
+    }
+
     // Marcar todos los campos como tocados para mostrar errores
     if (this.prestamoForm.invalid) {
       this.prestamoForm.markAllAsTouched();
@@ -151,7 +172,8 @@ export class PrestamoComponent implements OnInit {
     }
 
     // Crear mensaje de confirmación con los datos esenciales del préstamo
-    const confirmMessage = `¿Confirmar registro de préstamo?<br><br>Herramienta: ${this.selectedHerramientaInfo?.nombre}<br>Responsable: ${this.selectedUsuarioInfo?.nombre} ${this.selectedUsuarioInfo?.apellido}`;
+    const herramientasText = this.selectedHerramientas.map(h => h.nombre).join(', ');
+    const confirmMessage = `¿Confirmar registro de préstamo?<br><br>Herramientas (${this.selectedHerramientas.length}): ${herramientasText}<br>Responsable: ${this.selectedUsuarioInfo?.nombre} ${this.selectedUsuarioInfo?.apellido}`;
 
     this.alertService.confirm(confirmMessage, 'Confirmar Préstamo').then((result) => {
       if (result.isConfirmed) {
@@ -172,29 +194,37 @@ export class PrestamoComponent implements OnInit {
       return;
     }
 
-    const prestamoData: CreateMovimientoDto = {
-      idHerramienta: formData.herramientaId,
+    // Crear un préstamo por cada herramienta seleccionada
+    const prestamos = this.selectedHerramientas.map(herramienta => ({
+      idHerramienta: herramienta.id,
       idUsuarioResponsable: formData.responsableId,
       idUsuarioGenera: currentUserId,
       idTipoMovimiento: 1, // Préstamo
-      fechaMovimiento: new Date().toISOString(), // Enviar fecha actual
+      fechaMovimiento: new Date().toISOString(),
       fechaEstimadaDevolucion: formData.fechaEstimadaDevolucion,
       estadoHerramientaAlDevolver: formData.estadoFisicoHerramientaId,
       idObra: formData.obraId,
       idProveedor: formData.proveedorId || null,
       observaciones: formData.observaciones || undefined,
-    };
+    }));
 
-    this.movimientoService.registrarPrestamo(prestamoData).subscribe({
-      next: (response) => {
+    // Registrar todos los préstamos
+    const prestamoRequests = prestamos.map(prestamo =>
+      this.movimientoService.registrarPrestamo(prestamo)
+    );
+
+    // Usar forkJoin para ejecutar todas las peticiones en paralelo
+    this.movimientoService.registrarMultiplesPrestamos(prestamos).subscribe({
+      next: (responses: any[]) => {
         this.isLoading = false;
-        this.alertService.success(`El préstamo de la herramienta ${this.selectedHerramientaInfo?.codigo} ha sido registrado exitosamente.`, '✓ Préstamo Registrado');
+        const herramientasText = this.selectedHerramientas.map(h => h.codigo).join(', ');
+        this.alertService.success(`Los préstamos de las herramientas ${herramientasText} han sido registrados exitosamente.`, '✓ Préstamos Registrados');
         this.resetForm();
       },
       error: (error) => {
         this.isLoading = false;
         this.alertService.error(error.error?.message || 'Ha ocurrido un error inesperado. Por favor, intente nuevamente.', '✗ Error al Registrar');
-        console.error('Error al crear préstamo:', error);
+        console.error('Error al crear préstamos:', error);
       }
     });
   }
@@ -217,7 +247,8 @@ export class PrestamoComponent implements OnInit {
 
   resetForm(): void {
     this.prestamoForm.reset();
-    this.selectedHerramientaInfo = null;
+    this.selectedHerramientas = [];
+    this.currentHerramientaSelection = null;
     this.selectedUsuarioInfo = null;
     this.selectedObraInfo = null;
   }
@@ -248,5 +279,21 @@ export class PrestamoComponent implements OnInit {
   isOverdue(): boolean {
     // Para préstamo, no aplica overdue
     return false;
+  }
+
+  onUsuarioSelected(usuario: UsuarioOption | null): void {
+    this.selectedUsuarioInfo = usuario;
+
+    if (usuario) {
+      console.log('Usuario seleccionado:', usuario);
+    }
+  }
+
+  onObraSelected(obra: ObraOption | null): void {
+    this.selectedObraInfo = obra;
+
+    if (obra) {
+      console.log('Obra seleccionada:', obra);
+    }
   }
 }

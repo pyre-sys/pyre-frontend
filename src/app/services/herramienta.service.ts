@@ -355,4 +355,8 @@ export class HerramientaService {
     return this.http.get<any>(`${this.baseUrl}/disponibilidad`, { params });
   }
 
+  // [HttpGet("prestamo/usuario/{idUsuarioResponsable}")]
+  getHerramientasEnPrestamoByUsuario(idUsuarioResponsable: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/prestamo/usuario/${idUsuarioResponsable}`);
+  }
 }

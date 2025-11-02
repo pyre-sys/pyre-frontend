@@ -3,30 +3,25 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { CboHerramientasComponent, HerramientaOption } from '../../../shared/components/Cbo/cbo-herramientas/cbo-herramientas.component';
+import { CboUsuarioComponent, UsuarioOption } from "../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component";
+import { HerramientaService } from '../../../services/herramienta.service';
 import { MovimientoService, CreateMovimientoDto } from '../../../services/movimiento.service';
 import { AuthService } from '../../../services/auth.service';
 import { PageTitleService } from '../../../services/page-title.service';
 import { AlertaService } from '../../../services/alerta.service';
 
-interface MovimientoInfo {
-  idHerramienta: number;
-  idUsuarioGenera: number;
-  idUsuarioResponsable: number;
-  idTipoMovimiento: number;
-  fechaMovimiento: string;
-  fechaEstimadaDevolucion?: string;
-  idEstadoHerramientaAlDevolver?: number;
-  idObra?: number;
-  idProveedor?: number;
-  observaciones?: string;
-  // Additional fields for display
-  herramientaCodigo?: string;
-  herramientaNombre?: string;
-  usuarioNombre?: string;
-  usuarioApellido?: string;
-  usuarioLegajo?: string;
-  obraNombre?: string;
+interface HerramientaDevolucion {
+  id: number;
+  codigo: string;
+  nombre: string;
+  marca: string;
+  fechaPrestamo: string;
+  fechaEstimadaDevolucion: string;
+  nombreObra?: string;
+  observacionesPrestamo?: string;
+  selected: boolean;
+  estadoFisicoId: number | null;
+  observaciones: string;
 }
 
 @Component({
@@ -36,7 +31,7 @@ interface MovimientoInfo {
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
-    CboHerramientasComponent,
+    CboUsuarioComponent,
   ],
   templateUrl: './devolucion.component.html',
   styleUrls: ['../../../../styles/visor-style.css', '../../../../styles/movimientos-style.css', './devolucion.component.css'],
@@ -52,19 +47,16 @@ interface MovimientoInfo {
 export class DevolucionComponent implements OnInit {
 
   devolucionForm!: FormGroup;
-  selectedHerramientaInfo: HerramientaOption | null = null;
-  movimientoInfo: MovimientoInfo | null = null;
+  selectedUsuarioInfo: UsuarioOption | null = null;
+  herramientasEnPrestamo: HerramientaDevolucion[] = [];
 
   isLoading = false;
-  isLoadingMovimiento = false;
+  isLoadingHerramientas = false;
 
   // Campos requeridos para calcular el progreso
-  private requiredFields = ['herramientaId', 'estadoFisicoId'];
+  private requiredFields = ['usuarioId'];
 
-  // Placeholder original para observaciones
-  private originalPlaceholder: string = 'Agregue cualquier detalle adicional sobre la devolución... (Opcional)';
-
-  // Opciones para estado físico (ejemplo; adaptar según servicio si existe)
+  // Opciones para estado físico
   estadoFisicoOptions = [
     { id: 1, nombre: 'Excelente' },
     { id: 2, nombre: 'Bueno' },
@@ -74,6 +66,7 @@ export class DevolucionComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
+    private herramientaService: HerramientaService,
     private movimientoService: MovimientoService,
     private authService: AuthService,
     private pageTitleService: PageTitleService,
@@ -83,36 +76,12 @@ export class DevolucionComponent implements OnInit {
   ngOnInit(): void {
     this.pageTitleService.setTitle('Registrar Devolución');
     this.buildForm();
-    this.setupFormListeners();
-    this.setInitialPlaceholder();
   }
 
   private buildForm(): void {
     this.devolucionForm = this.fb.group({
-      herramientaId: ['', Validators.required],
-      estadoFisicoId: ['', Validators.required],
-      observaciones: ['', Validators.maxLength(500)]
+      usuarioId: ['', Validators.required]
     });
-  }
-
-  private setupFormListeners(): void {
-    // Escuchar cambios en el formulario para actualizar el progreso en tiempo real
-    this.devolucionForm.valueChanges.subscribe(() => {
-      // Podrías agregar lógica adicional aquí si es necesario
-    });
-  }
-
-  private setInitialPlaceholder(): void {
-    setTimeout(() => {
-      const textarea = document.querySelector('textarea[formControlName="observaciones"]') as HTMLTextAreaElement;
-      if (textarea) {
-        textarea.placeholder = this.originalPlaceholder;
-      }
-    });
-  }
-
-  private getTodayDate(): string {
-    return new Date().toISOString().split('T')[0];
   }
 
   /**
@@ -120,8 +89,9 @@ export class DevolucionComponent implements OnInit {
    */
   getFormCompletionPercentage(): number {
     let filledFields = 0;
-    const totalFields = this.requiredFields.length;
+    let totalFields = this.requiredFields.length + 1; // +1 for herramientas selection
 
+    // Check usuario
     this.requiredFields.forEach(field => {
       const control = this.devolucionForm.get(field);
       if (control && control.value && control.valid) {
@@ -129,87 +99,147 @@ export class DevolucionComponent implements OnInit {
       }
     });
 
+    // Check if at least one tool is selected and properly filled
+    const hasValidSelection = this.herramientasEnPrestamo.some(h => 
+      h.selected && h.estadoFisicoId !== null
+    );
+    
+    if (hasValidSelection) {
+      filledFields++;
+    }
+
     return Math.round((filledFields / totalFields) * 100);
   }
 
-  onHerramientaSelected(herramienta: HerramientaOption | null): void {
-    this.selectedHerramientaInfo = herramienta;
-    this.movimientoInfo = null;
+  onUsuarioSelected(usuario: UsuarioOption | null): void {
+    this.selectedUsuarioInfo = usuario;
+    this.herramientasEnPrestamo = [];
 
-    if (herramienta) {
-      console.log('Herramienta seleccionada:', herramienta);
-      this.loadMovimientoInfo(herramienta.id);
+    if (usuario) {
+      console.log('Usuario seleccionado:', usuario);
+      this.loadHerramientasEnPrestamo(usuario.id);
     }
   }
 
-  private loadMovimientoInfo(herramientaId: number): void {
-    this.isLoadingMovimiento = true;
+  private loadHerramientasEnPrestamo(usuarioId: number): void {
+    this.isLoadingHerramientas = true;
 
-    this.movimientoService.getUltimoMovimientoByHerramienta(herramientaId).subscribe({
+    this.herramientaService.getHerramientasEnPrestamoByUsuario(usuarioId).subscribe({
       next: (response) => {
-        this.isLoadingMovimiento = false;
+        this.isLoadingHerramientas = false;
         if (response.success && response.data) {
-          // Get the most recent active loan (should be the last one)
-          const lastMovimiento = response.data;
-
-          this.movimientoInfo = {
-            idHerramienta: lastMovimiento.idHerramienta,
-            idUsuarioGenera: lastMovimiento.idUsuarioGenera,
-            idUsuarioResponsable: lastMovimiento.idUsuarioResponsable,
-            idTipoMovimiento: lastMovimiento.idTipoMovimiento,
-            fechaMovimiento: lastMovimiento.fecha,
-            fechaEstimadaDevolucion: lastMovimiento.fechaEstimadaDevolucion,
-            idObra: lastMovimiento.idObra,
-            idProveedor: lastMovimiento.idProveedor,
-            observaciones: lastMovimiento.observaciones || '',
-            // Display fields
-            herramientaCodigo: lastMovimiento.codigoHerramienta,
-            herramientaNombre: lastMovimiento.nombreHerramienta,
-            usuarioNombre: lastMovimiento.nombreUsuarioResponsable || 'N/A',
-            usuarioApellido: '', // Not provided in API response
-            usuarioLegajo: 'N/A', // Not provided in API response
-            obraNombre: lastMovimiento.nombreObra || 'N/A'
-          };
+          this.herramientasEnPrestamo = response.data.map((item: any) => ({
+            id: item.idHerramienta,
+            codigo: item.codigoHerramienta,
+            nombre: item.nombreHerramienta,
+            marca: item.marca || 'N/A',
+            fechaPrestamo: item.fechaPrestamo,
+            fechaEstimadaDevolucion: item.fechaEstimadaDevolucion,
+            nombreObra: item.nombreObra,
+            observacionesPrestamo: item.observaciones,
+            selected: false,
+            estadoFisicoId: null,
+            observaciones: ''
+          }));
         } else {
-          // No movements found
-          this.movimientoInfo = null;
-          console.warn('No se encontraron movimientos para esta herramienta');
+          this.herramientasEnPrestamo = [];
+          this.alertService.error('Este usuario no tiene herramientas en préstamo actualmente.', 'Sin Herramientas');
         }
       },
       error: (error) => {
-        this.isLoadingMovimiento = false;
-        this.movimientoInfo = null;
-        console.error('Error al cargar información del movimiento:', error);
-
-        // Show error modal
-        this.alertService.error('No se pudo cargar la información de devolución.', 'Error al Cargar Información');
+        this.isLoadingHerramientas = false;
+        this.herramientasEnPrestamo = [];
+        console.error('Error al cargar herramientas en préstamo:', error);
+        this.alertService.error('No se pudieron cargar las herramientas en préstamo.', 'Error al Cargar');
       }
     });
+  }
+
+  onHerramientaToggle(herramienta: HerramientaDevolucion): void {
+    herramienta.selected = !herramienta.selected;
+    
+    // If deselected, clear the fields
+    if (!herramienta.selected) {
+      herramienta.estadoFisicoId = null;
+      herramienta.observaciones = '';
+    }
+  }
+
+  onEstadoFisicoChange(herramienta: HerramientaDevolucion, estadoId: number): void {
+    herramienta.estadoFisicoId = estadoId;
+  }
+
+  onObservacionesChange(herramienta: HerramientaDevolucion, observaciones: string): void {
+    herramienta.observaciones = observaciones;
+  }
+
+  getSelectedHerramientas(): HerramientaDevolucion[] {
+    return this.herramientasEnPrestamo.filter(h => h.selected);
+  }
+
+  isFormValid(): boolean {
+    const selectedHerramientas = this.getSelectedHerramientas();
+    
+    if (!this.devolucionForm.valid || selectedHerramientas.length === 0) {
+      return false;
+    }
+
+    // Check if all selected tools have required fields filled
+    return selectedHerramientas.every(h => h.estadoFisicoId !== null);
+  }
+
+  getDaysOverdue(fechaEstimada: string): number {
+    if (!fechaEstimada) return 0;
+
+    const today = new Date();
+    const estimatedDate = new Date(fechaEstimada + (fechaEstimada.includes('Z') ? '' : 'Z'));
+    const diffTime = today.getTime() - estimatedDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return diffDays > 0 ? diffDays : 0;
+  }
+
+  isOverdue(fechaEstimada: string): boolean {
+    return this.getDaysOverdue(fechaEstimada) > 0;
   }
 
   onSubmit(): void {
-    // Marcar todos los campos como tocados para mostrar errores
-    if (this.devolucionForm.invalid) {
-      this.devolucionForm.markAllAsTouched();
-      this.scrollToFirstError();
+    const selectedHerramientas = this.getSelectedHerramientas();
+
+    // Validations
+    if (selectedHerramientas.length === 0) {
+      this.alertService.error('Debe seleccionar al menos una herramienta para devolver', 'Herramientas requeridas');
       return;
     }
 
-    // Crear mensaje de confirmación con los datos esenciales de la devolución
-    const confirmMessage = `¿Confirmar registro de devolución?<br><br>Herramienta: ${this.selectedHerramientaInfo?.nombre}<br>Fecha: ${this.devolucionForm.get('fechaDevolucion')?.value}`;
+    if (this.devolucionForm.invalid) {
+      this.devolucionForm.markAllAsTouched();
+      return;
+    }
+
+    // Check if all selected tools have required fields
+    const invalidTools = selectedHerramientas.filter(h => h.estadoFisicoId === null);
+    if (invalidTools.length > 0) {
+      this.alertService.error('Debe especificar el estado físico para todas las herramientas seleccionadas', 'Campos requeridos');
+      return;
+    }
+
+    // Create confirmation message
+    const herramientasText = selectedHerramientas.map(h => h.codigo).join(', ');
+    const confirmMessage = `¿Confirmar registro de devolución?<br><br>Herramientas (${selectedHerramientas.length}): ${herramientasText}<br>Usuario: ${this.selectedUsuarioInfo?.nombre} ${this.selectedUsuarioInfo?.apellido}`;
 
     this.alertService.confirm(confirmMessage, 'Confirmar Devolución').then((result) => {
       if (result.isConfirmed) {
-        this.registrarDevolucion();
+        this.registrarDevoluciones();
       }
     });
   }
 
-  private registrarDevolucion(): void {
+  private registrarDevoluciones(): void {
     this.isLoading = true;
 
-    const formData = this.devolucionForm.value;
     const currentUserId = this.authService.getUserId();
+    const selectedHerramientas = this.getSelectedHerramientas();
 
     if (!currentUserId) {
       this.isLoading = false;
@@ -217,95 +247,37 @@ export class DevolucionComponent implements OnInit {
       return;
     }
 
-    if (!this.movimientoInfo) {
-      this.isLoading = false;
-      this.alertService.error('No se encontró información del movimiento. Por favor, seleccione una herramienta válida.', 'Error de Datos');
-      return;
-    }
-
-    const devolucionData: CreateMovimientoDto = {
-      idHerramienta: this.movimientoInfo.idHerramienta,
+    // Create devoluciones array
+    const devoluciones = selectedHerramientas.map(herramienta => ({
+      idHerramienta: herramienta.id,
       idUsuarioGenera: currentUserId,
-      idUsuarioResponsable: this.movimientoInfo.idUsuarioResponsable || null,
+      idUsuarioResponsable: this.selectedUsuarioInfo!.id,
       idTipoMovimiento: 2, // Devolución
-      fechaMovimiento: this.getTodayDate(), // Set to current date
-      estadoHerramientaAlDevolver: formData.estadoFisicoId,
-      idObra: this.movimientoInfo.idObra || undefined,
-      idProveedor: this.movimientoInfo.idProveedor || undefined,
-      observaciones: formData.observaciones || undefined,
+      fechaMovimiento: new Date().toISOString(),
+      estadoHerramientaAlDevolver: herramienta.estadoFisicoId,
+      observaciones: herramienta.observaciones || undefined,
       fechaEstimadaDevolucion: null
-    };
+    }));
 
-    this.movimientoService.registrarDevolucion(devolucionData).subscribe({
-      next: (response) => {
+    // Register all devoluciones
+    this.movimientoService.registrarMultiplesPrestamos(devoluciones).subscribe({
+      next: (responses: any[]) => {
         this.isLoading = false;
-        this.alertService.success(`La devolución de la herramienta ${this.selectedHerramientaInfo?.codigo} ha sido registrada exitosamente.`, '✓ Devolución Registrada');
+        const herramientasText = selectedHerramientas.map(h => h.codigo).join(', ');
+        this.alertService.success(`Las devoluciones de las herramientas ${herramientasText} han sido registradas exitosamente.`, '✓ Devoluciones Registradas');
         this.resetForm();
       },
       error: (error) => {
         this.isLoading = false;
         this.alertService.error(error.error?.message || 'Ha ocurrido un error inesperado. Por favor, intente nuevamente.', '✗ Error al Registrar');
-        console.error('Error al crear devolución:', error);
+        console.error('Error al crear devoluciones:', error);
       }
     });
-  }
-
-  private formatDate(dateString: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
-  }
-
-  /**
-   * Hace scroll al primer campo con error
-   */
-  private scrollToFirstError(): void {
-    const firstError = document.querySelector('.is-invalid, .has-error');
-    if (firstError) {
-      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
   }
 
   resetForm(): void {
     this.devolucionForm.reset();
-    this.devolucionForm.patchValue({
-      fechaDevolucion: this.getTodayDate()
-    });
-    this.selectedHerramientaInfo = null;
-    this.movimientoInfo = null;
-  }
-
-  // Métodos para manejar el placeholder del textarea
-  onTextareaFocus(): void {
-    const textarea = document.querySelector('textarea[formControlName="observaciones"]') as HTMLTextAreaElement;
-    if (textarea) {
-      textarea.placeholder = '';
-    }
-  }
-
-  onTextareaBlur(): void {
-    const control = this.devolucionForm.get('observaciones');
-    if (!control?.value) {
-      const textarea = document.querySelector('textarea[formControlName="observaciones"]') as HTMLTextAreaElement;
-      if (textarea) {
-        textarea.placeholder = this.originalPlaceholder;
-      }
-    }
-  }
-
-  getDaysOverdue(): number {
-    if (!this.movimientoInfo?.fechaEstimadaDevolucion) return 0;
-
-    const today = new Date();
-    // Parse the estimated date as UTC to avoid timezone issues
-    const estimatedDate = new Date(this.movimientoInfo.fechaEstimadaDevolucion + (this.movimientoInfo.fechaEstimadaDevolucion.includes('Z') ? '' : 'Z'));
-    const diffTime = today.getTime() - estimatedDate.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    return diffDays > 0 ? diffDays : 0;
-  }
-
-  isOverdue(): boolean {
-    return this.getDaysOverdue() > 0;
+    this.selectedUsuarioInfo = null;
+    this.herramientasEnPrestamo = [];
   }
 }
