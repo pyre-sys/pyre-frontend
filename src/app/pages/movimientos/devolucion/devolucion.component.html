@@ -45,10 +45,9 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="operation-type-selector">
-                                        <div *ngFor="let option of tipoOperacionOptions" 
-                                             class="operation-card" 
-                                             [class.selected]="tipoOperacion === option.value"
-                                             (click)="onTipoOperacionSelected(option.value)">
+                                        <div *ngFor="let option of tipoOperacionOptions" class="operation-card"
+                                            [class.selected]="tipoOperacion === option.value"
+                                            (click)="onTipoOperacionSelected(option.value)">
                                             <div class="operation-icon">
                                                 <i [class]="option.icon"></i>
                                             </div>
@@ -84,25 +83,25 @@
                                     <div class="form-field-wrapper"
                                         [class.has-value]="devolucionForm.get('responsableId')?.value"
                                         [class.has-error]="devolucionForm.get('responsableId')?.invalid && devolucionForm.get('responsableId')?.touched">
-                                        
+
                                         <!-- Usuario selector for prestamo -->
-                                        <app-cbo-usuario *ngIf="isPrestamoOperation()" 
-                                            [isId]="'usuarioSelect'" [showOnlyActive]="true"
+                                        <app-cbo-usuario *ngIf="isPrestamoOperation()" [isId]="'usuarioSelect'"
+                                            [showOnlyActive]="true"
                                             [objectErrors]="devolucionForm.get('responsableId')?.errors"
                                             [isTouched]="!!devolucionForm.get('responsableId')?.touched"
-                                            formControlName="responsableId" 
+                                            formControlName="responsableId"
                                             (usuarioSelected)="onUsuarioSelected($event)">
                                         </app-cbo-usuario>
 
                                         <!-- Proveedor selector for reparacion -->
-                                        <app-cbo-proveedor *ngIf="isReparacionOperation()" 
-                                            [isId]="'proveedorSelect'"
+                                        <app-cbo-proveedor *ngIf="isReparacionOperation()" [isId]="'proveedorSelect'"
                                             [objectErrors]="devolucionForm.get('responsableId')?.errors"
-                                            formControlName="responsableId" 
+                                            formControlName="responsableId"
                                             (proveedorSelected)="onProveedorSelected($event)">
                                         </app-cbo-proveedor>
 
-                                        <span class="field-check-icon" *ngIf="devolucionForm.get('responsableId')?.valid">
+                                        <span class="field-check-icon"
+                                            *ngIf="devolucionForm.get('responsableId')?.valid">
                                             <i class="bi bi-check-circle-fill text-success"></i>
                                         </span>
                                     </div>
@@ -136,8 +135,10 @@
                                 class="alert alert-info d-flex align-items-center">
                                 <i class="bi bi-info-circle me-2"></i>
                                 <div>
-                                    <span *ngIf="isPrestamoOperation()">Este usuario no tiene herramientas en préstamo actualmente</span>
-                                    <span *ngIf="isReparacionOperation()">Este proveedor no tiene herramientas en reparación actualmente</span>
+                                    <span *ngIf="isPrestamoOperation()">Este usuario no tiene herramientas en préstamo
+                                        actualmente</span>
+                                    <span *ngIf="isReparacionOperation()">Este proveedor no tiene herramientas en
+                                        reparación actualmente</span>
                                 </div>
                             </div>
 
@@ -184,14 +185,16 @@
                                             <div class="info-row">
                                                 <span class="info-label">
                                                     <span *ngIf="isPrestamoOperation()">Fecha Estimada:</span>
-                                                    <span *ngIf="isReparacionOperation()">Fecha Est. Finalización:</span>
+                                                    <span *ngIf="isReparacionOperation()">Fecha Est.
+                                                        Finalización:</span>
                                                 </span>
                                                 <span class="info-value"
                                                     [class.text-danger]="isOverdue(herramienta.fechaEstimadaDevolucion)">
                                                     {{herramienta.fechaEstimadaDevolucion | date:'dd/MM/yyyy':'UTC'}}
                                                 </span>
                                             </div>
-                                            <div class="info-row" *ngIf="herramienta.nombreObra && isPrestamoOperation()">
+                                            <div class="info-row"
+                                                *ngIf="herramienta.nombreObra && isPrestamoOperation()">
                                                 <span class="info-label">Obra:</span>
                                                 <span class="info-value">{{herramienta.nombreObra}}</span>
                                             </div>
@@ -266,8 +269,8 @@
         <!-- PANEL LATERAL DE INFORMACIÓN -->
         <div class="col-lg-4">
             <!-- Información del Responsable -->
-            <div class="info-card responsable-card card mb-3 shadow-sm" 
-                 *ngIf="selectedUsuarioInfo || selectedProveedorInfo" @fadeIn>
+            <div class="info-card responsable-card card mb-3 shadow-sm"
+                *ngIf="selectedUsuarioInfo || selectedProveedorInfo" @fadeIn>
                 <div class="card-header bg-gradient-info text-white">
                     <h6 class="card-title mb-0 d-flex align-items-center">
                         <i class="bi bi-person-badge me-2" *ngIf="isPrestamoOperation()"></i>
@@ -402,7 +405,7 @@
         }
 
         .operation-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-color: #007bff;
         }
 
