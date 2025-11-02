@@ -1,1 +1,197 @@
-<p>alertas works!</p>
+<div class="alertas-container">
+    <!-- Header Section -->
+    <div class="alertas-header" @fadeIn>
+        <div class="header-content">
+            <div class="title-section">
+                <h2 class="page-title">
+                    <i class="bi bi-bell-fill me-2"></i>
+                    Gestión de Alertas
+                </h2>
+                <p class="page-subtitle">Monitoreo y seguimiento de alertas del sistema</p>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+                <div class="stat-item stat-total">
+                    <span class="stat-number">{{stats.total}}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat-item stat-pending">
+                    <span class="stat-number">{{stats.pendientes}}</span>
+                    <span class="stat-label">Pendientes</span>
+                </div>
+                <div class="stat-item stat-overdue">
+                    <span class="stat-number">{{stats.vencidas}}</span>
+                    <span class="stat-label">Vencidas</span>
+                </div>
+                <div class="stat-item stat-unread">
+                    <span class="stat-number">{{stats.noLeidas}}</span>
+                    <span class="stat-label">Sin Leer</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Actions Section -->
+    <div class="filters-section" @slideIn>
+        <div class="filters-container">
+            <!-- Filter Buttons -->
+            <div class="filter-buttons">
+                <button *ngFor="let filtro of filtroOptions" type="button" class="filter-btn"
+                    [class.active]="tipoFiltroActual === filtro.value" [class]="'filter-' + filtro.color"
+                    (click)="onFilterChange(filtro.value)">
+                    <i [class]="filtro.icon"></i>
+                    <span class="filter-label">{{filtro.label}}</span>
+                    <span class="filter-count">{{getFilterCount(filtro.value)}}</span>
+                </button>
+            </div>
+
+            <!-- Search and Actions -->
+            <div class="actions-container">
+                <div class="search-container">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Buscar alertas..."
+                            (input)="onSearchChange($event)" [value]="searchTerm">
+                    </div>
+                </div>
+
+                <!-- <button type="button" class="btn btn-outline-primary" (click)="marcarTodasLeidas()"
+                    [disabled]="alertasFiltradas?.filter(a => !a.leida).length === 0">
+                    <i class="bi bi-check-all me-1"></i>
+                    Marcar todas como leídas
+                </button> -->
+
+                <button type="button" class="btn btn-outline-secondary" (click)="loadAlertas()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando alertas...</span>
+        </div>
+        <p class="loading-text">Cargando alertas...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && alertasFiltradas.length === 0" class="empty-state" @fadeIn>
+        <div class="empty-icon">
+            <i class="bi bi-bell-slash"></i>
+        </div>
+        <h3>No se encontraron alertas</h3>
+        <p>No hay alertas que coincidan con los filtros seleccionados.</p>
+        <button type="button" class="btn btn-primary" (click)="onFilterChange('todas')">
+            Ver todas las alertas
+        </button>
+    </div>
+
+    <!-- Alerts Grid -->
+    <div *ngIf="!isLoading && alertasFiltradas.length > 0" class="alertas-grid">
+        <div *ngFor="let alerta of alertasFiltradas; trackBy: trackByAlerta" class="alerta-card"
+            [class.unread]="!alerta.leida" [class.warning-alert]="alerta.idTipoAlerta === 1"
+            [class.danger-alert]="alerta.idTipoAlerta === 2" @fadeIn>
+
+            <!-- Card Header -->
+            <div class="card-header">
+                <div class="alert-indicator">
+                    <i [class]="getAlertIcon(alerta.idTipoAlerta)"
+                        [class]="'text-' + getAlertColor(alerta.idTipoAlerta)"></i>
+                </div>
+
+                <div class="alert-title">
+                    <h6 class="tool-name">{{alerta.nombreHerramienta}}</h6>
+                    <span class="alert-type" [class]="'badge-' + getAlertColor(alerta.idTipoAlerta)">
+                        {{alerta.nombreTipoAlerta}}
+                    </span>
+                </div>
+
+                <div class="card-actions">
+                    <button type="button" class="btn-read-toggle" [class.read]="alerta.leida"
+                        (click)="toggleAlertaLeida(alerta)"
+                        [title]="alerta.leida ? 'Marcar como no leída' : 'Marcar como leída'">
+                        <i class="bi" [class.bi-envelope-open]="alerta.leida" [class.bi-envelope]="!alerta.leida"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body">
+                <div class="alert-details">
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="bi bi-tools"></i>
+                            Herramienta:
+                        </span>
+                        <span class="detail-value">
+                            <span class="tool-code"
+                                *ngIf="alerta.codigoHerramienta">#{{alerta.codigoHerramienta}}</span>
+                            {{alerta.nombreHerramienta}}
+                        </span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="bi bi-calendar3"></i>
+                            Generada:
+                        </span>
+                        <span class="detail-value">
+                            {{alerta.fechaGeneracion | date:'dd/MM/yyyy HH:mm'}}
+                        </span>
+                    </div>
+
+                    <div class="detail-row"
+                        *ngIf="alerta.idTipoAlerta === 2 && alerta.diasVencido && alerta.diasVencido > 0">
+                        <span class="detail-label">
+                            <i class="bi bi-clock-history"></i>
+                            Días vencida:
+                        </span>
+                        <span class="detail-value text-danger fw-bold">
+                            {{alerta.diasVencido}} día{{alerta.diasVencido > 1 ? 's' : ''}}
+                        </span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="bi bi-eye"></i>
+                            Estado:
+                        </span>
+                        <span class="detail-value">
+                            <span class="read-status" [class.read]="alerta.leida" [class.unread]="!alerta.leida">
+                                {{alerta.leida ? 'Leída' : 'Sin leer'}}
+                            </span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Priority Indicator for Overdue -->
+                <div *ngIf="alerta.idTipoAlerta === 2" class="priority-indicator">
+                    <div class="priority-bar" [style.width.%]="Math.min(100, (alerta.diasVencido || 0) * 10)"></div>
+                    <span class="priority-text">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Requiere atención inmediata
+                    </span>
+                </div>
+            </div>
+
+            <!-- Unread Indicator -->
+            <div *ngIf="!alerta.leida" class="unread-indicator"></div>
+        </div>
+    </div>
+
+    <!-- Results Summary -->
+    <div *ngIf="!isLoading && alertasFiltradas.length > 0" class="results-summary" @fadeIn>
+        <div class="summary-text">
+            Mostrando {{alertasFiltradas.length}} de {{alertas.length}} alertas
+            <span *ngIf="searchTerm" class="search-info">
+                • Búsqueda: "{{searchTerm}}"
+            </span>
+        </div>
+    </div>
+</div>

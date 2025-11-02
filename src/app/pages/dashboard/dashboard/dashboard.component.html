@@ -7,7 +7,7 @@
 
   <!-- Fila de alertas principales -->
   <div class="stats-row stats-row-alertas">
-    <div class="stat-card stat-card-alerta">
+    <div class="stat-card stat-card-alerta" (click)="navigateAlerta()">
       <div class="stat-icon alert big">
         <i class="bi bi-exclamation-triangle"></i>
       </div>
@@ -19,7 +19,7 @@
         <p>Alertas pendientes que requieren atención inmediata</p>
       </div>
     </div>
-    <div class="stat-card stat-card-alerta">
+    <div class="stat-card stat-card-alerta" (click)="navigateAlerta()">
       <div class="stat-icon danger big">
         <i class="bi bi-exclamation-octagon"></i>
       </div>

@@ -71,4 +71,20 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+  // <!-- Topbar -->
+  // <app-topbar
+  //   [isLoggedIn]="isLoggedIn"
+  //   [isSmallScreen]="isSmallScreen"
+  //   [userEmail]="userEmail"
+  //   [displayEmail]="displayEmail"
+  //   [userLegajo]="userLegajo"
+  //   [displayLegajo]="displayLegajo"
+  //   [userRole]="userRole"
+  //   [displayRole]="displayRole"
+  //   [userLabel]="userLabel"
+  //   (perfilModalToggled)="onPerfilModalToggled($event)"
+  //   (homeNavigation)="onHomeNavigation()"
+  //   (logoutRequested)="onLogoutRequested()"
+  //   (sidebarToggled)="onSidebarToggled()">
+  // </app-topbar>
 }

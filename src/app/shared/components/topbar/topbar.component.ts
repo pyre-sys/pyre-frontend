@@ -1,9 +1,11 @@
-import { Component, Input, Output, EventEmitter, HostListener, ElementRef, inject, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, ElementRef, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { trigger, transition, style, animate } from '@angular/animations';
+import { trigger, transition, style, animate, state } from '@angular/animations';
+import { Subscription, interval } from 'rxjs';
 import { PageTitleService, PageMetadata } from '../../../services/page-title.service';
+import { AlertaService } from '../../../services/alerta.service';
 
 @Component({
   selector: 'app-topbar',
@@ -23,10 +25,18 @@ import { PageTitleService, PageMetadata } from '../../../services/page-title.ser
         style({ opacity: 0, transform: 'translateX(-10px)' }),
         animate('200ms 100ms ease-out', style({ opacity: 1, transform: 'translateX(0)' }))
       ])
+    ]),
+    trigger('alertsPulse', [
+      state('normal', style({ transform: 'scale(1)' })),
+      state('critical', style({ transform: 'scale(1)' })),
+      transition('normal => critical', [
+        animate('500ms ease-in-out', style({ transform: 'scale(1.05)' })),
+        animate('500ms ease-in-out', style({ transform: 'scale(1)' }))
+      ])
     ])
   ]
 })
-export class TopbarComponent implements OnInit {
+export class TopbarComponent implements OnInit, OnDestroy {
   @Input() isLoggedIn: boolean = false;
   @Input() isSmallScreen: boolean = false;
   @Input() userEmail: string | null = null;
@@ -51,15 +61,38 @@ export class TopbarComponent implements OnInit {
     color: 'primary'
   };
 
+  // Propiedades de alertas
+  alertasPendientes = 0;
+  alertasVencidas = 0;
+  isLoadingAlertas = false;
+
+  private alertsSubscription?: Subscription;
+  private alertsInterval?: Subscription;
+
   private el = inject(ElementRef);
 
-  constructor(private pageTitleService: PageTitleService) {}
+  constructor(
+    private pageTitleService: PageTitleService,
+    private alertaService: AlertaService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     // Suscribirse a cambios en la metadata
     this.pageTitleService.metadata$.subscribe(metadata => {
       this.pageMetadata = metadata;
     });
+
+    // Cargar alertas inicial y configurar actualización periódica
+    if (this.isLoggedIn) {
+      this.loadAlertas();
+      this.setupAlertsPolling();
+    }
+  }
+
+  ngOnDestroy() {
+    this.alertsSubscription?.unsubscribe();
+    this.alertsInterval?.unsubscribe();
   }
 
   // Getters para acceso fácil en la plantilla
@@ -98,6 +131,29 @@ export class TopbarComponent implements OnInit {
     return role ? `${leg} — ${role}` : leg;
   }
 
+  // Getters para alertas
+  get totalAlertas(): number {
+    return this.alertasPendientes + this.alertasVencidas;
+  }
+
+  get alertsTooltip(): string {
+    if (this.totalAlertas === 0) {
+      return 'No hay alertas pendientes';
+    }
+
+    const parts: string[] = [];
+
+    if (this.alertasVencidas > 0) {
+      parts.push(`${this.alertasVencidas} vencida${this.alertasVencidas > 1 ? 's' : ''}`);
+    }
+
+    if (this.alertasPendientes > 0) {
+      parts.push(`${this.alertasPendientes} pendiente${this.alertasPendientes > 1 ? 's' : ''}`);
+    }
+
+    return `${this.totalAlertas} alerta${this.totalAlertas > 1 ? 's' : ''}: ${parts.join(', ')}`;
+  }
+
   togglePerfilModal(): void {
     this.isPerfilModalVisible = !this.isPerfilModalVisible;
     this.perfilModalToggled.emit(this.isPerfilModalVisible);
@@ -123,5 +179,56 @@ export class TopbarComponent implements OnInit {
 
     this.isPerfilModalVisible = false;
     this.perfilModalToggled.emit(false);
+  }
+
+  private loadAlertas(): void {
+    if (this.isLoadingAlertas) return;
+
+    this.isLoadingAlertas = true;
+
+    // Cargar alertas pendientes
+    this.alertaService.getCountAlertasPendientes().subscribe({
+      next: (resp) => {
+        this.alertasPendientes = resp?.data ?? 0;
+        this.checkLoadingComplete();
+      },
+      error: (error) => {
+        console.error('Error loading pending alerts:', error);
+        this.alertasPendientes = 0;
+        this.checkLoadingComplete();
+      }
+    });
+
+    // Cargar alertas vencidas
+    this.alertaService.getCountAlertasVencidas().subscribe({
+      next: (resp) => {
+        this.alertasVencidas = resp?.data ?? 0;
+        this.checkLoadingComplete();
+      },
+      error: (error) => {
+        console.error('Error loading overdue alerts:', error);
+        this.alertasVencidas = 0;
+        this.checkLoadingComplete();
+      }
+    });
+  }
+
+  private checkLoadingComplete(): void {
+    // Simple check - en una implementación más robusta podrías usar forkJoin
+    setTimeout(() => {
+      this.isLoadingAlertas = false;
+    }, 100);
+  }
+
+  private setupAlertsPolling(): void {
+    // Actualizar alertas cada 2 minutos
+    this.alertsInterval = interval(120000).subscribe(() => {
+      this.loadAlertas();
+    });
+  }
+
+  navigateToAlertas(): void {
+    // Navegar a la página de alertas
+    this.router.navigate(['/dashboard/alertas']);
   }
 }

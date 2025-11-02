@@ -3,10 +3,7 @@
   <div class="topbar-container">
 
     <!-- Botón hamburguesa (móvil) -->
-    <button
-      *ngIf="isLoggedIn && isSmallScreen"
-      class="btn-hamburger"
-      (click)="toggleSidebar()"
+    <button *ngIf="isLoggedIn && isSmallScreen" class="btn-hamburger" (click)="toggleSidebar()"
       aria-label="Toggle sidebar">
       <i class="bi bi-list"></i>
     </button>
@@ -16,25 +13,16 @@
       <!-- Breadcrumbs (si existen) -->
       <nav *ngIf="hasBreadcrumbs && !isSmallScreen" class="breadcrumbs" aria-label="breadcrumb">
         <ol class="breadcrumb-list">
-          <li
-            *ngFor="let crumb of breadcrumbs; let last = last"
-            class="breadcrumb-item"
-            [@breadcrumbSlide]>
+          <li *ngFor="let crumb of breadcrumbs; let last = last" class="breadcrumb-item" [@breadcrumbSlide]>
 
             <!-- Si tiene ruta, es clickeable -->
-            <a
-              *ngIf="crumb.route && !last"
-              [routerLink]="crumb.route"
-              class="breadcrumb-link">
+            <a *ngIf="crumb.route && !last" [routerLink]="crumb.route" class="breadcrumb-link">
               <i *ngIf="crumb.icon" [class]="'bi ' + crumb.icon + ' me-1'"></i>
               {{ crumb.label }}
             </a>
 
             <!-- Último elemento o sin ruta -->
-            <span
-              *ngIf="!crumb.route || last"
-              class="breadcrumb-current"
-              [class.active]="last">
+            <span *ngIf="!crumb.route || last" class="breadcrumb-current" [class.active]="last">
               <i *ngIf="crumb.icon" [class]="'bi ' + crumb.icon + ' me-1'"></i>
               {{ crumb.label }}
             </span>
@@ -59,10 +47,7 @@
               {{ pageTitle }}
 
               <!-- Badge opcional (ej: notificaciones) -->
-              <span
-                *ngIf="pageBadge"
-                class="badge ms-2"
-                [class]="'bg-' + pageBadge.color">
+              <span *ngIf="pageBadge" class="badge ms-2" [class]="'bg-' + pageBadge.color">
                 {{ pageBadge.text }}
               </span>
             </h1>
@@ -74,6 +59,59 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- SECCIÓN DE ALERTAS (Centro-Derecha) -->
+    <div class="topbar-alerts-section" *ngIf="isLoggedIn && !isSmallScreen">
+      <div class="alerts-card" (click)="navigateToAlertas()" [class.has-alerts]="totalAlertas > 0"
+        [class.has-critical]="alertasVencidas > 0" [ngbTooltip]="alertsTooltip" placement="bottom"
+        [@alertsPulse]="alertasVencidas > 0 ? 'critical' : 'normal'">
+
+        <!-- Icono de campana -->
+        <div class="alerts-icon">
+          <i class="bi bi-bell" [class.bi-bell-fill]="totalAlertas > 0"></i>
+
+          <!-- Indicador de alertas críticas -->
+          <div *ngIf="alertasVencidas > 0" class="critical-indicator"></div>
+        </div>
+
+        <!-- Contador de alertas -->
+        <div class="alerts-counter" *ngIf="totalAlertas > 0">
+          <div class="alerts-stats">
+            <!-- Alertas pendientes -->
+            <span *ngIf="alertasPendientes > 0" class="alert-count pending">
+              <i class="bi bi-exclamation-triangle"></i>
+              {{alertasPendientes}}
+            </span>
+
+            <!-- Alertas vencidas -->
+            <span *ngIf="alertasVencidas > 0" class="alert-count overdue">
+              <i class="bi bi-exclamation-octagon"></i>
+              {{alertasVencidas}}
+            </span>
+          </div>
+
+          <!-- Badge total -->
+          <div class="total-badge" [class.critical]="alertasVencidas > 0"
+            [class.warning]="alertasVencidas === 0 && alertasPendientes > 0">
+            {{totalAlertas}}
+          </div>
+        </div>
+
+        <!-- Estado sin alertas -->
+        <div *ngIf="totalAlertas === 0" class="no-alerts">
+          <span class="no-alerts-text">Sin alertas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN DE ALERTAS MÓVIL (Simplificada) -->
+    <div class="topbar-alerts-mobile" *ngIf="isLoggedIn && isSmallScreen && totalAlertas > 0">
+      <button class="alerts-mobile-btn" (click)="navigateToAlertas()" [class.critical]="alertasVencidas > 0"
+        [ngbTooltip]="alertsTooltip" placement="bottom">
+        <i class="bi bi-bell-fill"></i>
+        <span class="mobile-badge">{{totalAlertas}}</span>
+      </button>
     </div>
 
     <!-- SECCIÓN DE USUARIO (Derecha) -->
@@ -91,7 +129,8 @@
       </div>
 
       <!-- Botón de logout (icono) -->
-      <button class="logout-icon-btn" (click)="confirmLogout()" [ngbTooltip]="'Cerrar Sesión'" aria-label="Cerrar sesión" *ngIf="!isSmallScreen">
+      <button class="logout-icon-btn" (click)="confirmLogout()" [ngbTooltip]="'Cerrar Sesión'"
+        aria-label="Cerrar sesión" *ngIf="!isSmallScreen">
         <i class="bi bi-power"></i>
       </button>
     </div>

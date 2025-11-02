@@ -93,4 +93,19 @@ export class AlertaService {
   getCountAlertasVencidas() {
     return this.http.get<any>(`${this.apiUrl}/Alerta/count-alertas-vencidas`);
   }
+
+  // GET /api/Alerta - Get all alerts
+  getAlertas() {
+    return this.http.get<any>(`${this.apiUrl}/Alerta`);
+  }
+
+  // PUT /api/Alerta/{id}/marcar-leida - Mark alert as read/unread
+  marcarAlertaLeida(idAlerta: number, leida: boolean) {
+    return this.http.put<any>(`${this.apiUrl}/Alerta/${idAlerta}/marcar-leida`, { leida });
+  }
+
+  // PUT /api/Alerta/marcar-multiples-leidas - Mark multiple alerts as read
+  marcarMultiplesAlertasLeidas(idsAlertas: number[]) {
+    return this.http.put<any>(`${this.apiUrl}/Alerta/marcar-multiples-leidas`, { idsAlertas });
+  }
 }

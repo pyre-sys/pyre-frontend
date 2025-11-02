@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { HerramientaService } from '../../../services/herramienta.service';
 import { AlertaService } from '../../../services/alerta.service';
 import { PageTitleService } from '../../../services/page-title.service';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -21,7 +22,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private herramientaService: HerramientaService,
     private alertaService: AlertaService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -44,5 +46,9 @@ export class DashboardComponent implements OnInit {
     this.alertaService.getCountAlertasVencidas().subscribe((resp: any) => {
       this.alertasVencidas = resp?.data ?? 0;
     });
+  }
+
+  navigateAlerta() {
+    this.router.navigate(['/dashboard/alertas']);
   }
 }
