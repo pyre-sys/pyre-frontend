@@ -34,14 +34,15 @@ import { CboProveedorComponent } from "../../../shared/components/Cbo/cbo-provee
 })
 export class ReparacionComponent implements OnInit {
   reparacionForm!: FormGroup;
-  selectedHerramientaInfo: HerramientaOption | null = null;
+  selectedHerramientas: HerramientaOption[] = [];
   selectedProveedorInfo: any | null = null;
+  currentHerramientaSelection: HerramientaOption | null = null;
 
   isLoading = false;
   isLoadingMovimiento = false;
 
   // Campos requeridos para calcular el progreso
-  private requiredFields = ['herramientaId', 'proveedorId', 'fechaEstimadaFinalizacion'];
+  private requiredFields = ['proveedorId', 'fechaEstimadaFinalizacion'];
 
   // Placeholder original para observaciones
   private originalPlaceholder: string = 'Agregue cualquier detalle adicional sobre la reparación... (Opcional)';
@@ -71,7 +72,7 @@ export class ReparacionComponent implements OnInit {
 
   private buildForm(): void {
     this.reparacionForm = this.fb.group({
-      herramientaId: ['', Validators.required],
+      herramientaId: [''], // Solo para selección temporal
       proveedorId: ['', Validators.required],
       fechaEstimadaFinalizacion: ['', [Validators.required]],
       observaciones: ['', Validators.maxLength(500)]
@@ -103,7 +104,12 @@ export class ReparacionComponent implements OnInit {
    */
   getFormCompletionPercentage(): number {
     let filledFields = 0;
-    const totalFields = this.requiredFields.length;
+    let totalFields = this.requiredFields.length + 1; // +1 for herramientas array
+
+    // Check herramientas
+    if (this.selectedHerramientas.length > 0) {
+      filledFields++;
+    }
 
     this.requiredFields.forEach(field => {
       const control = this.reparacionForm.get(field);
@@ -116,11 +122,36 @@ export class ReparacionComponent implements OnInit {
   }
 
   onHerramientaSelected(herramienta: HerramientaOption | null): void {
-    this.selectedHerramientaInfo = herramienta;
+    this.currentHerramientaSelection = herramienta;
+  }
 
-    if (herramienta) {
-      console.log('Herramienta seleccionada:', herramienta);
+  addHerramienta(): void {
+    if (!this.currentHerramientaSelection) {
+      this.alertService.error('Debe seleccionar una herramienta primero', 'Selección requerida');
+      return;
     }
+
+    // Verificar si la herramienta ya está en la lista
+    const exists = this.selectedHerramientas.some(h => h.id === this.currentHerramientaSelection!.id);
+    if (exists) {
+      this.alertService.error('Esta herramienta ya está en la lista', 'Herramienta duplicada');
+      return;
+    }
+
+    // Agregar herramienta a la lista
+    this.selectedHerramientas.push(this.currentHerramientaSelection);
+
+    // Limpiar selección temporal
+    this.reparacionForm.get('herramientaId')?.setValue('');
+    this.currentHerramientaSelection = null;
+  }
+
+  removeHerramienta(index: number): void {
+    this.selectedHerramientas.splice(index, 1);
+  }
+
+  isFormValid(): boolean {
+    return this.reparacionForm.valid && this.selectedHerramientas.length > 0;
   }
 
   onProveedorSelected(proveedor: any | null): void {
@@ -132,6 +163,12 @@ export class ReparacionComponent implements OnInit {
   }
 
   onSubmit(): void {
+    // Validar herramientas seleccionadas
+    if (this.selectedHerramientas.length === 0) {
+      this.alertService.error('Debe seleccionar al menos una herramienta', 'Herramientas requeridas');
+      return;
+    }
+
     // Marcar todos los campos como tocados para mostrar errores
     if (this.reparacionForm.invalid) {
       this.reparacionForm.markAllAsTouched();
@@ -140,7 +177,8 @@ export class ReparacionComponent implements OnInit {
     }
 
     // Crear mensaje de confirmación con los datos esenciales de la reparación
-    const confirmMessage = `¿Confirmar registro de reparación?<br><br>Herramienta: ${this.selectedHerramientaInfo?.nombre}<br>Proveedor: ${this.selectedProveedorInfo?.nombreProveedor}`;
+    const herramientasText = this.selectedHerramientas.map(h => h.nombre).join(', ');
+    const confirmMessage = `¿Confirmar registro de reparación?<br><br>Herramientas (${this.selectedHerramientas.length}): ${herramientasText}<br>Proveedor: ${this.selectedProveedorInfo?.nombreProveedor}`;
 
     this.alertService.confirm(confirmMessage, 'Confirmar Reparación').then((result) => {
       if (result.isConfirmed) {
@@ -161,29 +199,32 @@ export class ReparacionComponent implements OnInit {
       return;
     }
 
-    const reparacionData: CreateMovimientoDto = {
-      idHerramienta: formData.herramientaId,
+    // Crear una reparación por cada herramienta seleccionada
+    const reparaciones = this.selectedHerramientas.map(herramienta => ({
+      idHerramienta: herramienta.id,
       idUsuarioGenera: currentUserId,
       idUsuarioResponsable: null, // Para reparaciones no hay usuario responsable
       idTipoMovimiento: 3, // Reparación
-      fechaMovimiento: new Date().toISOString(), // Enviar fecha actual
+      fechaMovimiento: new Date().toISOString(),
       fechaEstimadaDevolucion: formData.fechaEstimadaFinalizacion,
       estadoHerramientaAlDevolver: null, // Estado inicial
       idObra: null, // No aplica para reparaciones
       idProveedor: formData.proveedorId.idProveedor, // El ID del proveedor seleccionado
       observaciones: formData.observaciones || undefined,
-    };
+    }));
 
-    this.movimientoService.registrarPrestamo(reparacionData).subscribe({
-      next: (response) => {
+    // Registrar todas las reparaciones
+    this.movimientoService.registrarMultiplesPrestamos(reparaciones).subscribe({
+      next: (responses: any[]) => {
         this.isLoading = false;
-        this.alertService.success(`La reparación de la herramienta ${this.selectedHerramientaInfo?.codigo} ha sido registrada exitosamente.`, '✓ Reparación Registrada');
+        const herramientasText = this.selectedHerramientas.map(h => h.codigo).join(', ');
+        this.alertService.success(`Las reparaciones de las herramientas ${herramientasText} han sido registradas exitosamente.`, '✓ Reparaciones Registradas');
         this.resetForm();
       },
       error: (error) => {
         this.isLoading = false;
         this.alertService.error(error.error?.message || 'Ha ocurrido un error inesperado. Por favor, intente nuevamente.', '✗ Error al Registrar');
-        console.error('Error al crear reparación:', error);
+        console.error('Error al crear reparaciones:', error);
       }
     });
   }
@@ -206,7 +247,8 @@ export class ReparacionComponent implements OnInit {
 
   resetForm(): void {
     this.reparacionForm.reset();
-    this.selectedHerramientaInfo = null;
+    this.selectedHerramientas = [];
+    this.currentHerramientaSelection = null;
     this.selectedProveedorInfo = null;
   }
 
