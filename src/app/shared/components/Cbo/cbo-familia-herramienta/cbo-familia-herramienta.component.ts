@@ -1,7 +1,27 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, forwardRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnDestroy,
+  forwardRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR, FormControl } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, switchMap, catchError, of, Subject } from 'rxjs';
+import {
+  FormsModule,
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+  FormControl,
+} from '@angular/forms';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  catchError,
+  of,
+  Subject,
+} from 'rxjs';
 import { FamiliaHerramientaService } from '../../../../services/familia-herramienta.service';
 
 @Component({
@@ -14,11 +34,13 @@ import { FamiliaHerramientaService } from '../../../../services/familia-herramie
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CboFamiliaHerramientaComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
-export class CboFamiliaHerramientaComponent implements OnInit, OnDestroy, ControlValueAccessor {
+export class CboFamiliaHerramientaComponent
+  implements OnInit, OnDestroy, ControlValueAccessor
+{
   @Input() isLabel: string = '';
   @Input() isId: string = 'familia-herramienta-select';
   @Input() isDisabled: boolean = false;
@@ -36,10 +58,11 @@ export class CboFamiliaHerramientaComponent implements OnInit, OnDestroy, Contro
   placeholder = 'Seleccionar familia...';
 
   private destroy$ = new Subject<void>();
-  private onChange = (value: any) => { };
-  private onTouched = () => { };
+  private onChange = (value: any) => {};
+  private onTouched = () => {};
+  private isDataLoaded = false; // Nueva bandera para evitar llamadas redundantes
 
-  constructor(private familiaService: FamiliaHerramientaService) { }
+  constructor(private familiaService: FamiliaHerramientaService) {}
 
   ngOnInit(): void {
     this.setupSearch();
@@ -72,29 +95,31 @@ export class CboFamiliaHerramientaComponent implements OnInit, OnDestroy, Contro
   }
 
   private setupSearch(): void {
-    this.searchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(searchTerm => {
-        if (!searchTerm || searchTerm.length < 2) {
-          return of(this.familias);
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((searchTerm) => {
+          if (!searchTerm || searchTerm.length < 2) {
+            return of(this.familias);
+          }
+          this.isLoading = true;
+          return this.searchFamilias(searchTerm);
+        })
+      )
+      .subscribe((familias: any) => {
+        if (!this.searchControl.value || this.searchControl.value.length < 2) {
+          // Don't update if it's just the initial load
+        } else {
+          this.familias = familias || [];
         }
-        this.isLoading = true;
-        return this.searchFamilias(searchTerm);
-      })
-    ).subscribe((familias: any) => {
-      if (!this.searchControl.value || this.searchControl.value.length < 2) {
-        // Don't update if it's just the initial load
-      } else {
-        this.familias = familias || [];
-      }
-      this.isLoading = false;
-    });
+        this.isLoading = false;
+      });
   }
 
   private searchFamilias(searchTerm: string) {
     return this.familiaService.getFamilias().pipe(
-      switchMap(response => {
+      switchMap((response) => {
         const rawList = response.data || [];
 
         // Filter client-side by search term
@@ -106,7 +131,7 @@ export class CboFamiliaHerramientaComponent implements OnInit, OnDestroy, Contro
 
         return of(filteredList);
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('Error searching familias:', error);
         return of([]);
       })
@@ -114,16 +139,22 @@ export class CboFamiliaHerramientaComponent implements OnInit, OnDestroy, Contro
   }
 
   private loadFamilias(): void {
+    if (this.isDataLoaded) return; // Evitar llamadas si los datos ya están cargados
+
     this.isLoading = true;
-    this.familiaService.getFamilias().pipe(
-      catchError(error => {
-        console.error('Error loading familias:', error);
-        return of({ data: [] });
-      })
-    ).subscribe((response: any) => {
-      this.familias = response.data || [];
-      this.isLoading = false;
-    });
+    this.familiaService
+      .getFamilias()
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading familias:', error);
+          return of({ data: [] });
+        })
+      )
+      .subscribe((response: any) => {
+        this.familias = response.data || [];
+        this.isLoading = false;
+        this.isDataLoaded = true; // Marcar como cargado
+      });
   }
 
   onMainInputClick(): void {
@@ -135,7 +166,7 @@ export class CboFamiliaHerramientaComponent implements OnInit, OnDestroy, Contro
   onMainInputFocus(): void {
     if (!this.isDisabled && !this.isOpen) {
       this.isOpen = true;
-      this.loadFamilias();
+      this.loadFamilias(); // Solo se llama si los datos no están cargados
     }
   }
 
@@ -154,8 +185,10 @@ export class CboFamiliaHerramientaComponent implements OnInit, OnDestroy, Contro
   }
 
   private openDropdown(): void {
+    if (!this.isDataLoaded) {
+      this.loadFamilias(); // Solo se llama si los datos no están cargados
+    }
     this.isOpen = true;
-    this.loadFamilias();
   }
 
   private closeDropdown(): void {
@@ -203,7 +236,8 @@ export class CboFamiliaHerramientaComponent implements OnInit, OnDestroy, Contro
 
   private updatePlaceholder(): void {
     if (this.selectedFamilia) {
-      this.placeholder = this.selectedFamilia.nombreFamilia || 'Familia seleccionada';
+      this.placeholder =
+        this.selectedFamilia.nombreFamilia || 'Familia seleccionada';
     } else {
       this.placeholder = 'Seleccionar familia...';
     }

@@ -2,8 +2,13 @@
 <div class="container-fluid page-shell page-header-container">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div></div>
-    <a class="btn btn-primary header-action" (click)="createNewTool()" role="button">
-      <i class="bx bx-wrench bx-tada me-1" aria-hidden="true"></i> Nueva Herramienta
+    <a
+      class="btn btn-primary header-action"
+      (click)="createNewTool()"
+      role="button"
+    >
+      <i class="bx bx-wrench bx-tada me-1" aria-hidden="true"></i> Nueva
+      Herramienta
     </a>
   </div>
 </div>
@@ -15,20 +20,35 @@
       <div class="row g-3 align-items-end">
         <!-- Código -->
         <div class="col-lg-2 col-md-3 col-sm-6">
-          <input type="text" class="form-control" [(ngModel)]="filtroCodigo" placeholder="Código de herramienta"
-            (keyup.enter)="onSearch()" />
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="filtroCodigo"
+            placeholder="Código de herramienta"
+            readonly
+          />
         </div>
 
         <!-- Nombre -->
         <div class="col-lg-3 col-md-3 col-sm-6">
-          <input type="text" class="form-control" [(ngModel)]="filtroNombre" placeholder="Nombre de herramienta"
-            (keyup.enter)="onSearch()" />
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="filtroNombre"
+            placeholder="Nombre de herramienta"
+            (keyup.enter)="onSearch()"
+          />
         </div>
 
         <!-- Marca -->
         <div class="col-lg-2 col-md-3 col-sm-6">
-          <input type="text" class="form-control" [(ngModel)]="filtroMarca" placeholder="Marca"
-            (keyup.enter)="onSearch()" />
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="filtroMarca"
+            placeholder="Marca"
+            (keyup.enter)="onSearch()"
+          />
         </div>
 
         <!-- Estado + botón reset -->
@@ -39,8 +59,13 @@
               <option value="activo">Activo</option>
               <option value="inactivo">Inactivo</option>
             </select>
-            <button *ngIf="hasActiveFilters()" type="button" class="btn btn-outline-secondary"
-              (click)="onResetFilters()" title="Limpiar todos los filtros">
+            <button
+              *ngIf="hasActiveFilters()"
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="onResetFilters()"
+              title="Limpiar todos los filtros"
+            >
               <i class="pi pi-filter-slash"></i>
             </button>
           </div>
@@ -48,14 +73,18 @@
 
         <!-- Botón Buscar -->
         <div class="col-lg-2 col-md-12 col-sm-12 d-flex justify-content-end">
-          <button type="button" class="btn btn-primary" (click)="onSearch()" [disabled]="!hasActiveFilters()"
-            title="Buscar">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="onSearch()"
+            [disabled]="!hasActiveFilters()"
+            title="Buscar"
+          >
             <i class="pi pi-search"></i>
           </button>
         </div>
       </div>
     </div>
-
 
     <!-- Loading indicator -->
     <div *ngIf="loading" class="text-center py-4">
@@ -78,7 +107,12 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let herramienta of getPaginatedHerramientas(); let i = index">
+          <tr
+            *ngFor="
+              let herramienta of getPaginatedHerramientas();
+              let i = index
+            "
+          >
             <td>{{ herramienta.codigo }}</td>
             <td>{{ herramienta.nombre }}</td>
             <td>{{ herramienta.marca }}</td>
@@ -86,28 +120,53 @@
             <td>{{ herramienta.disponibilidad }}</td>
             <td>
               <div class="estado-toggle">
-                <label class="toggle-switch" [ngbTooltip]="herramienta.activo ? 'Activo' : 'Inactivo'" placement="top"
-                  container="body">
-                  <input type="checkbox" [checked]="herramienta.activo" (change)="toggleToolActive(herramienta)" />
-                  <span class="toggle-slider modern" [class.active]="herramienta.activo"></span>
+                <label
+                  class="toggle-switch"
+                  [ngbTooltip]="herramienta.activo ? 'Activo' : 'Inactivo'"
+                  placement="top"
+                  container="body"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="herramienta.activo"
+                    (change)="toggleToolActive(herramienta)"
+                  />
+                  <span
+                    class="toggle-slider modern"
+                    [class.active]="herramienta.activo"
+                  ></span>
                 </label>
               </div>
             </td>
             <td>
               <div class="action-buttons">
-                <button type="button" class="btn-icon btn-edit" (click)="editTool(herramienta)"
-                  ngbTooltip="Ver / Editar herramienta" placement="top" container="body">
+                <button
+                  type="button"
+                  class="btn-icon btn-edit"
+                  (click)="editTool(herramienta)"
+                  ngbTooltip="Ver / Editar herramienta"
+                  placement="top"
+                  container="body"
+                >
                   <i class="pi pi-eye"></i>
                 </button>
-                <button type="button" class="btn-icon btn-delete" (click)="deleteTool(herramienta)"
-                  ngbTooltip="Eliminar herramienta" placement="top" container="body">
+                <button
+                  type="button"
+                  class="btn-icon btn-delete"
+                  (click)="deleteTool(herramienta)"
+                  ngbTooltip="Eliminar herramienta"
+                  placement="top"
+                  container="body"
+                >
                   <i class="pi pi-trash"></i>
                 </button>
               </div>
             </td>
           </tr>
           <tr *ngIf="getPaginatedHerramientas().length === 0">
-            <td colspan="7" class="empty-message">No se encontraron herramientas.</td>
+            <td colspan="7" class="empty-message">
+              No se encontraron herramientas.
+            </td>
           </tr>
         </tbody>
       </table>
@@ -115,14 +174,23 @@
 
     <!-- Paginador -->
     <div *ngIf="!loading && totalItems > 0" class="paginator-container">
-      <app-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="currentPage - 1"
-        (pageChange)="onPageEvent($event)">
+      <app-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage - 1"
+        (pageChange)="onPageEvent($event)"
+      >
       </app-paginator>
     </div>
   </div>
 
   <!-- Modal de herramienta -->
-  <app-herramientas-modal *ngIf="showToolModal" [initialData]="modalInitialData" [mode]="modalMode"
-    (submit)="onModalSubmit($event)" (close)="closeToolModal()">
+  <app-herramientas-modal
+    *ngIf="showToolModal"
+    [initialData]="modalInitialData"
+    [mode]="modalMode"
+    (submit)="onModalSubmit($event)"
+    (close)="closeToolModal()"
+  >
   </app-herramientas-modal>
 </div>

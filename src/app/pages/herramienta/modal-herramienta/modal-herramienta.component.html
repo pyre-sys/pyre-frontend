@@ -4,11 +4,29 @@
       <div class="modal-header">
         <div class="header-controls">
           <div *ngIf="mode === 'edit'" class="mode-switch-wrapper">
-            <button type="button" class="mode-switch" (click)="toggleEditing()" [attr.aria-pressed]="editingEnabled" [attr.aria-label]="editingEnabled ? 'Desactivar edición' : 'Activar edición'">
-              <span class="switch-track" [class.on]="editingEnabled"><span class="switch-thumb" [class.on]="editingEnabled"></span></span>
+            <button
+              type="button"
+              class="mode-switch"
+              (click)="toggleEditing()"
+              [attr.aria-pressed]="editingEnabled"
+              [attr.aria-label]="
+                editingEnabled ? 'Desactivar edición' : 'Activar edición'
+              "
+            >
+              <span class="switch-track" [class.on]="editingEnabled"
+                ><span class="switch-thumb" [class.on]="editingEnabled"></span
+              ></span>
             </button>
           </div>
-          <h3 class="modal-title">{{ mode === 'edit' ? (editingEnabled ? 'Modo edición' : 'Modo lectura') : 'Nueva Herramienta' }}</h3>
+          <h3 class="modal-title">
+            {{
+              mode === "edit"
+                ? editingEnabled
+                  ? "Modo edición"
+                  : "Modo lectura"
+                : "Nueva Herramienta"
+            }}
+          </h3>
         </div>
         <button class="close-btn" (click)="onCancel()" aria-label="Cerrar">
           <span class="pi pi-times" aria-hidden="true"></span>
@@ -18,75 +36,156 @@
         <div class="loading-spinner"></div>
         <p>Cargando datos de la herramienta...</p>
       </div>
-      <form *ngIf="mode === 'create' || initialData" [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-form" autocomplete="off">
+      <form
+        *ngIf="mode === 'create' || initialData"
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        class="modal-form"
+        autocomplete="off"
+      >
         <div class="compact-form-grid">
           <!-- Mostrar error general si existe -->
           <div *ngIf="serverErrors['general']" class="error-general">
-            {{ serverErrors['general'] }}
+            {{ serverErrors["general"] }}
           </div>
 
-          <!-- Campos del formulario -->
-          <div class="field-group" [class.has-error]="form.get('Codigo')?.invalid && form.get('Codigo')?.touched">
-            <label class="required">Código</label>
-            <input formControlName="Codigo" placeholder="Código único" [class.error]="form.get('Codigo')?.invalid && form.get('Codigo')?.touched" />
-            <div *ngIf="form.get('Codigo')?.invalid && form.get('Codigo')?.touched" class="error-text">El código es requerido</div>
-            <div *ngIf="serverErrors['Codigo']" class="error-text">{{ serverErrors['Codigo'] }}</div>
+          <!-- CAMPOS OBLIGATORIOS -->
+          <div
+            class="field-group"
+            [class.has-error]="
+              form.get('Nombre')?.invalid && form.get('Nombre')?.touched
+            "
+          >
+            <label class="required">Nombre de la Herramienta</label>
+            <input
+              formControlName="Nombre"
+              placeholder="Nombre de la herramienta"
+              [class.error]="
+                form.get('Nombre')?.invalid && form.get('Nombre')?.touched
+              "
+            />
+            <div
+              *ngIf="form.get('Nombre')?.invalid && form.get('Nombre')?.touched"
+              class="error-text"
+            >
+              El nombre es requerido
+            </div>
           </div>
-          <div class="field-group" [class.has-error]="form.get('Nombre')?.invalid && form.get('Nombre')?.touched">
-            <label class="required">Nombre</label>
-            <input formControlName="Nombre" placeholder="Nombre de la herramienta" [class.error]="form.get('Nombre')?.invalid && form.get('Nombre')?.touched" />
-            <div *ngIf="form.get('Nombre')?.invalid && form.get('Nombre')?.touched" class="error-text">El nombre es requerido</div>
+
+          <div class="field-group">
+            <label class="required">Familia</label>
+            <app-cbo-familia-herramienta
+              formControlName="Familia"
+            ></app-cbo-familia-herramienta>
+            <div
+              *ngIf="
+                form.get('Familia')?.invalid && form.get('Familia')?.touched
+              "
+              class="error-text"
+            >
+              Selecciona una familia
+            </div>
           </div>
+
+          <!-- CAMPOS OPCIONALES -->
           <div class="field-group">
             <label>Marca</label>
             <input formControlName="Marca" placeholder="Marca" />
-            <div *ngIf="form.get('Marca')?.invalid && form.get('Marca')?.touched" class="error-text">Máximo 50 caracteres</div>
+            <div
+              *ngIf="form.get('Marca')?.invalid && form.get('Marca')?.touched"
+              class="error-text"
+            >
+              Máximo 50 caracteres
+            </div>
           </div>
+
           <div class="field-group">
             <label>Tipo</label>
             <input formControlName="Tipo" placeholder="Tipo" />
-            <div *ngIf="form.get('Tipo')?.invalid && form.get('Tipo')?.touched" class="error-text">Máximo 50 caracteres</div>
+            <div
+              *ngIf="form.get('Tipo')?.invalid && form.get('Tipo')?.touched"
+              class="error-text"
+            >
+              Máximo 50 caracteres
+            </div>
           </div>
-          <div class="field-group" [class.has-error]="form.get('EstadoFisico')?.invalid && form.get('EstadoFisico')?.touched">
-            <label class="required">Estado Físico</label>
-            <select formControlName="EstadoFisico" [class.error]="form.get('EstadoFisico')?.invalid && form.get('EstadoFisico')?.touched">
-              <option value="" disabled>Selecciona estado</option>
-              <option value="Excelente">Excelente</option>
-              <option value="Bueno">Bueno</option>
-              <option value="Regular">Regular</option>
-              <option value="Malo">Malo</option>
-              <option value="Muy malo">Muy malo</option>
-            </select>
-            <div *ngIf="form.get('EstadoFisico')?.invalid && form.get('EstadoFisico')?.touched" class="error-text">Selecciona estado físico</div>
-          </div>
-          <div class="field-group" [class.has-error]="form.get('Disponibilidad')?.invalid && form.get('Disponibilidad')?.touched">
-            <label class="required">Disponibilidad</label>
-            <select formControlName="Disponibilidad" [class.error]="form.get('Disponibilidad')?.invalid && form.get('Disponibilidad')?.touched">
-              <option value="" disabled>Selecciona disponibilidad</option>
-              <option value="Disponible">Disponible</option>
-              <option value="Prestada">Prestada</option>
-              <option value="Mantenimiento">Mantenimiento</option>
-              <option value="Extraviada">Extraviada</option>
-            </select>
-            <div *ngIf="form.get('Disponibilidad')?.invalid && form.get('Disponibilidad')?.touched" class="error-text">Selecciona disponibilidad</div>
-          </div>
+
           <div class="field-group">
-            <label>Ubicación</label>
-            <input formControlName="Ubicacion" placeholder="Ubicación" />
-            <div *ngIf="form.get('Ubicacion')?.invalid && form.get('Ubicacion')?.touched" class="error-text">Máximo 100 caracteres</div>
+            <label>Ubicación Física</label>
+            <input
+              formControlName="UbicacionFisica"
+              placeholder="Ubicación Física"
+            />
+            <div
+              *ngIf="
+                form.get('UbicacionFisica')?.invalid &&
+                form.get('UbicacionFisica')?.touched
+              "
+              class="error-text"
+            >
+              Máximo 100 caracteres
+            </div>
           </div>
+
           <div class="field-group">
-            <label>Planta</label>
-            <input formControlName="Planta" placeholder="Planta" />
-            <div *ngIf="form.get('Planta')?.invalid && form.get('Planta')?.touched" class="error-text">Máximo 50 caracteres</div>
+            <label>Serie</label>
+            <input formControlName="Serie" placeholder="Número de serie" />
+            <div
+              *ngIf="form.get('Serie')?.invalid && form.get('Serie')?.touched"
+              class="error-text"
+            >
+              Máximo 100 caracteres
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Valor (Costo en dólares)</label>
+            <input
+              formControlName="Valor"
+              placeholder="Costo en dólares"
+              type="number"
+              step="0.01"
+            />
+            <div
+              *ngIf="form.get('Valor')?.invalid && form.get('Valor')?.touched"
+              class="error-text"
+            >
+              Ingresa un valor válido
+            </div>
           </div>
         </div>
         <div class="actions">
-          <button type="button" class="btn-cancel" (click)="onCancel()">Cancelar</button>
-          <span [ngbTooltip]="!editingEnabled ? 'Pasa a modo edición para poder actualizar' : null" placement="top" container="body">
-            <button *ngIf="mode === 'edit'" [disabled]="!editingEnabled" type="submit" class="btn-submit">Actualizar</button>
+          <button type="button" class="btn-cancel" (click)="onCancel()">
+            Cancelar
+          </button>
+          <span
+            [ngbTooltip]="
+              !editingEnabled
+                ? 'Pasa a modo edición para poder actualizar'
+                : null
+            "
+            placement="top"
+            container="body"
+          >
+            <button
+              *ngIf="mode === 'edit'"
+              [disabled]="!editingEnabled"
+              type="submit"
+              class="btn-submit"
+            >
+              Actualizar
+            </button>
           </span>
-          <button *ngIf="mode !== 'edit'" type="submit" class="btn-submit">Crear</button>
+          <button
+            *ngIf="mode !== 'edit'"
+            type="submit"
+            class="btn-submit"
+            [disabled]="form.invalid"
+            ngbTooltip="Complete los campos obligatorios"
+            [disableTooltip]="!form.invalid"
+          >
+            Crear
+          </button>
         </div>
       </form>
     </div>
