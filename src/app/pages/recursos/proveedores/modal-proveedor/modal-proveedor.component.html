@@ -99,6 +99,14 @@
                         <div *ngIf="form.get('activo')?.invalid && form.get('activo')?.touched" class="error-text">
                             Selecciona un estado</div>
                     </div>
+
+                    <div class="field-group full-width">
+                        <label>Descripcion <span class="optional-text">(opcional)</span></label>
+                        <textarea formControlName="descripcion" rows="3"
+                            placeholder="Descripcion adicional"></textarea>
+                        <div *ngIf="form.get('descripcion')?.invalid && form.get('descripcion')?.touched"
+                            class="error-text">Máximo 1000 caracteres</div>
+                    </div>
                 </div>
 
                 <div class="actions">

@@ -12,6 +12,7 @@ export interface ProveedorDto {
   telefono?: string;
   email?: string;
   direccion?: string;
+  descripcion?: string;
   activo: boolean;
 }
 
@@ -112,6 +113,7 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
       telefono: ['', [Validators.maxLength(50)]],
       email: ['', [Validators.email, Validators.maxLength(150)]],
       direccion: ['', [Validators.maxLength(200)]],
+      descripcion: ['', [Validators.maxLength(1000)]],
       activo: [true, [Validators.required]]
     });
   }
@@ -131,6 +133,7 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
       telefono: data?.telefono ?? '',
       email: data?.email ?? '',
       direccion: data?.direccion ?? '',
+      descripcion: data?.descripcion ?? '',
       activo: data?.activo ?? true
     };
 

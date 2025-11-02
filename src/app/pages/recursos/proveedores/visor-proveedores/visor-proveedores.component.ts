@@ -14,6 +14,7 @@ export interface ProveedorDto {
   telefono?: string;
   email?: string;
   direccion?: string;
+  descripcion?: string;
   activo: boolean;
 }
 
@@ -78,6 +79,7 @@ export class VisorProveedoresComponent implements OnInit {
           telefono: p.telefono,
           email: p.email,
           direccion: p.direccion,
+          descripcion: p.descripcion,
           activo: p.activo
         }));
         this.applyFilters();

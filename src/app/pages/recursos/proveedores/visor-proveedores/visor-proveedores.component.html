@@ -51,7 +51,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Contacto</th>
-                        <th>CUIT</th>
+                        <th>Descripción</th>
                         <th>Teléfono</th>
                         <th>Email</th>
                         <th>Estado</th>
@@ -62,7 +62,7 @@
                     <tr *ngFor="let proveedor of getPaginatedProveedores(); let i = index">
                         <td>{{ proveedor.nombreProveedor }}</td>
                         <td>{{ proveedor.contacto }}</td>
-                        <td>{{ proveedor.cuit }}</td>
+                        <td>{{ proveedor.descripcion }}</td>
                         <td>{{ proveedor.telefono }}</td>
                         <td>{{ proveedor.email }}</td>
                         <td>
