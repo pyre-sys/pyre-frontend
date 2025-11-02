@@ -42,13 +42,13 @@
                                         Seleccionar Usuario
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <div class="form-field-wrapper" [class.has-value]="devolucionForm.get('usuarioId')?.value"
+                                    <div class="form-field-wrapper"
+                                        [class.has-value]="devolucionForm.get('usuarioId')?.value"
                                         [class.has-error]="devolucionForm.get('usuarioId')?.invalid && devolucionForm.get('usuarioId')?.touched">
                                         <app-cbo-usuario [isId]="'usuarioSelect'" [showOnlyActive]="true"
                                             [objectErrors]="devolucionForm.get('usuarioId')?.errors"
-                                            [isTouched]="!!devolucionForm.get('usuarioId')?.touched" 
-                                            formControlName="usuarioId"
-                                            (usuarioSelected)="onUsuarioSelected($event)">
+                                            [isTouched]="!!devolucionForm.get('usuarioId')?.touched"
+                                            formControlName="usuarioId" (usuarioSelected)="onUsuarioSelected($event)">
                                         </app-cbo-usuario>
                                         <span class="field-check-icon" *ngIf="devolucionForm.get('usuarioId')?.valid">
                                             <i class="bi bi-check-circle-fill text-success"></i>
@@ -76,30 +76,31 @@
                             </div>
 
                             <!-- Empty state -->
-                            <div *ngIf="!isLoadingHerramientas && herramientasEnPrestamo.length === 0" 
-                                 class="alert alert-info d-flex align-items-center">
+                            <div *ngIf="!isLoadingHerramientas && herramientasEnPrestamo.length === 0"
+                                class="alert alert-info d-flex align-items-center">
                                 <i class="bi bi-info-circle me-2"></i>
                                 <div>Este usuario no tiene herramientas en préstamo actualmente</div>
                             </div>
 
                             <!-- Herramientas cards -->
-                            <div *ngIf="!isLoadingHerramientas && herramientasEnPrestamo.length > 0" 
-                                 class="herramientas-grid">
-                                <div *ngFor="let herramienta of herramientasEnPrestamo; let i = index" 
-                                     class="herramienta-card" [class.selected]="herramienta.selected" @fadeIn>
-                                    
+                            <div *ngIf="!isLoadingHerramientas && herramientasEnPrestamo.length > 0"
+                                class="herramientas-grid">
+                                <div *ngFor="let herramienta of herramientasEnPrestamo; let i = index"
+                                    class="herramienta-card" [class.selected]="herramienta.selected" @fadeIn>
+
                                     <!-- Card header with checkbox -->
                                     <div class="card-header-custom">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" 
-                                                   [id]="'herramienta-' + herramienta.id"
-                                                   [checked]="herramienta.selected"
-                                                   (change)="onHerramientaToggle(herramienta)">
-                                            <label class="form-check-label fw-bold" [for]="'herramienta-' + herramienta.id">
+                                            <input class="form-check-input" type="checkbox"
+                                                [id]="'herramienta-' + herramienta.id" [checked]="herramienta.selected"
+                                                (change)="onHerramientaToggle(herramienta)">
+                                            <label class="form-check-label fw-bold"
+                                                [for]="'herramienta-' + herramienta.id">
                                                 {{herramienta.codigo}} - {{herramienta.nombre}}
                                             </label>
                                         </div>
-                                        <div class="overdue-badge" *ngIf="isOverdue(herramienta.fechaEstimadaDevolucion)">
+                                        <div class="overdue-badge"
+                                            *ngIf="isOverdue(herramienta.fechaEstimadaDevolucion)">
                                             <span class="badge bg-danger">
                                                 Vencido {{getDaysOverdue(herramienta.fechaEstimadaDevolucion)}} días
                                             </span>
@@ -115,11 +116,13 @@
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Fecha Préstamo:</span>
-                                                <span class="info-value">{{herramienta.fechaPrestamo | date:'dd/MM/yyyy'}}</span>
+                                                <span class="info-value">{{herramienta.fechaPrestamo |
+                                                    date:'dd/MM/yyyy'}}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Fecha Estimada:</span>
-                                                <span class="info-value" [class.text-danger]="isOverdue(herramienta.fechaEstimadaDevolucion)">
+                                                <span class="info-value"
+                                                    [class.text-danger]="isOverdue(herramienta.fechaEstimadaDevolucion)">
                                                     {{herramienta.fechaEstimadaDevolucion | date:'dd/MM/yyyy':'UTC'}}
                                                 </span>
                                             </div>
@@ -137,23 +140,23 @@
                                                         Estado Físico al Devolver
                                                         <span class="text-danger">*</span>
                                                     </label>
-                                                    <select class="form-select form-select-sm" 
-                                                            [value]="herramienta.estadoFisicoId || ''"
-                                                            (change)="onEstadoFisicoChange(herramienta, +$any($event.target).value)"
-                                                            [class.is-invalid]="herramienta.selected && !herramienta.estadoFisicoId">
+                                                    <select class="form-select form-select-sm"
+                                                        [value]="herramienta.estadoFisicoId || ''"
+                                                        (change)="onEstadoFisicoChange(herramienta, +$any($event.target).value)"
+                                                        [class.is-invalid]="herramienta.selected && !herramienta.estadoFisicoId">
                                                         <option value="">Seleccionar Estado</option>
-                                                        <option *ngFor="let estado of estadoFisicoOptions" 
-                                                                [value]="estado.id">{{estado.nombre}}</option>
+                                                        <option *ngFor="let estado of estadoFisicoOptions"
+                                                            [value]="estado.id">{{estado.nombre}}</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-12">
                                                     <label class="form-label small fw-bold">Observaciones</label>
-                                                    <textarea class="form-control form-control-sm" rows="2" 
-                                                              maxlength="200"
-                                                              [value]="herramienta.observaciones"
-                                                              (input)="onObservacionesChange(herramienta, $any($event.target).value)"
-                                                              placeholder="Observaciones sobre la devolución..."></textarea>
-                                                    <small class="text-muted">{{herramienta.observaciones.length || 0}}/200</small>
+                                                    <textarea class="form-control form-control-sm" rows="2"
+                                                        maxlength="200" [value]="herramienta.observaciones"
+                                                        (input)="onObservacionesChange(herramienta, $any($event.target).value)"
+                                                        placeholder="Observaciones sobre la devolución..."></textarea>
+                                                    <small class="text-muted">{{herramienta.observaciones.length ||
+                                                        0}}/200</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -166,7 +169,9 @@
                                 <div class="alert alert-success d-flex align-items-center">
                                     <i class="bi bi-check-circle-fill me-2"></i>
                                     <div>
-                                        <strong>{{getSelectedHerramientas().length}} herramienta{{getSelectedHerramientas().length > 1 ? 's' : ''}} seleccionada{{getSelectedHerramientas().length > 1 ? 's' : ''}}</strong>
+                                        <strong>{{getSelectedHerramientas().length}}
+                                            herramienta{{getSelectedHerramientas().length > 1 ? 's' : ''}}
+                                            seleccionada{{getSelectedHerramientas().length > 1 ? 's' : ''}}</strong>
                                         <small class="d-block text-muted">para devolución</small>
                                     </div>
                                 </div>
@@ -226,9 +231,8 @@
             </div>
 
             <!-- Resumen de herramientas -->
-            <div class="info-card herramienta-card card mb-3 shadow-sm" 
-                 [class.card-skeleton]="!selectedUsuarioInfo"
-                 [class.card-filled]="herramientasEnPrestamo.length > 0" @fadeIn>
+            <div class="info-card herramienta-card card mb-3 shadow-sm" [class.card-skeleton]="!selectedUsuarioInfo"
+                [class.card-filled]="herramientasEnPrestamo.length > 0" @fadeIn>
                 <div class="card-header bg-gradient-primary text-white">
                     <h6 class="card-title mb-0 d-flex align-items-center">
                         <i class="bi bi-tools me-2"></i>
@@ -248,20 +252,21 @@
                     </div>
 
                     <!-- Estado con herramientas -->
-                    <div *ngIf="selectedUsuarioInfo && herramientasEnPrestamo.length > 0" class="info-content-herramienta">
+                    <div *ngIf="selectedUsuarioInfo && herramientasEnPrestamo.length > 0"
+                        class="info-content-herramienta">
                         <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
                             <i class="bi bi-info-circle me-2"></i>
                             <div>
-                                <strong>{{herramientasEnPrestamo.length}} herramienta{{herramientasEnPrestamo.length > 1 ? 's' : ''}}</strong>
+                                <strong>{{herramientasEnPrestamo.length}} herramienta{{herramientasEnPrestamo.length > 1
+                                    ? 's' : ''}}</strong>
                                 <small class="d-block text-muted">en préstamo</small>
                             </div>
                         </div>
 
                         <div class="herramientas-summary">
-                            <div *ngFor="let herramienta of herramientasEnPrestamo" 
-                                 class="herramienta-summary-item mb-2 p-2 border rounded"
-                                 [class.border-success]="herramienta.selected"
-                                 [class.bg-light]="herramienta.selected">
+                            <div *ngFor="let herramienta of herramientasEnPrestamo"
+                                class="herramienta-summary-item mb-2 p-2 border rounded"
+                                [class.border-success]="herramienta.selected" [class.bg-light]="herramienta.selected">
                                 <div class="fw-bold small">{{herramienta.codigo}}</div>
                                 <div class="small text-muted">{{herramienta.nombre}}</div>
                                 <div class="small" [class.text-danger]="isOverdue(herramienta.fechaEstimadaDevolucion)">
@@ -275,8 +280,8 @@
                     </div>
 
                     <!-- Sin herramientas -->
-                    <div *ngIf="selectedUsuarioInfo && herramientasEnPrestamo.length === 0 && !isLoadingHerramientas" 
-                         class="text-center text-muted py-3">
+                    <div *ngIf="selectedUsuarioInfo && herramientasEnPrestamo.length === 0 && !isLoadingHerramientas"
+                        class="text-center text-muted py-3">
                         <i class="bi bi-exclamation-circle" style="font-size: 2rem;"></i>
                         <p class="mb-0 mt-2">Este usuario no tiene herramientas en préstamo</p>
                     </div>
@@ -300,7 +305,7 @@
         }
 
         .herramienta-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .herramienta-card.selected {

@@ -100,10 +100,10 @@ export class DevolucionComponent implements OnInit {
     });
 
     // Check if at least one tool is selected and properly filled
-    const hasValidSelection = this.herramientasEnPrestamo.some(h => 
+    const hasValidSelection = this.herramientasEnPrestamo.some(h =>
       h.selected && h.estadoFisicoId !== null
     );
-    
+
     if (hasValidSelection) {
       filledFields++;
     }
@@ -157,7 +157,7 @@ export class DevolucionComponent implements OnInit {
 
   onHerramientaToggle(herramienta: HerramientaDevolucion): void {
     herramienta.selected = !herramienta.selected;
-    
+
     // If deselected, clear the fields
     if (!herramienta.selected) {
       herramienta.estadoFisicoId = null;
@@ -179,7 +179,7 @@ export class DevolucionComponent implements OnInit {
 
   isFormValid(): boolean {
     const selectedHerramientas = this.getSelectedHerramientas();
-    
+
     if (!this.devolucionForm.valid || selectedHerramientas.length === 0) {
       return false;
     }
