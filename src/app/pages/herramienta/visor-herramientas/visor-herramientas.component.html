@@ -3,7 +3,8 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div></div>
     <a class="btn btn-primary header-action" (click)="createNewTool()" role="button">
-      <i class="bx bx-wrench bx-tada me-1" aria-hidden="true"></i> Nueva Herramienta
+      <i class="bx bx-wrench bx-tada me-1" aria-hidden="true"></i> Nueva
+      Herramienta
     </a>
   </div>
 </div>
@@ -16,7 +17,7 @@
         <!-- Código -->
         <div class="col-lg-2 col-md-3 col-sm-6">
           <input type="text" class="form-control" [(ngModel)]="filtroCodigo" placeholder="Código de herramienta"
-            (keyup.enter)="onSearch()" />
+            readonly />
         </div>
 
         <!-- Nombre -->
@@ -48,14 +49,13 @@
 
         <!-- Botón Buscar -->
         <div class="col-lg-2 col-md-12 col-sm-12 d-flex justify-content-end">
-          <button type="button" class="btn btn-secondary" (click)="onSearch()" [disabled]="!hasActiveFilters()"
+          <button type="button" class="btn btn-primary" (click)="onSearch()" [disabled]="!hasActiveFilters()"
             title="Buscar">
             <i class="pi pi-search"></i>
           </button>
         </div>
       </div>
     </div>
-
 
     <!-- Loading indicator -->
     <div *ngIf="loading" class="text-center py-4">
@@ -78,7 +78,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let herramienta of getPaginatedHerramientas(); let i = index">
+          <tr *ngFor="
+              let herramienta of getPaginatedHerramientas();
+              let i = index
+            ">
             <td>{{ herramienta.codigo }}</td>
             <td>{{ herramienta.nombre }}</td>
             <td>{{ herramienta.marca }}</td>
@@ -107,7 +110,9 @@
             </td>
           </tr>
           <tr *ngIf="getPaginatedHerramientas().length === 0">
-            <td colspan="7" class="empty-message">No se encontraron herramientas.</td>
+            <td colspan="7" class="empty-message">
+              No se encontraron herramientas.
+            </td>
           </tr>
         </tbody>
       </table>

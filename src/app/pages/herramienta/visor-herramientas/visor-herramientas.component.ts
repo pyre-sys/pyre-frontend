@@ -42,16 +42,18 @@ interface PaginationData {
 
 // Nueva interfaz para la respuesta
 interface ApiResponse {
-  data: any[] | {
-    data: any[];
-    pagination?: PaginationData;
-    page?: number;
-    pageSize?: number;
-    totalRecords?: number;
-    totalPages?: number;
-    hasNextPage?: boolean;
-    hasPreviousPage?: boolean;
-  };
+  data:
+    | any[]
+    | {
+        data: any[];
+        pagination?: PaginationData;
+        page?: number;
+        pageSize?: number;
+        totalRecords?: number;
+        totalPages?: number;
+        hasNextPage?: boolean;
+        hasPreviousPage?: boolean;
+      };
   total?: number;
   pagination?: PaginationData;
 }
@@ -65,7 +67,7 @@ interface ApiResponse {
     RouterModule,
     HerramientasModalComponent,
     PaginatorComponent,
-    NgbTooltipModule
+    NgbTooltipModule,
   ],
   templateUrl: './visor-herramientas.component.html',
   styleUrls: ['../../../../styles/visor-style.css'],
@@ -74,7 +76,13 @@ interface ApiResponse {
 export class VisorHerramientasComponent implements OnInit {
   herramientas: DisplayHerramienta[] = [];
   filteredHerramientas: DisplayHerramienta[] = [];
-  columns: string[] = ['codigo', 'nombre', 'marca', 'estadoFisico', 'disponibilidad'];
+  columns: string[] = [
+    'codigo',
+    'nombre',
+    'marca',
+    'estadoFisico',
+    'disponibilidad',
+  ];
   currentPage = 1;
   pageSize = 6;
   loading = false;
@@ -96,7 +104,11 @@ export class VisorHerramientasComponent implements OnInit {
   modalMode: 'create' | 'edit' = 'create';
 
   // Constructor con inyección de servicios
-  constructor(private srvHerramienta: HerramientaService, private srvAlerta: AlertaService, private pageTitleService: PageTitleService) { }
+  constructor(
+    private srvHerramienta: HerramientaService,
+    private srvAlerta: AlertaService,
+    private pageTitleService: PageTitleService
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Listado de Herramientas');
@@ -105,7 +117,6 @@ export class VisorHerramientasComponent implements OnInit {
 
   fetchHerramientas(): void {
     this.loading = true;
-    console.log(`[HerramientasList] fetchHerramientas page=${this.currentPage} size=${this.pageSize}`);
 
     // Construir objeto de filtros para enviar al servicio
     const filters: any = {};
@@ -118,51 +129,50 @@ export class VisorHerramientasComponent implements OnInit {
       filters.estado = this.filtroEstado === 'activo';
     }
 
-    console.debug('[HerramientasList] Enviando filtros:', filters);
+    this.srvHerramienta
+      .getTools(this.currentPage, this.pageSize, filters)
+      .subscribe({
+        next: (resp: any) => {
+          let herramientasData = [];
 
-    this.srvHerramienta.getTools(this.currentPage, this.pageSize, filters).subscribe({
-      next: (resp: any) => {
-        console.debug('[HerramientasList] fetchHerramientas - respuesta:', resp);
+          if (Array.isArray(resp.data)) {
+            herramientasData = resp.data;
+          } else if (resp.data && Array.isArray(resp.data.data)) {
+            herramientasData = resp.data.data;
+          }
 
-        // Extraer datos del array
-        let herramientasData = [];
+          // Mapear los datos al formato de visualización
+          this.herramientas = herramientasData.map((h: any) =>
+            this.mapHerramientaToDisplayFormat(h)
+          );
 
-        if (Array.isArray(resp.data)) {
-          herramientasData = resp.data;
-        } else if (resp.data && Array.isArray(resp.data.data)) {
-          herramientasData = resp.data.data;
-        }
+          // Actualizar información de paginación
+          this.totalItems = resp.total || herramientasData.length;
+          this.totalPages = Math.ceil(this.totalItems / this.pageSize);
 
-        // Mapear los datos al formato de visualización
-        this.herramientas = herramientasData.map((h: any) => this.mapHerramientaToDisplayFormat(h));
-
-        // Actualizar información de paginación
-        this.totalItems = resp.total || herramientasData.length;
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-
-        // Usar datos directamente sin filtrado adicional
-        this.filteredHerramientas = this.herramientas;
-        this.loading = false;
-
-        console.log('[HerramientasList] Herramientas cargadas:', this.herramientas.length);
-        console.log('[HerramientasList] Paginación:', {
-          total: this.totalItems,
-          pages: this.totalPages,
-          current: this.currentPage
-        });
-      },
-      error: (error: any) => {
-        console.error('Error al cargar herramientas:', error);
-        this.srvAlerta.error('Error al cargar las herramientas. Por favor, inténtelo de nuevo.');
-        this.loading = false;
-      }
-    });
+          // Usar datos directamente sin filtrado adicional
+          this.filteredHerramientas = this.herramientas;
+          this.loading = false;
+        },
+        error: (error: any) => {
+          this.srvAlerta.error(
+            'Error al cargar las herramientas. Por favor, inténtelo de nuevo.'
+          );
+          this.loading = false;
+        },
+      });
   }
 
   // Helper para mapear herramienta a formato de visualización
-  private mapHerramientaToDisplayFormat(h: HerramientasRaw): DisplayHerramienta {
-    const estadoRaw = h['activo'] ?? h['estado'] ?? h['active'] ?? h['isActive'] ?? null;
-    const activo = typeof estadoRaw === 'boolean' ? estadoRaw : (estadoRaw === 'Activo' || estadoRaw === true);
+  private mapHerramientaToDisplayFormat(
+    h: HerramientasRaw
+  ): DisplayHerramienta {
+    const estadoRaw =
+      h['activo'] ?? h['estado'] ?? h['active'] ?? h['isActive'] ?? null;
+    const activo =
+      typeof estadoRaw === 'boolean'
+        ? estadoRaw
+        : estadoRaw === 'Activo' || estadoRaw === true;
     const estado = activo ? 'Activo' : 'Inactivo';
 
     // Mapeo para normalizar los valores de disponibilidad
@@ -171,16 +181,20 @@ export class VisorHerramientasComponent implements OnInit {
     // Normalizar disponibilidad según los valores correctos
     if (disponibilidad) {
       if (typeof disponibilidad === 'string') {
-        if (disponibilidad.toLowerCase().includes('prest')) disponibilidad = 'Prestada';
-        else if (disponibilidad.toLowerCase().includes('manten')) disponibilidad = 'Mantenimiento';
-        else if (disponibilidad.toLowerCase().includes('extra')) disponibilidad = 'Extraviada';
-        else if (disponibilidad.toLowerCase().includes('disp')) disponibilidad = 'Disponible';
+        if (disponibilidad.toLowerCase().includes('prest'))
+          disponibilidad = 'Prestada';
+        else if (disponibilidad.toLowerCase().includes('manten'))
+          disponibilidad = 'Mantenimiento';
+        else if (disponibilidad.toLowerCase().includes('extra'))
+          disponibilidad = 'Extraviada';
+        else if (disponibilidad.toLowerCase().includes('disp'))
+          disponibilidad = 'Disponible';
       } else if (typeof disponibilidad === 'number') {
         const dispMap: { [key: number]: string } = {
           1: 'Disponible',
           2: 'Prestada',
           3: 'Mantenimiento',
-          4: 'Extraviada'
+          4: 'Extraviada',
         };
         disponibilidad = dispMap[disponibilidad] || 'Disponible';
       }
@@ -198,7 +212,7 @@ export class VisorHerramientasComponent implements OnInit {
       ubicacion: h['ubicacion'] ?? h['ubicacionFisica'] ?? '', // Añadir ubicacionFisica como fallback
       planta: h['nombrePlanta'] ?? h['planta'] ?? '',
       activo: activo,
-      estado: estado
+      estado: estado,
     } as DisplayHerramienta;
   }
 
@@ -241,7 +255,12 @@ export class VisorHerramientasComponent implements OnInit {
   }
 
   hasActiveFilters(): boolean {
-    return !!(this.filtroCodigo?.trim() || this.filtroNombre?.trim() || this.filtroMarca?.trim() || this.filtroEstado);
+    return !!(
+      this.filtroCodigo?.trim() ||
+      this.filtroNombre?.trim() ||
+      this.filtroMarca?.trim() ||
+      this.filtroEstado
+    );
   }
 
   onPageChange(page: number): void {
@@ -290,13 +309,11 @@ export class VisorHerramientasComponent implements OnInit {
 
     this.srvHerramienta.getToolById(Number(id)).subscribe({
       next: (resp: any) => {
-        console.debug('[HerramientasList] Datos de herramienta recibidos:', resp);
         // Extraer los datos de la respuesta según su estructura
         const toolData = resp?.data ?? resp ?? null;
 
         // Si no hay datos o están vacíos, usar el item directamente
         if (!toolData) {
-          console.warn('[HerramientasList] No se recibieron datos, usando item actual');
           this.modalInitialData = item;
           return;
         }
@@ -305,25 +322,31 @@ export class VisorHerramientasComponent implements OnInit {
         const normalizedData = {
           ...toolData,
           // Asegurar que nombreHerramienta/nombre estén presentes
-          nombreHerramienta: toolData.nombreHerramienta || toolData.nombre || item.nombre,
+          nombreHerramienta:
+            toolData.nombreHerramienta || toolData.nombre || item.nombre,
           nombre: toolData.nombre || toolData.nombreHerramienta || item.nombre,
           // Asegurar que disponibilidad/estadoDisponibilidad estén presentes
-          disponibilidad: toolData.disponibilidad || toolData.estadoDisponibilidad || item.disponibilidad,
-          estadoDisponibilidad: toolData.estadoDisponibilidad || toolData.disponibilidad || item.disponibilidad,
+          disponibilidad:
+            toolData.disponibilidad ||
+            toolData.estadoDisponibilidad ||
+            item.disponibilidad,
+          estadoDisponibilidad:
+            toolData.estadoDisponibilidad ||
+            toolData.disponibilidad ||
+            item.disponibilidad,
           // Asegurar que estadoFisico esté presente
           estadoFisico: toolData.estadoFisico || item.estadoFisico || 'Bueno',
           // Asegurar que id/idHerramienta estén presentes
           id: toolData.id || toolData.idHerramienta || item.id,
-          idHerramienta: toolData.idHerramienta || toolData.id || item.idHerramienta
+          idHerramienta:
+            toolData.idHerramienta || toolData.id || item.idHerramienta,
         };
 
         this.modalInitialData = normalizedData;
-        console.debug('[HerramientasList] Datos normalizados para el modal:', normalizedData);
       },
       error: (err: any) => {
-        console.error('[HerramientasList] error loading tool by id', err);
         this.modalInitialData = item;
-      }
+      },
     });
   }
 
@@ -331,18 +354,26 @@ export class VisorHerramientasComponent implements OnInit {
     const id = item?.id ?? item?.idHerramienta ?? null;
     if (id == null) return;
 
-    this.srvAlerta.confirm('¿Estás seguro de que deseas eliminar esta herramienta?', 'Eliminar Herramienta')
+    this.srvAlerta
+      .confirm(
+        '¿Estás seguro de que deseas eliminar esta herramienta?',
+        'Eliminar Herramienta'
+      )
       .then((result: any) => {
         if (result && result.isConfirmed) {
           this.srvHerramienta.deleteTool(Number(id)).subscribe({
             next: () => {
-              this.srvAlerta.success('La herramienta ha sido eliminada correctamente.', '¡Eliminada!');
+              this.srvAlerta.success(
+                'La herramienta ha sido eliminada correctamente.',
+                '¡Eliminada!'
+              );
               this.fetchHerramientas();
             },
             error: (err: any) => {
-              console.error('[HerramientasList] deleteTool error', err);
-              this.srvAlerta.error('No se pudo eliminar la herramienta. Intente nuevamente.');
-            }
+              this.srvAlerta.error(
+                'No se pudo eliminar la herramienta. Intente nuevamente.'
+              );
+            },
           });
         }
       });
@@ -356,36 +387,48 @@ export class VisorHerramientasComponent implements OnInit {
     const targetState = !current;
     const actionText = targetState ? 'activar' : 'desactivar';
 
-    this.srvAlerta.confirm(`¿Estás seguro de que deseas ${actionText} esta herramienta?`, `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} Herramienta`)
+    this.srvAlerta
+      .confirm(
+        `¿Estás seguro de que deseas ${actionText} esta herramienta?`,
+        `${
+          actionText.charAt(0).toUpperCase() + actionText.slice(1)
+        } Herramienta`
+      )
       .then((result: any) => {
         if (result && result.isConfirmed) {
           // Usar el nuevo método updateToolStatus en lugar de toggleActivo
-          this.srvHerramienta.updateToolStatus(Number(id), targetState).subscribe({
-            next: (response) => {
-              // Verificar si la respuesta contiene información sobre el éxito de la operación
-              const success = response?.success !== false;
+          this.srvHerramienta
+            .updateToolStatus(Number(id), targetState)
+            .subscribe({
+              next: (response) => {
+                // Verificar si la respuesta contiene información sobre el éxito de la operación
+                const success = response?.success !== false;
 
-              if (success) {
-                item.activo = targetState; // Actualizar el estado localmente
-                const pastText = targetState ? 'activada' : 'desactivada';
-                this.srvAlerta.success(`Herramienta ${pastText} correctamente.`, '¡Hecho!');
-              } else {
-                // Si el backend indica que hubo un error
-                const errorMsg = response?.message || 'No se pudo cambiar el estado de la herramienta.';
+                if (success) {
+                  item.activo = targetState; // Actualizar el estado localmente
+                  const pastText = targetState ? 'activada' : 'desactivada';
+                  this.srvAlerta.success(
+                    `Herramienta ${pastText} correctamente.`,
+                    '¡Hecho!'
+                  );
+                } else {
+                  // Si el backend indica que hubo un error
+                  const errorMsg =
+                    response?.message ||
+                    'No se pudo cambiar el estado de la herramienta.';
+                  this.srvAlerta.error(errorMsg);
+                }
+              },
+              error: (err: any) => {
+                // Extraer mensaje de error del backend si está disponible
+                const errorMsg =
+                  err?.error?.message ||
+                  err?.message ||
+                  'No se pudo cambiar el estado de la herramienta. Intente nuevamente.';
+
                 this.srvAlerta.error(errorMsg);
-              }
-            },
-            error: (err: any) => {
-              console.error('[HerramientasList] updateToolStatus error:', err);
-
-              // Extraer mensaje de error del backend si está disponible
-              const errorMsg = err?.error?.message ||
-                               err?.message ||
-                               'No se pudo cambiar el estado de la herramienta. Intente nuevamente.';
-
-              this.srvAlerta.error(errorMsg);
-            }
-          });
+              },
+            });
         }
       });
   }
@@ -399,53 +442,49 @@ export class VisorHerramientasComponent implements OnInit {
   async onModalSubmit(event: {
     mode: 'create' | 'edit';
     data: any;
-    onSuccess: () => void;
+    onSuccess: (response: any) => void;
     onError: (error: any) => void;
   }) {
     if (event.mode === 'create') {
-      // Para creación, mantener el formato original
       this.srvHerramienta.createTool(event.data).subscribe({
-        next: () => {
+        next: (response) => {
           this.fetchHerramientas();
-          event.onSuccess();
+          event.onSuccess(response);
         },
         error: (err) => {
-          console.error('[HerramientasList] createTool error:', err);
           event.onError(err);
-        }
+        },
       });
     } else {
-      // Para actualización, extraer el ID correctamente
-      const id = Number(this.modalInitialData?.id ?? this.modalInitialData?.idHerramienta ?? null);
+      const id = Number(
+        this.modalInitialData?.id ??
+          this.modalInitialData?.idHerramienta ??
+          null
+      );
       if (!id) {
-        console.warn('[HerramientasList] update requested but no id available');
-        event.onError({ message: 'No se pudo identificar la herramienta a actualizar' });
+        const error = {
+          message: 'No se pudo identificar la herramienta a actualizar',
+        };
+        event.onError(error);
         return;
       }
 
-      console.debug('[HerramientasList] Datos a enviar para actualización:', { id, data: event.data });
-
-      // Llamar al servicio con ID y datos
       this.srvHerramienta.updateTool(id, event.data).subscribe({
-        next: () => {
+        next: (response) => {
           this.fetchHerramientas();
-          event.onSuccess();
+          event.onSuccess(response);
         },
         error: (err) => {
-          console.error('[HerramientasList] updateTool error:', err);
           event.onError(err);
-        }
+        },
       });
     }
   }
 
-  onPageEvent(event: { pageIndex: number, pageSize: number }): void {
+  onPageEvent(event: { pageIndex: number; pageSize: number }): void {
     // pageIndex es 0-based, pero backend espera 1-based
     this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
-
-    console.log(`[HerramientasList] Cambio de página: pageIndex=${event.pageIndex}, pageSize=${event.pageSize}`);
-    console.log(`[HerramientasList] Solicitando página ${this.currentPage} con ${this.pageSize} registros por página`);
 
     this.fetchHerramientas();
   }

@@ -947,3 +947,12 @@ input:checked + .toggle-slider::before {
     padding: 0 16px;
   }
 }
+
+/* Estilo para las etiquetas de fecha en los filtros */
+.date-label {
+  font-size: 0.75rem; /* Ajustar el tamaño de la fuente */
+  color: #6b7280;
+  margin-bottom: 2px;
+  display: block;
+  font-weight: 500;
+}

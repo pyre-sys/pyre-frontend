@@ -1,22 +1,47 @@
-import { Component, EventEmitter, Output, OnInit, Input, OnChanges, SimpleChanges, HostListener, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output,
+  OnInit,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  HostListener,
+  ElementRef,
+  ViewChild,
+  OnDestroy,
+} from '@angular/core';
 import { Subscription, debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../services/alerta.service';
+import { CboFamiliaHerramientaComponent } from '../../../shared/components/Cbo/cbo-familia-herramienta/cbo-familia-herramienta.component';
 
 @Component({
   selector: 'app-herramientas-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbTooltipModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgbTooltipModule,
+    CboFamiliaHerramientaComponent, // Ensure the component is imported
+  ],
   templateUrl: './modal-herramienta.component.html',
-  styleUrls: ['./modal-herramienta.component.css']
+  styleUrls: ['./modal-herramienta.component.css'],
 })
-export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy {
+export class HerramientasModalComponent
+  implements OnInit, OnChanges, OnDestroy
+{
   @Output() submit = new EventEmitter<{
     mode: 'create' | 'edit';
     data: any;
-    onSuccess: () => void;
+    onSuccess: (response: any) => void;
     onError: (error: any) => void;
   }>();
   @Output() close = new EventEmitter<void>();
@@ -38,7 +63,7 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
     private fb: FormBuilder,
     private elementRef: ElementRef,
     private srvAlerta: AlertaService
-  ) { }
+  ) {}
 
   @HostListener('document:keydown.escape', ['$event'])
   onEscapeKey(event: KeyboardEvent) {
@@ -53,7 +78,9 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
     this.setControlsDisabled(!this.editingEnabled);
 
     setTimeout(() => {
-      const firstInput = this.elementRef.nativeElement.querySelector('input:not([style*="display:none"])');
+      const firstInput = this.elementRef.nativeElement.querySelector(
+        'input:not([style*="display:none"])'
+      );
       if (firstInput) firstInput.focus();
     }, 150);
   }
@@ -73,7 +100,9 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
     this.editingEnabled = true;
     this.setControlsDisabled(false);
     setTimeout(() => {
-      const firstInput = this.elementRef.nativeElement.querySelector('input:not([disabled])');
+      const firstInput = this.elementRef.nativeElement.querySelector(
+        'input:not([disabled])'
+      );
       if (firstInput) firstInput.focus();
     }, 50);
   }
@@ -83,7 +112,9 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
     this.setControlsDisabled(!this.editingEnabled);
     if (this.editingEnabled) {
       setTimeout(() => {
-        const firstInput = this.elementRef.nativeElement.querySelector('input:not([disabled])');
+        const firstInput = this.elementRef.nativeElement.querySelector(
+          'input:not([disabled])'
+        );
         if (firstInput) firstInput.focus();
       }, 50);
     }
@@ -91,7 +122,7 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
 
   private setControlsDisabled(disabled: boolean) {
     if (!this.form) return;
-    Object.keys(this.form.controls).forEach(key => {
+    Object.keys(this.form.controls).forEach((key) => {
       const control = this.form.get(key);
       if (!control) return;
       if (disabled) {
@@ -104,78 +135,135 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
 
   private buildForm() {
     this.form = this.fb.group({
-      Codigo: ['', [Validators.required, Validators.maxLength(20)]],
-      Nombre: ['', [Validators.required, Validators.maxLength(100)]],
-      Marca: ['', [Validators.maxLength(50)]],
-      Tipo: ['', [Validators.maxLength(50)]],
-      EstadoFisico: ['', [Validators.required]],
-      Disponibilidad: ['', [Validators.required]],
-      Ubicacion: ['', [Validators.maxLength(100)]],
-      Planta: ['', [Validators.maxLength(50)]]
+      Nombre: ['', [Validators.required, Validators.maxLength(150)]],
+      Marca: ['', [Validators.maxLength(100)]],
+      Tipo: ['', [Validators.maxLength(100)]],
+      Ubicacion: ['', [Validators.maxLength(50)]],
+      Planta: [1, [Validators.required]],
+      Familia: ['', [Validators.required]], // Added cbo-familia-herramienta
+      Serie: ['', [Validators.maxLength(100)]], // Added optional Serie field
+      Valor: [null, [Validators.min(0)]], // Cambiar validación para permitir decimales
+      CostoDolares: [null, [Validators.min(0)]],
+      UbicacionFisica: ['', [Validators.maxLength(150)]],
+      Activo: [true],
+      Codigo: ['', [Validators.maxLength(50)]], // Agregar el campo Codigo
     });
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions.forEach((s) => s.unsubscribe());
     this.subscriptions = [];
   }
 
   onSubmit(): void {
     if (this.form.invalid) {
+      console.error(
+        '[HerramientasModal] Formulario inválido:',
+        this.form.errors
+      );
       this.form.markAllAsTouched();
       return;
     }
 
-    // Log para depuración de los valores del formulario al enviar
-    console.debug('[HerramientasModal] Valores del formulario al enviar:', this.form.value);
+    console.debug(
+      '[HerramientasModal] Valores del formulario al enviar:',
+      this.form.value
+    );
 
     const formValue = { ...this.form.value };
 
-    // En modo edición, asegurarse de que el ID esté incluido
-    if (this.mode === 'edit' && this.toolId) {
-      formValue.Id = this.toolId;
-      formValue.idHerramienta = this.toolId;
+    // Procesar el valor del campo Valor para asegurar formato numérico correcto
+    let costoDolares = 0;
+    if (
+      formValue.Valor !== null &&
+      formValue.Valor !== undefined &&
+      formValue.Valor !== ''
+    ) {
+      const valorNumerico = parseFloat(formValue.Valor.toString());
+      costoDolares = isNaN(valorNumerico) ? 0 : valorNumerico;
     }
 
-    console.debug('[HerramientasModal] Datos del formulario para enviar al backend:', formValue);
+    // Construir el payload con los campos necesarios
+    const payload: any = {
+      nombreHerramienta: formValue.Nombre,
+      idFamilia: formValue.Familia?.idFamilia || formValue.Familia,
+      tipo: formValue.Tipo || '',
+      marca: formValue.Marca || '',
+      serie: formValue.Serie || '',
+      codigo: formValue.Codigo || '',
+      costoDolares: costoDolares, // Usar el valor procesado
+      ubicacionFisica: formValue.UbicacionFisica || '',
+      idPlanta: 1, // Valor predeterminado
+      activo: formValue.Activo !== undefined ? formValue.Activo : true,
+      idDisponibilidad: 1, // Campo obligatorio con valor predeterminado
+      diasAlerta: 5, // Valor predeterminado
+    };
+
+    // Si estamos en modo edición, agregar el ID de la herramienta
+    if (this.mode === 'edit' && this.toolId) {
+      payload.idHerramienta = this.toolId;
+    }
+
+    // Logs de depuración mejorados
+    console.debug('[HerramientasModal] Datos procesados:', {
+      modo: this.mode,
+      idHerramienta: this.toolId,
+      valorOriginal: formValue.Valor,
+      costoDolaresCalculado: costoDolares,
+      payloadCompleto: payload,
+    });
 
     this.submit.emit({
       mode: this.mode,
-      data: formValue,
-      onSuccess: () => {
-        this.srvAlerta.success(
-          `La herramienta ha sido ${this.mode === 'create' ? 'creada' : 'actualizada'} exitosamente`,
-          `¡Herramienta ${this.mode === 'create' ? 'Creada' : 'Actualizada'}!`
-        );
+      data: payload,
+      onSuccess: (response: any) => {
+        console.debug('[HerramientasModal] Éxito al enviar:', response);
+        const successMessage =
+          response?.message ||
+          (this.mode === 'create'
+            ? 'Herramienta creada correctamente'
+            : 'Herramienta actualizada correctamente');
+        this.srvAlerta.success(successMessage);
         this.resetModal();
-        this.visible = false;
         this.close.emit();
       },
       onError: (error: any) => {
-        console.error('[HerramientasModal] Error en la operación:', error);
-        let errorMessage = 'Ocurrió un error inesperado';
-
-        // Intentar obtener un mensaje de error significativo
-        if (error?.error?.message) {
-          errorMessage = error.error.message;
-        } else if (error?.error?.detail) {
-          errorMessage = error.error.detail;
-        } else if (error?.message) {
-          errorMessage = error.message;
-        } else if (typeof error?.error === 'string') {
-          errorMessage = error.error;
-        } else if (error?.statusText) {
-          errorMessage = `Error: ${error.statusText}`;
-        }
-
-        this.srvAlerta.error(
-          `Error al ${this.mode === 'create' ? 'crear' : 'actualizar'} la herramienta: ${errorMessage}`,
-          `Error al ${this.mode === 'create' ? 'Crear' : 'Actualizar'} Herramienta`
-        );
-
+        console.error('[HerramientasModal] Error al enviar:', error);
         this.handleServerErrors(error);
-      }
+      },
     });
+  }
+
+  private patchForm(data: any) {
+    if (!this.form) this.buildForm();
+
+    // Guardar el ID de la herramienta para actualización posterior
+    this.toolId = data?.idHerramienta ?? null;
+
+    console.debug('[HerramientasModal] Datos recibidos para patchForm:', data);
+
+    // Mapeo mejorado para considerar todas las variantes de nombres de propiedades
+    const mapped = {
+      Nombre: data?.nombreHerramienta ?? '',
+      Marca: data?.marca ?? '',
+      Tipo: data?.tipo ?? '',
+      Familia: {
+        idFamilia: data?.idFamilia ?? null,
+        nombreFamilia: data?.nombreFamilia ?? '',
+      },
+      Serie: data?.serie ?? '',
+      Valor: data?.costoDolares ?? null, // Mapear costoDolares al campo Valor del formulario
+      CostoDolares: data?.costoDolares ?? null,
+      UbicacionFisica: data?.ubicacionFisica ?? '',
+      Activo: data?.activo ?? true,
+      Codigo: data?.codigo ?? '', // Mapear el campo Codigo
+    };
+
+    console.debug(
+      '[HerramientasModal] Valores mapeados para el formulario:',
+      mapped
+    );
+    this.form.patchValue(mapped);
   }
 
   onCancel(): void {
@@ -210,7 +298,9 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
       if (errorData?.errors && typeof errorData.errors === 'object') {
         Object.keys(errorData.errors).forEach((k: string) => {
           const val = errorData.errors[k];
-          this.serverErrors[k] = Array.isArray(val) ? String(val[0]) : String(val);
+          this.serverErrors[k] = Array.isArray(val)
+            ? String(val[0])
+            : String(val);
 
           // Mapear errores del backend a campos del formulario
           const formField = this.fromServerKey(k);
@@ -220,7 +310,9 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
             control.setErrors({ server: true });
             control.markAsTouched();
           } else {
-            console.warn(`[HerramientasModal] No se encontró control para el campo: ${k} -> ${formField}`);
+            console.warn(
+              `[HerramientasModal] No se encontró control para el campo: ${k} -> ${formField}`
+            );
           }
         });
       }
@@ -236,24 +328,27 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
       else if (typeof error?.error === 'string') {
         this.serverErrors['general'] = error.error;
       }
-
     } catch (e) {
-      console.error('[HerramientasModal] Error al procesar respuesta del servidor:', e);
-      this.srvAlerta.error('Ocurrió un error al procesar la respuesta del servidor');
+      console.error(
+        '[HerramientasModal] Error al procesar respuesta del servidor:',
+        e
+      );
+      this.srvAlerta.error(
+        'Ocurrió un error al procesar la respuesta del servidor'
+      );
     }
   }
 
   // Mapeo de nombres de campos del servidor al formulario
   private fromServerKey(serverKey: string): string {
     const map: any = {
-      'NombreHerramienta': 'Nombre',
-      'Codigo': 'Codigo',
-      'Marca': 'Marca',
-      'Tipo': 'Tipo',
-      'EstadoFisico': 'EstadoFisico',
-      'Disponibilidad': 'Disponibilidad',
-      'Ubicacion': 'Ubicacion',
-      'Planta': 'Planta'
+      NombreHerramienta: 'Nombre',
+      Codigo: 'Codigo',
+      Marca: 'Marca',
+      Tipo: 'Tipo',
+      Disponibilidad: 'Disponibilidad',
+      Ubicacion: 'Ubicacion',
+      Planta: 'Planta',
     };
     return map[serverKey] ?? serverKey;
   }
@@ -261,50 +356,14 @@ export class HerramientasModalComponent implements OnInit, OnChanges, OnDestroy 
   // Mapeo de nombres de campos del formulario al servidor
   private toServerKey(formKey: string): string {
     const map: any = {
-      'Nombre': 'NombreHerramienta',
-      'Codigo': 'Codigo',
-      'Marca': 'Marca',
-      'Tipo': 'Tipo',
-      'EstadoFisico': 'EstadoFisico',
-      'Disponibilidad': 'Disponibilidad',
-      'Ubicacion': 'Ubicacion',
-      'Planta': 'Planta'
+      Nombre: 'NombreHerramienta',
+      Codigo: 'Codigo',
+      Marca: 'Marca',
+      Tipo: 'Tipo',
+      Disponibilidad: 'Disponibilidad',
+      Ubicacion: 'Ubicacion',
+      Planta: 'Planta',
     };
     return map[formKey] ?? formKey;
-  }
-
-  private patchForm(data: any) {
-    if (!this.form) this.buildForm();
-
-    // Guardar el ID de la herramienta para actualización posterior
-    this.toolId = data?.id ?? data?.Id ?? data?.idHerramienta ?? null;
-
-    console.debug('[HerramientasModal] Datos recibidos para patchForm:', data);
-
-    // Mapeo mejorado para considerar todas las variantes de nombres de propiedades
-    const mapped = {
-      Codigo: data?.codigo ?? data?.Codigo ?? '',
-      Nombre: data?.nombreHerramienta ?? data?.nombre ?? data?.Nombre ?? '',
-      Marca: data?.marca ?? data?.Marca ?? '',
-      Tipo: data?.tipo ?? data?.Tipo ?? '',
-      // Asegurar que el estadoFisico se cargue correctamente con todas las variantes posibles
-      EstadoFisico: data?.estadoFisico ?? data?.EstadoFisico ?? data?.estado_fisico ?? data?.estadoFisicoHerramienta ?? '',
-      Disponibilidad: data?.estadoDisponibilidad ?? data?.disponibilidad ?? data?.Disponibilidad ?? '',
-      Ubicacion: data?.ubicacion ?? data?.ubicacionFisica ?? data?.Ubicacion ?? '',
-      Planta: data?.nombrePlanta ?? data?.planta ?? data?.Planta ?? ''
-    };
-
-    console.debug('[HerramientasModal] Valores mapeados para el formulario:', mapped);
-    console.debug('[HerramientasModal] Estado físico encontrado:', mapped.EstadoFisico);
-    this.form.patchValue(mapped);
-
-    // Verificar si el estado físico se estableció correctamente
-    setTimeout(() => {
-      const estadoFisicoControl = this.form.get('EstadoFisico');
-      if (estadoFisicoControl && !estadoFisicoControl.value && mapped.EstadoFisico) {
-        console.warn('[HerramientasModal] Reintentando establecer estado físico:', mapped.EstadoFisico);
-        estadoFisicoControl.setValue(mapped.EstadoFisico, { emitEvent: false });
-      }
-    }, 100);
   }
 }
