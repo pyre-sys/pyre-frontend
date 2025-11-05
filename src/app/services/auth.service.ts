@@ -13,7 +13,7 @@ export class AuthService {
 
   private loggedIn = new BehaviorSubject<boolean>(this.isLoggedIn());
   loggedIn$ = this.loggedIn.asObservable();
-  private apiBase = environment.apiUrl || 'http://localhost:5000/api';
+  private apiBase = environment.apiUrl || 'http://localhost:1000/api';
 
   constructor(private http?: HttpClient) { }
 

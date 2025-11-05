@@ -23,7 +23,7 @@ interface LoginResponse {
   providedIn: 'root',
 })
 export class LoginService {
-  private apiUrl = environment.apiUrl || 'http://localhost:5000/api';
+  private apiUrl = environment.apiUrl || 'http://localhost:1000/api';
 
   constructor(
     private http: HttpClient
