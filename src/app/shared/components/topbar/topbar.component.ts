@@ -1,11 +1,31 @@
-import { Component, Input, Output, EventEmitter, HostListener, ElementRef, inject, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  HostListener,
+  ElementRef,
+  inject,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { trigger, transition, style, animate, state } from '@angular/animations';
+import {
+  trigger,
+  transition,
+  style,
+  animate,
+  state,
+} from '@angular/animations';
 import { Subscription, interval } from 'rxjs';
-import { PageTitleService, PageMetadata } from '../../../services/page-title.service';
+import {
+  PageTitleService,
+  PageMetadata,
+} from '../../../services/page-title.service';
 import { AlertaService } from '../../../services/alerta.service';
+import { SidebarService } from '../../../services/sidebar.service';
 
 @Component({
   selector: 'app-topbar',
@@ -17,24 +37,30 @@ import { AlertaService } from '../../../services/alerta.service';
     trigger('titleChange', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(-10px)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
+        animate(
+          '300ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' })
+        ),
+      ]),
     ]),
     trigger('breadcrumbSlide', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateX(-10px)' }),
-        animate('200ms 100ms ease-out', style({ opacity: 1, transform: 'translateX(0)' }))
-      ])
+        animate(
+          '200ms 100ms ease-out',
+          style({ opacity: 1, transform: 'translateX(0)' })
+        ),
+      ]),
     ]),
     trigger('alertsPulse', [
       state('normal', style({ transform: 'scale(1)' })),
       state('critical', style({ transform: 'scale(1)' })),
       transition('normal => critical', [
         animate('500ms ease-in-out', style({ transform: 'scale(1.05)' })),
-        animate('500ms ease-in-out', style({ transform: 'scale(1)' }))
-      ])
-    ])
-  ]
+        animate('500ms ease-in-out', style({ transform: 'scale(1)' })),
+      ]),
+    ]),
+  ],
 })
 export class TopbarComponent implements OnInit, OnDestroy {
   @Input() isLoggedIn: boolean = false;
@@ -53,12 +79,14 @@ export class TopbarComponent implements OnInit, OnDestroy {
   @Output() sidebarToggled = new EventEmitter<void>();
 
   isPerfilModalVisible: boolean = false;
+  // Estado del sidebar (visible = desplegado)
+  isSidebarVisible: boolean = true;
 
   // Metadata de la página actual
   pageMetadata: PageMetadata = {
     title: 'Sistema de Gestión',
     icon: 'bi-house-door',
-    color: 'primary'
+    color: 'primary',
   };
 
   // Propiedades de alertas
@@ -68,18 +96,20 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   private alertsSubscription?: Subscription;
   private alertsInterval?: Subscription;
+  private sidebarSubscription?: Subscription;
 
   private el = inject(ElementRef);
 
   constructor(
     private pageTitleService: PageTitleService,
     private alertaService: AlertaService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private sidebarService: SidebarService
+  ) {}
 
   ngOnInit() {
     // Suscribirse a cambios en la metadata
-    this.pageTitleService.metadata$.subscribe(metadata => {
+    this.pageTitleService.metadata$.subscribe((metadata) => {
       this.pageMetadata = metadata;
     });
 
@@ -88,11 +118,26 @@ export class TopbarComponent implements OnInit, OnDestroy {
       this.loadAlertas();
       this.setupAlertsPolling();
     }
+
+    // Leer el estado actual de forma síncrona para evitar races donde el sidebar
+    // ya fue colapsado antes de que este componente se haya inicializado.
+    try {
+      this.isSidebarVisible = this.sidebarService.isVisible;
+    } catch (e) {
+      // si por alguna razón no está disponible, dejamos el valor por defecto
+    }
+
+    this.sidebarSubscription = this.sidebarService.visible$.subscribe(
+      (visible) => {
+        this.isSidebarVisible = visible;
+      }
+    );
   }
 
   ngOnDestroy() {
     this.alertsSubscription?.unsubscribe();
     this.alertsInterval?.unsubscribe();
+    this.sidebarSubscription?.unsubscribe();
   }
 
   // Getters para acceso fácil en la plantilla
@@ -144,14 +189,22 @@ export class TopbarComponent implements OnInit, OnDestroy {
     const parts: string[] = [];
 
     if (this.alertasVencidas > 0) {
-      parts.push(`${this.alertasVencidas} vencida${this.alertasVencidas > 1 ? 's' : ''}`);
+      parts.push(
+        `${this.alertasVencidas} vencida${this.alertasVencidas > 1 ? 's' : ''}`
+      );
     }
 
     if (this.alertasPendientes > 0) {
-      parts.push(`${this.alertasPendientes} pendiente${this.alertasPendientes > 1 ? 's' : ''}`);
+      parts.push(
+        `${this.alertasPendientes} pendiente${
+          this.alertasPendientes > 1 ? 's' : ''
+        }`
+      );
     }
 
-    return `${this.totalAlertas} alerta${this.totalAlertas > 1 ? 's' : ''}: ${parts.join(', ')}`;
+    return `${this.totalAlertas} alerta${
+      this.totalAlertas > 1 ? 's' : ''
+    }: ${parts.join(', ')}`;
   }
 
   togglePerfilModal(): void {
@@ -196,7 +249,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
         console.error('Error loading pending alerts:', error);
         this.alertasPendientes = 0;
         this.checkLoadingComplete();
-      }
+      },
     });
 
     // Cargar alertas vencidas
@@ -209,7 +262,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
         console.error('Error loading overdue alerts:', error);
         this.alertasVencidas = 0;
         this.checkLoadingComplete();
-      }
+      },
     });
   }
 

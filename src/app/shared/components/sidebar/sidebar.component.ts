@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy, inject, HostListener, ElementRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  HostListener,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -59,7 +66,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: true,
       orden: 1,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
 
     // 2. Lista de Usuarios
@@ -72,7 +84,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: true,
       orden: 2,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
 
     // 3. Proveedores
@@ -85,7 +102,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: true,
       orden: 3,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
 
     // 4. Obras
@@ -98,7 +120,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: true,
       orden: 4,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
 
     // 5. Movimientos (principal con submenús)
@@ -111,7 +138,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: true,
       orden: 5,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
     {
       id: 51,
@@ -122,7 +154,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 1,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
     {
       id: 52,
@@ -133,7 +170,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 2,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
     {
       id: 53,
@@ -144,7 +186,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 3,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
     {
       id: 54,
@@ -155,7 +202,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 4,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
 
     // 6. Reportes (principal con submenús)
@@ -168,7 +220,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: true,
       orden: 6,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
     {
       id: 61,
@@ -179,7 +236,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 1,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
     {
       id: 62,
@@ -190,7 +252,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 2,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
     {
       id: 63,
@@ -201,7 +268,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 3,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
     {
       id: 64,
@@ -212,7 +284,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 4,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo]
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
     },
 
     // 7. Configuración (solo SuperAdmin, con submenús)
@@ -225,7 +302,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: true,
       orden: 7,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin]
+      requiredAccess: [Roles.SuperAdmin],
     },
     {
       id: 71,
@@ -236,7 +313,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 1,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin]
+      requiredAccess: [Roles.SuperAdmin],
     },
     {
       id: 72,
@@ -247,7 +324,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 2,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin]
+      requiredAccess: [Roles.SuperAdmin],
     },
     {
       id: 73,
@@ -258,7 +335,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 3,
       estado: true,
-      requiredAccess: [Roles.SuperAdmin]
+      requiredAccess: [Roles.SuperAdmin],
     },
   ];
 
@@ -271,11 +348,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   // Mapeo de roles a IDs
   private roleMapping = {
-    'SuperAdmin': Roles.SuperAdmin,
-    'Administrador': Roles.SuperAdmin,
-    'Supervisor': Roles.Supervisor,
-    'Operario': Roles.Operario,
-    'Administrativo': Roles.Administrativo,
+    SuperAdmin: Roles.SuperAdmin,
+    Administrador: Roles.SuperAdmin,
+    Supervisor: Roles.Supervisor,
+    Operario: Roles.Operario,
+    Administrativo: Roles.Administrativo,
   };
 
   @HostListener('window:resize')
@@ -286,8 +363,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (this.isSmallScreen !== previousState) {
       if (this.isSmallScreen) {
         this.isSidebarVisible = false;
+        // sincronizar con el servicio para que otros componentes (topbar) reciban el cambio
+        this.sidebarService.hide();
       } else {
         this.isSidebarVisible = this.isLoggedIn;
+        // sincronizar con el servicio
+        if (this.isLoggedIn) {
+          this.sidebarService.show();
+        } else {
+          this.sidebarService.hide();
+        }
       }
     }
   }
@@ -312,7 +397,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(
-      this.sidebarService.visible$.subscribe(v => {
+      this.sidebarService.visible$.subscribe((v) => {
         this.isSidebarVisible = v;
       })
     );
@@ -329,19 +414,31 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
       // Mapear el rol string a número
       const roleName = user.rolNombre ?? user.role ?? user.rol ?? '';
-      const mappedRoleId = this.roleMapping[roleName as keyof typeof this.roleMapping];
+      const mappedRoleId =
+        this.roleMapping[roleName as keyof typeof this.roleMapping];
 
-      this.id_acceso = mappedRoleId != null ? mappedRoleId : (user.id_acceso != null ? Number(user.id_acceso) : 0);
+      this.id_acceso =
+        mappedRoleId != null
+          ? mappedRoleId
+          : user.id_acceso != null
+          ? Number(user.id_acceso)
+          : 0;
 
       const nombre = user.nombre || '';
       const apellido = user.apellido || '';
       this.nombreCompleto = `${nombre} ${apellido}`.trim() || 'Usuario';
 
       this.userEmail = user.email || '';
-      this.displayEmail = this.userEmail && this.userEmail.length > 22 ? this.userEmail.slice(0, 19) + '...' : this.userEmail;
+      this.displayEmail =
+        this.userEmail && this.userEmail.length > 22
+          ? this.userEmail.slice(0, 19) + '...'
+          : this.userEmail;
 
       this.userLegajo = user.legajo ? String(user.legajo) : '';
-      this.displayLegajo = this.userLegajo && this.userLegajo.length > 12 ? this.userLegajo.slice(0, 9) + '...' : this.userLegajo;
+      this.displayLegajo =
+        this.userLegajo && this.userLegajo.length > 12
+          ? this.userLegajo.slice(0, 9) + '...'
+          : this.userLegajo;
 
       const legInfo = this.userLegajo ? `Legajo: ${this.userLegajo}` : '';
       const nameInfo = this.nombreCompleto ? ` — ${this.nombreCompleto}` : '';
@@ -353,7 +450,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         roleName,
         mappedRoleId,
         id_acceso: this.id_acceso,
-        user
+        user,
       });
     } else {
       this.id_acceso = 0;
@@ -369,35 +466,41 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   // Getters para el menú filtrado
   get visibleMenuItems(): MenuItem[] {
-    return this.allMenuItems.filter(item =>
-      item.principal &&
-      item.estado &&
-      this.isItemVisibleForUser(item)
-    ).sort((a, b) => a.orden - b.orden);
+    return this.allMenuItems
+      .filter(
+        (item) =>
+          item.principal && item.estado && this.isItemVisibleForUser(item)
+      )
+      .sort((a, b) => a.orden - b.orden);
   }
 
   getSubMenus(menu: MenuItem): MenuItem[] {
-    return this.allMenuItems.filter(item =>
-      !item.principal &&
-      item.grupo === menu.grupo &&
-      item.estado &&
-      this.isItemVisibleForUser(item)
-    ).sort((a, b) => a.orden - b.orden);
+    return this.allMenuItems
+      .filter(
+        (item) =>
+          !item.principal &&
+          item.grupo === menu.grupo &&
+          item.estado &&
+          this.isItemVisibleForUser(item)
+      )
+      .sort((a, b) => a.orden - b.orden);
   }
 
   private isItemVisibleForUser(item: MenuItem): boolean {
     if (!this.isLoggedIn || !this.id_acceso) return false;
 
-    const itemAllowed = item.requiredAccess && item.requiredAccess.length > 0
-      ? item.requiredAccess.map(x => Number(x))
-      : undefined;
+    const itemAllowed =
+      item.requiredAccess && item.requiredAccess.length > 0
+        ? item.requiredAccess.map((x) => Number(x))
+        : undefined;
 
     const parentAllowed = this.getParentRequiredAccessForLink(item.link);
 
     if (parentAllowed && parentAllowed.length > 0) {
-      const allowed = itemAllowed && itemAllowed.length > 0
-        ? itemAllowed.filter(x => parentAllowed.includes(x))
-        : parentAllowed;
+      const allowed =
+        itemAllowed && itemAllowed.length > 0
+          ? itemAllowed.filter((x) => parentAllowed.includes(x))
+          : parentAllowed;
       return allowed.includes(this.id_acceso);
     }
 
@@ -407,12 +510,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   private getParentRequiredAccessForLink(link: string): number[] | undefined {
     try {
-      const segments = link.split('/').filter(s => s.length > 0);
+      const segments = link.split('/').filter((s) => s.length > 0);
       if (segments.length === 0) return undefined;
       const first = segments[0];
-      const route = this.router.config.find(r => r.path === first);
+      const route = this.router.config.find((r) => r.path === first);
       const ra = route?.data?.['requiredAccess'] as number[] | undefined;
-      return ra ? ra.map(x => Number(x)) : undefined;
+      return ra ? ra.map((x) => Number(x)) : undefined;
     } catch (e) {
       return undefined;
     }
@@ -425,7 +528,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.sidebarService.hide();
       }
     } else {
-      this.visibleMenuItems.forEach(m => {
+      this.visibleMenuItems.forEach((m) => {
         if (m !== menu) m.expanded = false;
       });
       menu.expanded = !menu.expanded;
@@ -483,10 +586,17 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLElement;
     if (!this.isPerfilModalVisible) return;
 
-    const toggle = this.el.nativeElement.querySelector('.profile-toggle') as HTMLElement | null;
-    const dropdown = this.el.nativeElement.querySelector('.profile-dropdown') as HTMLElement | null;
+    const toggle = this.el.nativeElement.querySelector(
+      '.profile-toggle'
+    ) as HTMLElement | null;
+    const dropdown = this.el.nativeElement.querySelector(
+      '.profile-dropdown'
+    ) as HTMLElement | null;
 
-    if ((toggle && toggle.contains(target)) || (dropdown && dropdown.contains(target))) {
+    if (
+      (toggle && toggle.contains(target)) ||
+      (dropdown && dropdown.contains(target))
+    ) {
       return;
     }
 

@@ -1,34 +1,104 @@
 <!-- TOPBAR MEJORADO CON BREADCRUMBS Y TÍTULO DINÁMICO -->
 <nav class="topbar" [class.logged-in]="isLoggedIn && !isSmallScreen">
   <div class="topbar-container">
-
-    <!-- Botón hamburguesa (móvil) -->
-    <button *ngIf="isLoggedIn && isSmallScreen" class="btn-hamburger" (click)="toggleSidebar()"
-      aria-label="Toggle sidebar">
-      <i class="bi bi-list"></i>
+    <!-- Botón hamburguesa (móvil) - icono moderno que cambia según el estado del sidebar -->
+    <button
+      *ngIf="isLoggedIn && isSmallScreen"
+      class="btn-hamburger"
+      (click)="toggleSidebar()"
+      aria-label="Toggle sidebar"
+    >
+      <!-- Mostrar icono 'compacto' cuando el sidebar está colapsado (isSidebarVisible === false)
+           Mostrar icono 'cerrar' o 'chevron' cuando el sidebar está visible -->
+      <ng-container *ngIf="!isSidebarVisible; else expandedIcon">
+        <!-- Modern hamburger SVG (rounded bars) -->
+        <svg
+          class="menu-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <rect x="3" y="5" width="18" height="2" rx="1" fill="currentColor" />
+          <rect
+            x="3"
+            y="11"
+            width="18"
+            height="2"
+            rx="1"
+            fill="currentColor"
+            opacity="0.9"
+          />
+          <rect
+            x="3"
+            y="17"
+            width="12"
+            height="2"
+            rx="1"
+            fill="currentColor"
+            opacity="0.8"
+          />
+        </svg>
+      </ng-container>
+      <ng-template #expandedIcon>
+        <!-- Chevron / collapse icon when sidebar is open -->
+        <svg
+          class="chev-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M15 6L9 12L15 18"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </ng-template>
     </button>
 
     <!-- SECCIÓN DE TÍTULO CON BREADCRUMBS -->
     <div class="topbar-title-section" [@titleChange]>
       <!-- Breadcrumbs (si existen) -->
-      <nav *ngIf="hasBreadcrumbs && !isSmallScreen" class="breadcrumbs" aria-label="breadcrumb">
+      <nav
+        *ngIf="hasBreadcrumbs && !isSmallScreen"
+        class="breadcrumbs"
+        aria-label="breadcrumb"
+      >
         <ol class="breadcrumb-list">
-          <li *ngFor="let crumb of breadcrumbs; let last = last" class="breadcrumb-item" [@breadcrumbSlide]>
-
+          <li
+            *ngFor="let crumb of breadcrumbs; let last = last"
+            class="breadcrumb-item"
+            [@breadcrumbSlide]
+          >
             <!-- Si tiene ruta, es clickeable -->
-            <a *ngIf="crumb.route && !last" [routerLink]="crumb.route" class="breadcrumb-link">
+            <a
+              *ngIf="crumb.route && !last"
+              [routerLink]="crumb.route"
+              class="breadcrumb-link"
+            >
               <i *ngIf="crumb.icon" [class]="'bi ' + crumb.icon + ' me-1'"></i>
               {{ crumb.label }}
             </a>
 
             <!-- Último elemento o sin ruta -->
-            <span *ngIf="!crumb.route || last" class="breadcrumb-current" [class.active]="last">
+            <span
+              *ngIf="!crumb.route || last"
+              class="breadcrumb-current"
+              [class.active]="last"
+            >
               <i *ngIf="crumb.icon" [class]="'bi ' + crumb.icon + ' me-1'"></i>
               {{ crumb.label }}
             </span>
 
             <!-- Separador -->
-            <i *ngIf="!last" class="bi bi-chevron-right breadcrumb-separator"></i>
+            <i
+              *ngIf="!last"
+              class="bi bi-chevron-right breadcrumb-separator"
+            ></i>
           </li>
         </ol>
       </nav>
@@ -36,18 +106,17 @@
       <!-- Título Principal con Icono -->
       <div class="page-title-container">
         <div class="page-title-wrapper">
-          <!-- Icono de la página -->
-          <div *ngIf="pageIcon" class="page-icon" [class]="'text-' + pageColor">
-            <i [class]="'bi ' + pageIcon"></i>
-          </div>
-
           <!-- Título y Subtítulo -->
           <div class="page-title-content">
             <h1 class="page-title">
               {{ pageTitle }}
 
               <!-- Badge opcional (ej: notificaciones) -->
-              <span *ngIf="pageBadge" class="badge ms-2" [class]="'bg-' + pageBadge.color">
+              <span
+                *ngIf="pageBadge"
+                class="badge ms-2"
+                [class]="'bg-' + pageBadge.color"
+              >
                 {{ pageBadge.text }}
               </span>
             </h1>
@@ -63,10 +132,15 @@
 
     <!-- SECCIÓN DE ALERTAS (Centro-Derecha) -->
     <div class="topbar-alerts-section" *ngIf="isLoggedIn && !isSmallScreen">
-      <div class="alerts-card" (click)="navigateToAlertas()" [class.has-alerts]="totalAlertas > 0"
-        [class.has-critical]="alertasVencidas > 0" [ngbTooltip]="alertsTooltip" placement="bottom"
-        [@alertsPulse]="alertasVencidas > 0 ? 'critical' : 'normal'">
-
+      <div
+        class="alerts-card"
+        (click)="navigateToAlertas()"
+        [class.has-alerts]="totalAlertas > 0"
+        [class.has-critical]="alertasVencidas > 0"
+        [ngbTooltip]="alertsTooltip"
+        placement="bottom"
+        [@alertsPulse]="alertasVencidas > 0 ? 'critical' : 'normal'"
+      >
         <!-- Icono de campana -->
         <div class="alerts-icon">
           <i class="bi bi-bell" [class.bi-bell-fill]="totalAlertas > 0"></i>
@@ -81,20 +155,23 @@
             <!-- Alertas pendientes -->
             <span *ngIf="alertasPendientes > 0" class="alert-count pending">
               <i class="bi bi-exclamation-triangle"></i>
-              {{alertasPendientes}}
+              {{ alertasPendientes }}
             </span>
 
             <!-- Alertas vencidas -->
             <span *ngIf="alertasVencidas > 0" class="alert-count overdue">
               <i class="bi bi-exclamation-octagon"></i>
-              {{alertasVencidas}}
+              {{ alertasVencidas }}
             </span>
           </div>
 
           <!-- Badge total -->
-          <div class="total-badge" [class.critical]="alertasVencidas > 0"
-            [class.warning]="alertasVencidas === 0 && alertasPendientes > 0">
-            {{totalAlertas}}
+          <div
+            class="total-badge"
+            [class.critical]="alertasVencidas > 0"
+            [class.warning]="alertasVencidas === 0 && alertasPendientes > 0"
+          >
+            {{ totalAlertas }}
           </div>
         </div>
 
@@ -106,17 +183,24 @@
     </div>
 
     <!-- SECCIÓN DE ALERTAS MÓVIL (Simplificada) -->
-    <div class="topbar-alerts-mobile" *ngIf="isLoggedIn && isSmallScreen && totalAlertas > 0">
-      <button class="alerts-mobile-btn" (click)="navigateToAlertas()" [class.critical]="alertasVencidas > 0"
-        [ngbTooltip]="alertsTooltip" placement="bottom">
+    <div
+      class="topbar-alerts-mobile"
+      *ngIf="isLoggedIn && isSmallScreen && totalAlertas > 0"
+    >
+      <button
+        class="alerts-mobile-btn"
+        (click)="navigateToAlertas()"
+        [class.critical]="alertasVencidas > 0"
+        [ngbTooltip]="alertsTooltip"
+        placement="bottom"
+      >
         <i class="bi bi-bell-fill"></i>
-        <span class="mobile-badge">{{totalAlertas}}</span>
+        <span class="mobile-badge">{{ totalAlertas }}</span>
       </button>
     </div>
 
     <!-- SECCIÓN DE USUARIO (Derecha) -->
     <div class="topbar-user-section" *ngIf="isLoggedIn">
-
       <!-- Información del usuario (desktop) -->
       <div class="user-info" *ngIf="!isSmallScreen">
         <span class="user-pill" [ngbTooltip]="pillTooltip" placement="bottom">
@@ -129,8 +213,13 @@
       </div>
 
       <!-- Botón de logout (icono) -->
-      <button class="logout-icon-btn" (click)="confirmLogout()" [ngbTooltip]="'Cerrar Sesión'"
-        aria-label="Cerrar sesión" *ngIf="!isSmallScreen">
+      <button
+        class="logout-icon-btn"
+        (click)="confirmLogout()"
+        [ngbTooltip]="'Cerrar Sesión'"
+        aria-label="Cerrar sesión"
+        *ngIf="!isSmallScreen"
+      >
         <i class="bi bi-power"></i>
       </button>
     </div>
