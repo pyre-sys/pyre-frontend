@@ -13,8 +13,8 @@ export const reportesRoutes: Routes = [
     data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
   },
   {
-    path: 'stock',
-    loadComponent: () => import('./stock/stock.component').then(m => m.StockComponent),
+    path: 'valorizacion',
+    loadComponent: () => import('./valorizacion/valorizacion.component').then(m => m.ValorizacionComponent),
     data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
   },
   {
@@ -23,8 +23,8 @@ export const reportesRoutes: Routes = [
     data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
   },
   {
-    path: 'movimientos',
-    loadComponent: () => import('./movimientos/movimientos.component').then(m => m.MovimientosComponent),
+    path: 'disponibilidad',
+    loadComponent: () => import('./disponibilidad/disponibilidad.component').then(m => m.DisponibilidadComponent),
     data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
   }
 ];
