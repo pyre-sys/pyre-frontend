@@ -395,4 +395,14 @@ export class HerramientaService {
   getHerramientasEnReparacionByProveedor(idProveedor: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/reparacion/proveedor/${idProveedor}`);
   }
+
+  // [HttpGet("estado-fisico/{estadoFisicoId}")]
+  getHerramientasPorEstadoFisico(estadoFisicoId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/estado-fisico/${estadoFisicoId}`);
+  }
+
+  // [HttpGet("count-herramientas-by-estado-fisico/{estadoFisicoId}")]
+  getCountHerramientasByEstadoFisico(estadoFisicoId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/count-herramientas-by-estado-fisico/${estadoFisicoId}`);
+  }
 }

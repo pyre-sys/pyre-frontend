@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // <-- Import FormsModule
 import { PageTitleService } from '../../../services/page-title.service';
 import { HerramientaService } from '../../../services/herramienta.service';
 import { CboHerramientasComponent } from "../../../shared/components/Cbo/cbo-herramientas/cbo-herramientas.component";
 import { ModalHistorialComponent } from "../../movimientos/modal-historial/modal-historial.component";
 import { PaginatorComponent } from "../../../shared/components/paginator/paginator.component";
 import { CboEstadoFisicoHerramientaComponent } from "../../../shared/components/Cbo/cbo-estado-fisico-herramienta/cbo-estado-fisico-herramienta.component";
-import { CommonModule } from '@angular/common';
 import { AlertaService } from '../../../services/alerta.service';
 
 interface HerramientasRaw {
@@ -30,11 +31,10 @@ interface DisplayHerramienta {
 
 @Component({
   selector: 'app-estado',
-  imports: [CboHerramientasComponent,
-    ModalHistorialComponent,
+  imports: [
+    CommonModule,
+    FormsModule, // <-- Add FormsModule here
     PaginatorComponent,
-    CboEstadoFisicoHerramientaComponent,
-    CommonModule
   ],
   templateUrl: './estado.component.html',
   styleUrl: './estado.component.css'
@@ -64,9 +64,16 @@ export class EstadoComponent implements OnInit {
   herramientasNoApta = 0;
 
   // Filtros
-  herramientaSelect: any = null;
   estadoFisicoSelect: any = null;
 
+  // Estados físicos disponibles
+  estadosFisicos = [
+    { id: 1, nombre: 'Excelente', icon: 'bi-star-fill', color: 'success' },
+    { id: 2, nombre: 'Usada', icon: 'bi-check-circle', color: 'primary' },
+    { id: 3, nombre: 'Desgastada', icon: 'bi-exclamation-circle', color: 'warning' },
+    { id: 4, nombre: 'Dañada', icon: 'bi-x-circle', color: 'danger' },
+    { id: 5, nombre: 'No Apta', icon: 'bi-ban', color: 'dark' }
+  ];
 
   // Modal detalle
   showDetalleModal = false;
@@ -79,8 +86,10 @@ export class EstadoComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.pageTitleService.setTitle('Reportes');
+    this.pageTitleService.setTitle('Estado de Herramientas');
     this.cargarEstadisticas();
+    // Inicializar con estado "Dañada" (ID: 4)
+    this.estadoFisicoSelect = this.estadosFisicos.find(estado => estado.id === 4);
     this.onSearch();
   }
 
@@ -157,60 +166,92 @@ export class EstadoComponent implements OnInit {
   }
 
   cargarEstadisticas() {
-    const params: any = { search: '' }; // Elimina 'resumen' si no es una propiedad válida
-    this.srvHerramienta.getTools().subscribe({
-      next: (response: any) => {
-        const herramientas = response.data || [];
-        this.herramientasExcelente = herramientas.filter((h: any) => h.estadoFisicoHerramienta === 'excelente').length;
-        this.herramientasUsadas = herramientas.filter((h: any) => h.estadoFisicoHerramienta === 'usada').length;
-        this.herramientasDesgastadas = herramientas.filter((h: any) => h.estadoFisicoHerramienta === 'desgastada').length;
-        this.herramientasDaniadas = herramientas.filter((h: any) => h.estadoFisicoHerramienta === 'daniada').length;
-        this.herramientasNoApta = herramientas.filter((h: any) => h.estadoFisicoHerramienta === 'no apta').length;
-      },
-      error: (error: any) => {
-        console.error('Error cargando estadísticas:', error);
-      }
-    });
-  }
+    // Cargar todas las estadísticas en paralelo
+    const estadosIds = [1, 2, 3, 4, 5]; // Excelente, Usada, Desgastada, Dañada, No Apta
 
-  onHerramientaSelected(herramienta: any) {
-    this.herramientaSelect = herramienta;
+    estadosIds.forEach(estadoId => {
+      this.srvHerramienta.getCountHerramientasByEstadoFisico(estadoId).subscribe({
+        next: (response: any) => {
+          const count = response?.data ?? 0;
+          switch (estadoId) {
+            case 1: this.herramientasExcelente = count; break;
+            case 2: this.herramientasUsadas = count; break;
+            case 3: this.herramientasDesgastadas = count; break;
+            case 4: this.herramientasDaniadas = count; break;
+            case 5: this.herramientasNoApta = count; break;
+          }
+        },
+        error: (error: any) => {
+          console.error(`Error cargando estadísticas para estado ${estadoId}:`, error);
+        }
+      });
+    });
   }
 
   onEstadoFisicoSelected(estado: any) {
     this.estadoFisicoSelect = estado;
-  }
-
-  hasActiveFilters(): boolean {
-    return !!this.herramientaSelect || !!this.estadoFisicoSelect;
-  }
-
-  onResetFilters() {
-    this.herramientaSelect = null;
-    this.estadoFisicoSelect = null;
+    this.currentPage = 1; // Reset pagination
     this.onSearch();
   }
 
+  onEstadoCardClick(estado: any) {
+    this.estadoFisicoSelect = estado;
+    this.currentPage = 1;
+    this.onSearch();
+  }
+
+  hasActiveFilters(): boolean {
+    return !!this.estadoFisicoSelect;
+  }
+
+  onResetFilters() {
+    this.estadoFisicoSelect = null;
+    this.herramientas = [];
+    this.filteredHerramientas = [];
+    this.totalItems = 0;
+  }
+
   onSearch() {
+    if (!this.estadoFisicoSelect) {
+      this.herramientas = [];
+      this.filteredHerramientas = [];
+      this.totalItems = 0;
+      return;
+    }
+
     this.loading = true;
-    const params: any = {
-      herramienta: this.herramientaSelect?.id,
-      estadoFisico: this.estadoFisicoSelect?.id,
-      page: this.currentPage,
-      pageSize: this.pageSize
-    };
-    this.srvHerramienta.getTools(params).subscribe({
-      next: (res: any) => {
-        this.herramientas = res.items || [];
-        this.totalItems = res.total || 0;
+
+    this.srvHerramienta.getHerramientasPorEstadoFisico(this.estadoFisicoSelect.id).subscribe({
+      next: (response: any) => {
         this.loading = false;
+        if (response.success && response.data) {
+          const herramientasData = response.data;
+          this.herramientas = herramientasData.map((h: any) => this.mapHerramientaToDisplayFormat(h));
+          this.totalItems = this.herramientas.length;
+          this.calculatePagination();
+          this.updateFilteredData();
+        } else {
+          this.herramientas = [];
+          this.filteredHerramientas = [];
+          this.totalItems = 0;
+        }
       },
-      error: () => {
+      error: (error: any) => {
         this.loading = false;
+        console.error('Error al cargar herramientas por estado físico:', error);
+        this.srvAlerta.error('Error al cargar las herramientas. Por favor, inténtelo de nuevo.');
+        this.herramientas = [];
+        this.filteredHerramientas = [];
+        this.totalItems = 0;
       }
     });
   }
 
+  private updateFilteredData(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredHerramientas = this.herramientas.slice(startIndex, endIndex);
+  }
 
   calculatePagination(): void {
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
@@ -222,12 +263,14 @@ export class EstadoComponent implements OnInit {
   onPageChange(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
+      this.updateFilteredData();
     }
   }
 
   onPageSizeChange(): void {
     this.currentPage = 1;
     this.calculatePagination();
+    this.updateFilteredData();
   }
 
   getVisiblePages(): number[] {
@@ -250,14 +293,21 @@ export class EstadoComponent implements OnInit {
   }
 
   onPageEvent(event: { pageIndex: number, pageSize: number }): void {
-    // pageIndex es 0-based, pero backend espera 1-based
     this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
+    this.calculatePagination();
+    this.updateFilteredData();
+  }
 
-    console.log(`[HerramientasList] Cambio de página: pageIndex=${event.pageIndex}, pageSize=${event.pageSize}`);
-    console.log(`[HerramientasList] Solicitando página ${this.currentPage} con ${this.pageSize} registros por página`);
-
-    this.fetchHerramientas();
+  getEstadoStats(estadoId: number): number {
+    switch (estadoId) {
+      case 1: return this.herramientasExcelente;
+      case 2: return this.herramientasUsadas;
+      case 3: return this.herramientasDesgastadas;
+      case 4: return this.herramientasDaniadas;
+      case 5: return this.herramientasNoApta;
+      default: return 0;
+    }
   }
 
   abrirModalDetalle(movimiento: any) {
@@ -311,5 +361,28 @@ export class EstadoComponent implements OnInit {
       activo: activo,
       estado: estado
     } as DisplayHerramienta;
+  }
+
+  // Helper methods for template
+  getDisponibilidadColor(disponibilidad: string | undefined): string {
+    if (!disponibilidad) return 'primary';
+
+    const disp = disponibilidad.toLowerCase();
+    if (disp.includes('disponible')) return 'success';
+    if (disp.includes('prestada')) return 'primary';
+    if (disp.includes('mantenimiento')) return 'warning';
+    if (disp.includes('extraviada')) return 'danger';
+    return 'primary';
+  }
+
+  getDisponibilidadIcon(disponibilidad: string | undefined): string {
+    if (!disponibilidad) return 'bi-question-circle';
+
+    const disp = disponibilidad.toLowerCase();
+    if (disp.includes('disponible')) return 'bi-check-circle';
+    if (disp.includes('prestada')) return 'bi-arrow-right-circle';
+    if (disp.includes('mantenimiento')) return 'bi-wrench';
+    if (disp.includes('extraviada')) return 'bi-exclamation-triangle';
+    return 'bi-question-circle';
   }
 }
