@@ -205,9 +205,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     },
     {
       id: 64,
-      descripcion: 'Movimientos por Fecha / Herramienta',
+      descripcion: 'Disponibilidad de Herramientas',
       icono: 'bi bi-calendar-range',
-      link: '/reportes/movimientos',
+      link: '/reportes/disponibilidad',
       grupo: 'GM06',
       principal: false,
       orden: 4,

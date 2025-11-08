@@ -405,4 +405,9 @@ export class HerramientaService {
   getCountHerramientasByEstadoFisico(estadoFisicoId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/count-herramientas-by-estado-fisico/${estadoFisicoId}`);
   }
+
+  // [HttpGet("count-herramientas-by-disponibilidad/{disponibilidadId}")]
+  getCountHerramientasByDisponibilidad(disponibilidadId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/count-herramientas-by-disponibilidad/${disponibilidadId}`);
+  }
 }

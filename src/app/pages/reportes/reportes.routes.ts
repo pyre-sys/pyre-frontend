@@ -23,8 +23,8 @@ export const reportesRoutes: Routes = [
     data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
   },
   {
-    path: 'movimientos',
-    loadComponent: () => import('./movimientos/movimientos.component').then(m => m.MovimientosComponent),
+    path: 'disponibilidad',
+    loadComponent: () => import('./disponibilidad/disponibilidad.component').then(m => m.DisponibilidadComponent),
     data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
   }
 ];
