@@ -1,38 +1,89 @@
 <!-- Header Section -->
-<div class="estado-header" fadeIn>
+<div class="valorizacion-header" fadeIn>
   <div class="header-content">
     <div class="title-section">
       <h2 class="page-title">
-        <i class="bi bi-clipboard-data me-2"></i>
-        Estado de Herramientas
+        <i class="bi bi-currency-dollar me-2"></i>
+        Valorización de Inventario
       </h2>
       <p class="page-subtitle">
-        Monitoreo del estado físico de las herramientas
+        Análisis financiero y valoración del inventario de herramientas
       </p>
     </div>
   </div>
 </div>
 
-<!-- Estadísticas por Estado Físico -->
+<!-- Estadísticas Financieras -->
 <div class="stats-section">
   <div class="stats-grid-compact">
-    <div
-      *ngFor="let estado of estadosFisicos"
-      class="stat-card clickable compact"
-      [class.selected]="estadoFisicoSelect?.id === estado.id"
-      [class]="'stat-' + estado.color"
-      (click)="onEstadoCardClick(estado)"
-    >
-      <div class="stat-icon compact" [class]="estado.color">
-        <i [class]="estado.icon"></i>
+    <!-- Valor Total del Inventario -->
+    <div class="stat-card highlight">
+      <div class="stat-icon total compact">
+        <i class="bi bi-bank"></i>
       </div>
       <div class="stat-info compact">
-        <h3 class="stat-number compact">{{ getEstadoStats(estado.id) }}</h3>
-        <p class="stat-label">{{ estado.nombre }}</p>
+        <h3 class="stat-number compact">
+          {{ formatCurrency(valorInventarioTotal) }}
+        </h3>
+        <p class="stat-label compact">Valor Total</p>
+      </div>
+    </div>
+
+    <!-- Valor Promedio -->
+    <div class="stat-card">
+      <div class="stat-icon average compact">
+        <i class="bi bi-calculator"></i>
+      </div>
+      <div class="stat-info compact">
+        <h3 class="stat-number compact">
+          {{ formatCurrency(valorPromedioHerramienta) }}
+        </h3>
+        <p class="stat-label compact">Valor Promedio</p>
+      </div>
+    </div>
+
+    <!-- Total de Herramientas -->
+    <div class="stat-card">
+      <div class="stat-icon count compact">
+        <i class="bi bi-collection"></i>
+      </div>
+      <div class="stat-info compact">
+        <h3 class="stat-number compact">{{ herramientas.length }}</h3>
+        <p class="stat-label compact">Total Herramientas</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Distribución por Rangos de Precio -->
+<div class="price-distribution-section">
+  <div class="distribution-header">
+    <h6 class="section-title">
+      <i class="bi bi-pie-chart me-2"></i>
+      Distribución por Rangos de Precio
+    </h6>
+  </div>
+
+  <div class="stats-grid-compact">
+    <div
+      *ngFor="let rango of rangosPrecio"
+      class="stat-card clickable compact"
+      [class.selected]="rangoPrecioSelect === rango.value"
+      [class]="'stat-' + rango.color"
+      (click)="onRangoPrecioSelected(rango.value)"
+    >
+      <div class="stat-icon compact" [class]="rango.color">
+        <i [class]="rango.icon"></i>
+      </div>
+      <div class="stat-info compact">
+        <h4 class="stat-number compact">
+          {{ getRangoPrecioStats(rango.value) }}
+        </h4>
+        <p class="stat-label compact">{{ rango.label }}</p>
       </div>
       <div
         class="selection-indicator"
-        *ngIf="estadoFisicoSelect?.id === estado.id"
+        *ngIf="rangoPrecioSelect === rango.value"
       >
         <i class="bi bi-check-circle-fill"></i>
       </div>
@@ -41,18 +92,19 @@
 </div>
 
 <!-- Filtros Section -->
-<div class="filters-section" *ngIf="estadoFisicoSelect">
+<div class="filters-section">
   <div class="filters-container">
     <div class="filter-header">
       <h6 class="filter-title">
         <i class="bi bi-funnel me-2"></i>
-        Filtros
+        Filtros de Búsqueda
       </h6>
       <div class="filter-actions">
         <button
           type="button"
           class="btn btn-outline-secondary btn-sm"
           (click)="onResetFilters()"
+          *ngIf="hasActiveFilters()"
           title="Limpiar filtros"
         >
           <i class="bi bi-x-circle me-1"></i>
@@ -62,10 +114,32 @@
     </div>
 
     <div class="filter-content">
-      <div class="selected-filter-badge">
-        <span class="badge" [class]="'bg-' + estadoFisicoSelect.color">
-          <i [class]="estadoFisicoSelect.icon + ' me-1'"></i>
-          Estado: {{ estadoFisicoSelect.nombre }}
+      <div class="search-container">
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="bi bi-search"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar herramientas..."
+            [value]="searchTerm"
+            (input)="onSearchChange($event)"
+          />
+        </div>
+      </div>
+
+      <div class="active-filters" *ngIf="hasActiveFilters()">
+        <span
+          class="badge"
+          *ngIf="rangoPrecioSelect !== 'todos'"
+          [ngClass]="'bg-' + selectedRangoColor()"
+        >
+          <i [class]="selectedRango()?.icon + ' me-1'"></i>
+          {{ selectedRangoLabel() }}
+        </span>
+        <span class="badge bg-info" *ngIf="searchTerm">
+          Búsqueda: "{{ searchTerm }}"
         </span>
       </div>
     </div>
@@ -77,51 +151,39 @@
   <div class="spinner-border text-primary" role="status">
     <span class="visually-hidden">Cargando herramientas...</span>
   </div>
-  <p class="loading-text">Cargando herramientas...</p>
+  <p class="loading-text">Cargando información de valorización...</p>
 </div>
 
 <!-- Empty State -->
-<div *ngIf="!loading && !estadoFisicoSelect" class="empty-state">
-  <div class="empty-icon">
-    <i class="bi bi-tools"></i>
-  </div>
-  <h3>Seleccione un Estado Físico</h3>
-  <p>
-    Haga clic en una de las tarjetas de estado para ver las herramientas
-    correspondientes.
-  </p>
-</div>
-
-<!-- No Results State -->
-<div
-  *ngIf="!loading && estadoFisicoSelect && totalItems === 0"
-  class="empty-state"
->
+<div *ngIf="!loading && filteredHerramientas.length === 0" class="empty-state">
   <div class="empty-icon">
     <i class="bi bi-search"></i>
   </div>
-  <h3>Sin Resultados</h3>
-  <p>
-    No se encontraron herramientas en estado
-    <strong>{{ estadoFisicoSelect.nombre }}</strong
-    >.
-  </p>
+  <h3>No se encontraron herramientas</h3>
+  <p>No hay herramientas que coincidan con los filtros seleccionados.</p>
+  <button type="button" class="btn btn-primary" (click)="onResetFilters()">
+    Ver todo el inventario
+  </button>
 </div>
 
 <!-- Results Table -->
-<div *ngIf="!loading && totalItems > 0" class="results-section">
+<div
+  *ngIf="!loading && filteredHerramientas.length > 0"
+  class="results-section"
+>
   <!-- Results Header -->
   <div class="results-header">
     <div class="results-info">
       <h6 class="results-title">
-        Herramientas en Estado:
-        <span class="badge ms-2" [class]="'bg-' + estadoFisicoSelect.color">
-          {{ estadoFisicoSelect.nombre }}
-        </span>
+        Inventario de Herramientas
+        <span class="badge bg-primary ms-2">{{ totalItems }} herramientas</span>
       </h6>
       <p class="results-count">
         Mostrando {{ filteredHerramientas.length }} de
         {{ totalItems }} herramientas
+        <span *ngIf="rangoPrecioSelect !== 'todos'" class="ms-2">
+          • Rango: {{ selectedRangoLabel() }}
+        </span>
       </p>
     </div>
 
@@ -133,10 +195,10 @@
           [(ngModel)]="pageSize"
           (ngModelChange)="onPageSizeChange()"
         >
-          <option value="6">6 por página</option>
-          <option value="12">12 por página</option>
-          <option value="24">24 por página</option>
-          <option value="48">48 por página</option>
+          <option value="8">8 por página</option>
+          <option value="16">16 por página</option>
+          <option value="32">32 por página</option>
+          <option value="64">64 por página</option>
         </select>
       </div>
     </div>
@@ -163,19 +225,39 @@
             <i class="bi bi-gear me-1"></i>
             Tipo
           </th>
+          <th class="text-end">
+            <i class="bi bi-cash me-1"></i>
+            Costo (USD)
+          </th>
+          <th class="text-end">
+            <i class="bi bi-currency-dollar me-1"></i>
+            Valor Actual (USD)
+          </th>
+          <th>
+            <i class="bi bi-star me-1"></i>
+            Categoría
+          </th>
           <th>
             <i class="bi bi-check-circle me-1"></i>
             Disponibilidad
           </th>
           <th>
-            <i class="bi bi-geo-alt me-1"></i>
-            Ubicación
+            <i class="bi bi-clipboard-check me-1"></i>
+            Estado Físico
+          </th>
+          <th>
+            <i class="bi bi-calendar3 me-1"></i>
+            Ingreso
           </th>
         </tr>
       </thead>
       <tbody>
         <tr
-          *ngFor="let herramienta of filteredHerramientas; let i = index"
+          *ngFor="
+            let herramienta of filteredHerramientas;
+            trackBy: trackByHerramienta;
+            let i = index
+          "
           class="table-row"
           [class.row-even]="i % 2 === 0"
         >
@@ -189,22 +271,55 @@
           </td>
           <td>{{ herramienta.marca || "N/A" }}</td>
           <td>{{ herramienta.tipo || "N/A" }}</td>
+          <td class="text-end">
+            <span class="currency-value">{{
+              formatCurrency(herramienta.costoDolares)
+            }}</span>
+          </td>
+          <td class="text-end">
+            <span class="currency-value highlight">{{
+              formatCurrency(herramienta.valorActual)
+            }}</span>
+          </td>
           <td>
             <span
-              class="disponibilidad-badge"
-              [class]="
-                'badge-' + getDisponibilidadColor(herramienta.disponibilidad)
-              "
+              class="categoria-badge"
+              [ngClass]="'badge-' + getCategoriaColor(herramienta.categoria)"
+            >
+              <i
+                [class]="getCategoriaIcon(herramienta.categoria) + ' me-1'"
+              ></i>
+              {{ herramienta.categoria }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="estado-badge"
+              [ngClass]="getDisponibilidadClass(herramienta.disponibilidad)"
             >
               <i
                 [class]="
                   getDisponibilidadIcon(herramienta.disponibilidad) + ' me-1'
                 "
               ></i>
-              {{ herramienta.disponibilidad }}
+              {{ herramienta.disponibilidad || "N/A" }}
             </span>
           </td>
-          <td>{{ herramienta.ubicacion || "N/A" }}</td>
+          <td>
+            <span
+              class="estado-badge"
+              [ngClass]="getEstadoFisicoClass(herramienta.estadoFisico)"
+            >
+              {{ herramienta.estadoFisico || "N/A" }}
+            </span>
+          </td>
+          <td>
+            {{
+              herramienta.fechaDeIngreso
+                ? (herramienta.fechaDeIngreso | date : "MM/yyyy")
+                : "N/A"
+            }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -223,8 +338,8 @@
 </div>
 
 <style>
-  /* Estado Header */
-  .estado-header {
+  /* Header Section */
+  .valorizacion-header {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 1rem;
     padding: 2rem;
@@ -279,6 +394,12 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+  }
+
+  .stat-card.highlight {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
   }
 
   .stat-card.clickable {
@@ -342,6 +463,15 @@
     flex-shrink: 0;
   }
 
+  .stat-icon.total {
+    background: #e74c3c;
+  }
+  .stat-icon.average {
+    background: #3498db;
+  }
+  .stat-icon.count {
+    background: #27ae60;
+  }
   .stat-icon.success {
     background: #28a745;
   }
@@ -392,6 +522,22 @@
     font-size: 1rem;
   }
 
+  /* Price Distribution Section */
+  .price-distribution-section {
+    margin-bottom: 2rem;
+  }
+
+  .distribution-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+  }
+
   /* Filters Section */
   .filters-section {
     margin-bottom: 2rem;
@@ -418,19 +564,40 @@
     font-weight: 600;
   }
 
-  .selected-filter-badge {
+  .search-container {
+    max-width: 400px;
+  }
+
+  .search-container .input-group-text {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+  }
+
+  .search-container .form-control {
+    border-color: #dee2e6;
+  }
+
+  .search-container .form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+
+  .active-filters {
+    margin-top: 1rem;
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
   }
 
-  .selected-filter-badge .badge {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
+  .active-filters .badge {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
   }
 
   /* Loading and Empty States */
-  .loading-container {
+  .loading-container,
+  .empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -443,12 +610,6 @@
     margin-top: 1rem;
     color: #6c757d;
     font-size: 1.1rem;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #6c757d;
   }
 
   .empty-icon {
@@ -465,6 +626,7 @@
   .empty-state p {
     font-size: 1.1rem;
     margin-bottom: 2rem;
+    color: #6c757d;
   }
 
   /* Results Section */
@@ -578,7 +740,17 @@
     color: #495057;
   }
 
-  .disponibilidad-badge {
+  .currency-value {
+    font-family: "Courier New", monospace;
+    font-weight: 600;
+  }
+
+  .currency-value.highlight {
+    color: #28a745;
+    font-size: 1.1em;
+  }
+
+  .categoria-badge {
     padding: 0.375rem 0.75rem;
     border-radius: 0.5rem;
     font-size: 0.8rem;
@@ -587,28 +759,49 @@
     letter-spacing: 0.05em;
   }
 
-  .disponibilidad-badge.badge-success {
+  .estado-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-success {
     background: #e8f5e8;
     color: #2e7d32;
     border: 1px solid #c8e6c9;
   }
 
-  .disponibilidad-badge.badge-warning {
+  .badge-info {
+    background: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid #bbdefb;
+  }
+
+  .badge-warning {
     background: #fff3e0;
     color: #f57f17;
     border: 1px solid #ffcc80;
   }
 
-  .disponibilidad-badge.badge-danger {
+  .badge-danger {
     background: #ffebee;
     color: #c62828;
     border: 1px solid #ffcdd2;
   }
 
-  .disponibilidad-badge.badge-primary {
+  .badge-primary {
     background: #e3f2fd;
     color: #1976d2;
     border: 1px solid #bbdefb;
+  }
+
+  .badge-secondary {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
   }
 
   /* Pagination */
@@ -620,9 +813,9 @@
 
   /* Responsive Design */
   @media (max-width: 768px) {
-    .stats-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
+    .stats-grid-compact {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
     }
 
     .results-header {
@@ -631,16 +824,34 @@
       text-align: center;
     }
 
-    .stat-card {
-      padding: 1rem;
+    .stat-card.compact {
+      padding: 0.75rem 1rem;
     }
 
-    .stat-number {
-      font-size: 2rem;
+    .stat-number.compact {
+      font-size: 1.25rem;
     }
 
     .page-title {
       font-size: 1.5rem;
+    }
+
+    .stat-icon.compact {
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1rem;
+    }
+
+    .custom-table th,
+    .custom-table td {
+      padding: 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .stats-grid-compact {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 </style>

@@ -1,12 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // <-- Import FormsModule
+import { FormsModule } from '@angular/forms';
 import { PageTitleService } from '../../../services/page-title.service';
 import { HerramientaService } from '../../../services/herramienta.service';
-import { CboHerramientasComponent } from "../../../shared/components/Cbo/cbo-herramientas/cbo-herramientas.component";
-import { ModalHistorialComponent } from "../../movimientos/modal-historial/modal-historial.component";
 import { PaginatorComponent } from "../../../shared/components/paginator/paginator.component";
-import { CboEstadoFisicoHerramientaComponent } from "../../../shared/components/Cbo/cbo-estado-fisico-herramienta/cbo-estado-fisico-herramienta.component";
 import { AlertaService } from '../../../services/alerta.service';
 
 interface HerramientasRaw {
@@ -30,54 +27,41 @@ interface DisplayHerramienta {
 }
 
 @Component({
-  selector: 'app-estado',
+  selector: 'app-disponibilidad',
   imports: [
     CommonModule,
-    FormsModule, // <-- Add FormsModule here
+    FormsModule,
     PaginatorComponent,
   ],
-  templateUrl: './estado.component.html',
-  styleUrl: './estado.component.css'
+  templateUrl: './disponibilidad.component.html',
+  styleUrl: './disponibilidad.component.css'
 })
-export class EstadoComponent implements OnInit {
+export class DisponibilidadComponent implements OnInit {
 
   herramientas: DisplayHerramienta[] = [];
   filteredHerramientas: DisplayHerramienta[] = [];
-  columns: string[] = ['codigo', 'nombre', 'marca', 'estadoFisico', 'disponibilidad'];
   currentPage = 1;
   pageSize = 6;
   loading = false;
   totalItems = 0;
   totalPages = 0;
 
-  // Filtros
-  filtroCodigo: string = '';
-  filtroNombre: string = '';
-  filtroMarca: string = '';
-  filtroEstado: string = '';
-
   // Estadísticas
-  herramientasExcelente = 0;
-  herramientasUsadas = 0;
-  herramientasDesgastadas = 0;
-  herramientasDaniadas = 0;
-  herramientasNoApta = 0;
+  herramientasDisponibles = 0;
+  herramientasPrestadas = 0;
+  herramientasEnMantenimiento = 0;
+  herramientasExtraviadas = 0;
 
   // Filtros
-  estadoFisicoSelect: any = null;
+  disponibilidadSelect: any = null;
 
-  // Estados físicos disponibles
-  estadosFisicos = [
-    { id: 1, nombre: 'Excelente', icon: 'bi-star-fill', color: 'success' },
-    { id: 2, nombre: 'Usada', icon: 'bi-check-circle', color: 'primary' },
-    { id: 3, nombre: 'Desgastada', icon: 'bi-exclamation-circle', color: 'warning' },
-    { id: 4, nombre: 'Dañada', icon: 'bi-x-circle', color: 'danger' },
-    { id: 5, nombre: 'No Apta', icon: 'bi-ban', color: 'dark' }
+  // Estados de disponibilidad disponibles
+  estadosDisponibilidad = [
+    { id: 1, nombre: 'Disponible', icon: 'bi-check-circle-fill', color: 'success' },
+    { id: 2, nombre: 'Prestada', icon: 'bi-arrow-right-circle', color: 'primary' },
+    { id: 3, nombre: 'Mantenimiento', icon: 'bi-wrench-adjustable', color: 'warning' },
+    { id: 4, nombre: 'Extraviada', icon: 'bi-exclamation-triangle', color: 'danger' }
   ];
-
-  // Modal detalle
-  showDetalleModal = false;
-  detalleMovimiento: any = null;
 
   constructor(
     private pageTitleService: PageTitleService,
@@ -86,10 +70,10 @@ export class EstadoComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.pageTitleService.setTitle('Estado de Herramientas');
+    this.pageTitleService.setTitle('Estado de Disponibilidad');
     this.cargarEstadisticas();
-    // Inicializar con estado "Dañada" (ID: 4)
-    this.estadoFisicoSelect = this.estadosFisicos.find(estado => estado.id === 4);
+    // Inicializar con estado "Disponible" (ID: 1)
+    this.disponibilidadSelect = this.estadosDisponibilidad.find(estado => estado.id === 1);
     this.onSearch();
   }
 
@@ -97,122 +81,53 @@ export class EstadoComponent implements OnInit {
     return this.filteredHerramientas;
   }
 
-  // Los filtros ahora solo se aplicarán localmente cuando no usamos la paginación del backend
-  applyFilters(): void {
-    // Si hay filtros activos, hacer una nueva petición al backend en lugar de filtrar localmente
-    if (this.hasActiveFilters()) {
-      this.fetchHerramientas();
-      return;
-    }
-
-    // Si no hay filtros, simplemente mostramos los datos tal cual están
-    this.filteredHerramientas = [...this.herramientas];
-  }
-
-  fetchHerramientas(): void {
-    this.loading = true;
-    console.log(`[HerramientasList] fetchHerramientas page=${this.currentPage} size=${this.pageSize}`);
-
-    // Construir objeto de filtros para enviar al servicio
-    const filters: any = {};
-    if (this.filtroCodigo?.trim()) filters.codigo = this.filtroCodigo.trim();
-    if (this.filtroNombre?.trim()) filters.nombre = this.filtroNombre.trim();
-    if (this.filtroMarca?.trim()) filters.marca = this.filtroMarca.trim();
-
-    // Convertir estado de string a boolean para el backend
-    if (this.filtroEstado) {
-      filters.estado = this.filtroEstado === 'activo';
-    }
-
-    console.debug('[HerramientasList] Enviando filtros:', filters);
-
-    this.srvHerramienta.getTools(1, this.pageSize, filters).subscribe({
-      next: (resp: any) => {
-        console.debug('[HerramientasList] fetchHerramientas - respuesta:', resp);
-
-        // Extraer datos del array
-        let herramientasData = [];
-
-        if (Array.isArray(resp.data)) {
-          herramientasData = resp.data;
-        } else if (resp.data && Array.isArray(resp.data.data)) {
-          herramientasData = resp.data.data;
-        }
-
-        // Mapear los datos al formato de visualización
-        this.herramientas = herramientasData.map((h: any) => this.mapHerramientaToDisplayFormat(h));
-
-        // Actualizar información de paginación
-        this.totalItems = resp.total || herramientasData.length;
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-
-        // Usar datos directamente sin filtrado adicional
-        this.filteredHerramientas = this.herramientas;
-        this.loading = false;
-
-        console.log('[HerramientasList] Herramientas cargadas:', this.herramientas.length);
-        console.log('[HerramientasList] Paginación:', {
-          total: this.totalItems,
-          pages: this.totalPages,
-          current: this.currentPage
-        });
-      },
-      error: (error: any) => {
-        console.error('Error al cargar herramientas:', error);
-        this.srvAlerta.error('Error al cargar las herramientas. Por favor, inténtelo de nuevo.');
-        this.loading = false;
-      }
-    });
-  }
-
   cargarEstadisticas() {
     // Cargar todas las estadísticas en paralelo
-    const estadosIds = [1, 2, 3, 4, 5]; // Excelente, Usada, Desgastada, Dañada, No Apta
+    const disponibilidadIds = [1, 2, 3, 4]; // Disponible, Prestada, Mantenimiento, Extraviada
 
-    estadosIds.forEach(estadoId => {
-      this.srvHerramienta.getCountHerramientasByEstadoFisico(estadoId).subscribe({
+    disponibilidadIds.forEach(disponibilidadId => {
+      this.srvHerramienta.getCountHerramientasByDisponibilidad(disponibilidadId).subscribe({
         next: (response: any) => {
           const count = response?.data ?? 0;
-          switch (estadoId) {
-            case 1: this.herramientasExcelente = count; break;
-            case 2: this.herramientasUsadas = count; break;
-            case 3: this.herramientasDesgastadas = count; break;
-            case 4: this.herramientasDaniadas = count; break;
-            case 5: this.herramientasNoApta = count; break;
+          switch (disponibilidadId) {
+            case 1: this.herramientasDisponibles = count; break;
+            case 2: this.herramientasPrestadas = count; break;
+            case 3: this.herramientasEnMantenimiento = count; break;
+            case 4: this.herramientasExtraviadas = count; break;
           }
         },
         error: (error: any) => {
-          console.error(`Error cargando estadísticas para estado ${estadoId}:`, error);
+          console.error(`Error cargando estadísticas para disponibilidad ${disponibilidadId}:`, error);
         }
       });
     });
   }
 
-  onEstadoFisicoSelected(estado: any) {
-    this.estadoFisicoSelect = estado;
+  onDisponibilidadSelected(disponibilidad: any) {
+    this.disponibilidadSelect = disponibilidad;
     this.currentPage = 1; // Reset pagination
     this.onSearch();
   }
 
-  onEstadoCardClick(estado: any) {
-    this.estadoFisicoSelect = estado;
+  onDisponibilidadCardClick(disponibilidad: any) {
+    this.disponibilidadSelect = disponibilidad;
     this.currentPage = 1;
     this.onSearch();
   }
 
   hasActiveFilters(): boolean {
-    return !!this.estadoFisicoSelect;
+    return !!this.disponibilidadSelect;
   }
 
   onResetFilters() {
-    this.estadoFisicoSelect = null;
+    this.disponibilidadSelect = null;
     this.herramientas = [];
     this.filteredHerramientas = [];
     this.totalItems = 0;
   }
 
   onSearch() {
-    if (!this.estadoFisicoSelect) {
+    if (!this.disponibilidadSelect) {
       this.herramientas = [];
       this.filteredHerramientas = [];
       this.totalItems = 0;
@@ -221,7 +136,7 @@ export class EstadoComponent implements OnInit {
 
     this.loading = true;
 
-    this.srvHerramienta.getHerramientasPorEstadoFisico(this.estadoFisicoSelect.id).subscribe({
+    this.srvHerramienta.getHerramientasPorDisponibilidadArray([this.disponibilidadSelect.id]).subscribe({
       next: (response: any) => {
         this.loading = false;
         if (response.success && response.data) {
@@ -238,7 +153,7 @@ export class EstadoComponent implements OnInit {
       },
       error: (error: any) => {
         this.loading = false;
-        console.error('Error al cargar herramientas por estado físico:', error);
+        console.error('Error al cargar herramientas por disponibilidad:', error);
         this.srvAlerta.error('Error al cargar las herramientas. Por favor, inténtelo de nuevo.');
         this.herramientas = [];
         this.filteredHerramientas = [];
@@ -273,25 +188,6 @@ export class EstadoComponent implements OnInit {
     this.updateFilteredData();
   }
 
-  getVisiblePages(): number[] {
-    const pages: number[] = [];
-    const maxVisible = 5;
-    const half = Math.floor(maxVisible / 2);
-
-    let start = Math.max(1, this.currentPage - half);
-    let end = Math.min(this.totalPages, start + maxVisible - 1);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  }
-
   onPageEvent(event: { pageIndex: number, pageSize: number }): void {
     this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
@@ -299,25 +195,14 @@ export class EstadoComponent implements OnInit {
     this.updateFilteredData();
   }
 
-  getEstadoStats(estadoId: number): number {
-    switch (estadoId) {
-      case 1: return this.herramientasExcelente;
-      case 2: return this.herramientasUsadas;
-      case 3: return this.herramientasDesgastadas;
-      case 4: return this.herramientasDaniadas;
-      case 5: return this.herramientasNoApta;
+  getDisponibilidadStats(disponibilidadId: number): number {
+    switch (disponibilidadId) {
+      case 1: return this.herramientasDisponibles;
+      case 2: return this.herramientasPrestadas;
+      case 3: return this.herramientasEnMantenimiento;
+      case 4: return this.herramientasExtraviadas;
       default: return 0;
     }
-  }
-
-  abrirModalDetalle(movimiento: any) {
-    this.detalleMovimiento = movimiento;
-    this.showDetalleModal = true;
-  }
-
-  cerrarModalDetalle() {
-    this.showDetalleModal = false;
-    this.detalleMovimiento = null;
   }
 
   // Helper para mapear herramienta a formato de visualización
@@ -351,12 +236,12 @@ export class EstadoComponent implements OnInit {
       id: h['id'] ?? h['idHerramienta'] ?? null,
       idHerramienta: h['idHerramienta'] ?? h['id'] ?? null,
       codigo: h['codigo'] ?? '',
-      nombre: h['nombreHerramienta'] ?? h['nombre'] ?? '', // Primero buscar nombreHerramienta
+      nombre: h['nombreHerramienta'] ?? h['nombre'] ?? '',
       marca: h['marca'] ?? '',
       tipo: h['tipo'] ?? '',
       estadoFisico: h['estadoFisico'] ?? '',
       disponibilidad: disponibilidad,
-      ubicacion: h['ubicacion'] ?? h['ubicacionFisica'] ?? '', // Añadir ubicacionFisica como fallback
+      ubicacion: h['ubicacion'] ?? h['ubicacionFisica'] ?? '',
       planta: h['nombrePlanta'] ?? h['planta'] ?? '',
       activo: activo,
       estado: estado
@@ -383,6 +268,28 @@ export class EstadoComponent implements OnInit {
     if (disp.includes('prestada')) return 'bi-arrow-right-circle';
     if (disp.includes('mantenimiento')) return 'bi-wrench';
     if (disp.includes('extraviada')) return 'bi-exclamation-triangle';
+    return 'bi-question-circle';
+  }
+
+  getEstadoFisicoColor(estadoFisico: string | undefined): string {
+    if (!estadoFisico) return 'primary';
+
+    const estado = estadoFisico.toLowerCase();
+    if (estado.includes('excelente')) return 'success';
+    if (estado.includes('usada') || estado.includes('bueno')) return 'primary';
+    if (estado.includes('desgastada') || estado.includes('regular')) return 'warning';
+    if (estado.includes('dañada') || estado.includes('malo') || estado.includes('no apta')) return 'danger';
+    return 'primary';
+  }
+
+  getEstadoFisicoIcon(estadoFisico: string | undefined): string {
+    if (!estadoFisico) return 'bi-question-circle';
+
+    const estado = estadoFisico.toLowerCase();
+    if (estado.includes('excelente')) return 'bi-star-fill';
+    if (estado.includes('usada') || estado.includes('bueno')) return 'bi-check-circle';
+    if (estado.includes('desgastada') || estado.includes('regular')) return 'bi-exclamation-circle';
+    if (estado.includes('dañada') || estado.includes('malo') || estado.includes('no apta')) return 'bi-x-circle';
     return 'bi-question-circle';
   }
 }

@@ -1,38 +1,40 @@
 <!-- Header Section -->
-<div class="estado-header" fadeIn>
+<div class="disponibilidad-header" fadeIn>
   <div class="header-content">
     <div class="title-section">
       <h2 class="page-title">
         <i class="bi bi-clipboard-data me-2"></i>
-        Estado de Herramientas
+        Estado de Disponibilidad
       </h2>
       <p class="page-subtitle">
-        Monitoreo del estado físico de las herramientas
+        Monitoreo de la disponibilidad de las herramientas
       </p>
     </div>
   </div>
 </div>
 
-<!-- Estadísticas por Estado Físico -->
+<!-- Estadísticas por Estado de Disponibilidad -->
 <div class="stats-section">
   <div class="stats-grid-compact">
     <div
-      *ngFor="let estado of estadosFisicos"
+      *ngFor="let estado of estadosDisponibilidad"
       class="stat-card clickable compact"
-      [class.selected]="estadoFisicoSelect?.id === estado.id"
+      [class.selected]="disponibilidadSelect?.id === estado.id"
       [class]="'stat-' + estado.color"
-      (click)="onEstadoCardClick(estado)"
+      (click)="onDisponibilidadCardClick(estado)"
     >
       <div class="stat-icon compact" [class]="estado.color">
         <i [class]="estado.icon"></i>
       </div>
       <div class="stat-info compact">
-        <h3 class="stat-number compact">{{ getEstadoStats(estado.id) }}</h3>
-        <p class="stat-label">{{ estado.nombre }}</p>
+        <h3 class="stat-number compact">
+          {{ getDisponibilidadStats(estado.id) }}
+        </h3>
+        <p class="stat-label compact">{{ estado.nombre }}</p>
       </div>
       <div
         class="selection-indicator"
-        *ngIf="estadoFisicoSelect?.id === estado.id"
+        *ngIf="disponibilidadSelect?.id === estado.id"
       >
         <i class="bi bi-check-circle-fill"></i>
       </div>
@@ -41,7 +43,7 @@
 </div>
 
 <!-- Filtros Section -->
-<div class="filters-section" *ngIf="estadoFisicoSelect">
+<div class="filters-section" *ngIf="disponibilidadSelect">
   <div class="filters-container">
     <div class="filter-header">
       <h6 class="filter-title">
@@ -63,9 +65,9 @@
 
     <div class="filter-content">
       <div class="selected-filter-badge">
-        <span class="badge" [class]="'bg-' + estadoFisicoSelect.color">
-          <i [class]="estadoFisicoSelect.icon + ' me-1'"></i>
-          Estado: {{ estadoFisicoSelect.nombre }}
+        <span class="badge" [class]="'bg-' + disponibilidadSelect.color">
+          <i [class]="disponibilidadSelect.icon + ' me-1'"></i>
+          Estado: {{ disponibilidadSelect.nombre }}
         </span>
       </div>
     </div>
@@ -81,11 +83,11 @@
 </div>
 
 <!-- Empty State -->
-<div *ngIf="!loading && !estadoFisicoSelect" class="empty-state">
+<div *ngIf="!loading && !disponibilidadSelect" class="empty-state">
   <div class="empty-icon">
     <i class="bi bi-tools"></i>
   </div>
-  <h3>Seleccione un Estado Físico</h3>
+  <h3>Seleccione un Estado de Disponibilidad</h3>
   <p>
     Haga clic en una de las tarjetas de estado para ver las herramientas
     correspondientes.
@@ -94,7 +96,7 @@
 
 <!-- No Results State -->
 <div
-  *ngIf="!loading && estadoFisicoSelect && totalItems === 0"
+  *ngIf="!loading && disponibilidadSelect && totalItems === 0"
   class="empty-state"
 >
   <div class="empty-icon">
@@ -103,7 +105,7 @@
   <h3>Sin Resultados</h3>
   <p>
     No se encontraron herramientas en estado
-    <strong>{{ estadoFisicoSelect.nombre }}</strong
+    <strong>{{ disponibilidadSelect.nombre }}</strong
     >.
   </p>
 </div>
@@ -114,9 +116,9 @@
   <div class="results-header">
     <div class="results-info">
       <h6 class="results-title">
-        Herramientas en Estado:
-        <span class="badge ms-2" [class]="'bg-' + estadoFisicoSelect.color">
-          {{ estadoFisicoSelect.nombre }}
+        Herramientas con Estado:
+        <span class="badge ms-2" [class]="'bg-' + disponibilidadSelect.color">
+          {{ disponibilidadSelect.nombre }}
         </span>
       </h6>
       <p class="results-count">
@@ -164,8 +166,8 @@
             Tipo
           </th>
           <th>
-            <i class="bi bi-check-circle me-1"></i>
-            Disponibilidad
+            <i class="bi bi-clipboard-check me-1"></i>
+            Estado Físico
           </th>
           <th>
             <i class="bi bi-geo-alt me-1"></i>
@@ -191,17 +193,17 @@
           <td>{{ herramienta.tipo || "N/A" }}</td>
           <td>
             <span
-              class="disponibilidad-badge"
+              class="estado-badge"
               [class]="
-                'badge-' + getDisponibilidadColor(herramienta.disponibilidad)
+                'badge-' + getEstadoFisicoColor(herramienta.estadoFisico)
               "
             >
               <i
                 [class]="
-                  getDisponibilidadIcon(herramienta.disponibilidad) + ' me-1'
+                  getEstadoFisicoIcon(herramienta.estadoFisico) + ' me-1'
                 "
               ></i>
-              {{ herramienta.disponibilidad }}
+              {{ herramienta.estadoFisico || "N/A" }}
             </span>
           </td>
           <td>{{ herramienta.ubicacion || "N/A" }}</td>
@@ -223,8 +225,8 @@
 </div>
 
 <style>
-  /* Estado Header */
-  .estado-header {
+  /* Header Section */
+  .disponibilidad-header {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 1rem;
     padding: 2rem;
@@ -252,7 +254,7 @@
     font-size: 1.1rem;
   }
 
-  /* Stats Section */
+  /* Stats Section - Compact Version */
   .stats-section {
     margin-bottom: 2rem;
   }
@@ -261,7 +263,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
-    max-width: 1200px;
+    max-width: 900px;
     margin: 0 auto;
   }
 
@@ -321,12 +323,6 @@
     --stat-shadow: rgba(220, 53, 69, 0.25);
   }
 
-  .stat-card.stat-info {
-    --stat-color: #17a2b8;
-    --stat-bg: #f0fcff;
-    --stat-shadow: rgba(23, 162, 184, 0.25);
-  }
-
   .stat-icon.compact {
     width: 3rem;
     height: 3rem;
@@ -355,32 +351,24 @@
   .stat-icon.danger {
     background: #dc3545;
   }
-  .stat-icon.info {
-    background: #17a2b8;
-  }
-
-  .stat-card.highlight .stat-icon {
-    background: rgba(255, 255, 255, 0.2);
-  }
 
   .stat-number.compact {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
 
   .stat-number {
     font-weight: 700;
     margin: 0;
-    color: inherit;
+    color: #212529;
   }
 
   .stat-label.compact {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 
   .stat-label {
     margin: 0;
-    color: inherit;
-    opacity: 0.8;
+    color: #6c757d;
     font-weight: 500;
   }
 
@@ -578,7 +566,7 @@
     color: #495057;
   }
 
-  .disponibilidad-badge {
+  .estado-badge {
     padding: 0.375rem 0.75rem;
     border-radius: 0.5rem;
     font-size: 0.8rem;
@@ -587,25 +575,25 @@
     letter-spacing: 0.05em;
   }
 
-  .disponibilidad-badge.badge-success {
+  .estado-badge.badge-success {
     background: #e8f5e8;
     color: #2e7d32;
     border: 1px solid #c8e6c9;
   }
 
-  .disponibilidad-badge.badge-warning {
+  .estado-badge.badge-warning {
     background: #fff3e0;
     color: #f57f17;
     border: 1px solid #ffcc80;
   }
 
-  .disponibilidad-badge.badge-danger {
+  .estado-badge.badge-danger {
     background: #ffebee;
     color: #c62828;
     border: 1px solid #ffcdd2;
   }
 
-  .disponibilidad-badge.badge-primary {
+  .estado-badge.badge-primary {
     background: #e3f2fd;
     color: #1976d2;
     border: 1px solid #bbdefb;
@@ -620,9 +608,9 @@
 
   /* Responsive Design */
   @media (max-width: 768px) {
-    .stats-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
+    .stats-grid-compact {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
     }
 
     .results-header {
@@ -631,16 +619,28 @@
       text-align: center;
     }
 
-    .stat-card {
-      padding: 1rem;
+    .stat-card.compact {
+      padding: 0.75rem 1rem;
     }
 
-    .stat-number {
-      font-size: 2rem;
+    .stat-number.compact {
+      font-size: 1.75rem;
     }
 
     .page-title {
       font-size: 1.5rem;
+    }
+
+    .stat-icon.compact {
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .stats-grid-compact {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 </style>
