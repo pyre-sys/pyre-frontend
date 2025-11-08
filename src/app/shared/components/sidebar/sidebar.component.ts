@@ -185,7 +185,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       id: 62,
       descripcion: 'Stock Valorizado',
       icono: 'bi bi-cash-coin',
-      link: '/reportes/stock',
+      link: '/reportes/valorizacion',
       grupo: 'GM06',
       principal: false,
       orden: 2,
