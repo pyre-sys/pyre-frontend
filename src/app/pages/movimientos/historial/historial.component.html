@@ -1,167 +1,256 @@
 <!-- Título y botón en la misma línea -->
 <div class="container-fluid page-shell page-header-container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <!-- Título removido por solicitud: 'Historial de Movimientos' -->
-    </div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- Título removido por solicitud: 'Historial de Movimientos' -->
+  </div>
 </div>
 
 <div class="user-list-container container-fluid page-shell mt-2">
-    <div class="pyre-table-shell">
-        <!-- Filter bar -->
-        <div class="pyre-filter-bar container-fluid">
-            <!-- Row 1 -->
-            <div class="row g-3 align-items-end mb-2">
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Nombre Herramienta:</label>
-                    <input type="text" class="form-control" [(ngModel)]="filtroNombreHerramienta"
-                        placeholder="Buscar herramienta" (keyup.enter)="onSearch()" />
-                </div>
-
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Familia:</label>
-                    <app-cbo-familia-herramienta class="w-100" [isId]="'familiaHerramientaSelect'"
-                        (familiaSelected)="onFamiliaHerramientaSelected($event)">
-                    </app-cbo-familia-herramienta>
-                </div>
-
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Estado Físico:</label>
-                    <app-cbo-estado-fisico-herramienta class="w-100" [isId]="'estadoFisicoSelect'"
-                        (estadoFisicoSelected)="onEstadoFisicoSelected($event)">
-                    </app-cbo-estado-fisico-herramienta>
-                </div>
-
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Proveedor:</label>
-                    <app-cbo-proveedor class="w-100" [isId]="'proveedorSelect'"
-                        (proveedorSelected)="onProveedorSelected($event)">
-                    </app-cbo-proveedor>
-                </div>
-            </div>
-
-            <!-- Row 2 -->
-            <div class="row g-3 align-items-end mb-2">
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Tipo Movimiento:</label>
-                    <app-cbo-tipo-movimiento-herramienta class="w-100" [isId]="'tipoMovimientoSelect'"
-                        (tipoMovimientoSelected)="onTipoMovimientoSelected($event)">
-                    </app-cbo-tipo-movimiento-herramienta>
-                </div>
-
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Obra:</label>
-                    <app-cbo-obra class="w-100" [isId]="'obraSelect'" [showOnlyActive]="true"
-                        (obraSelected)="onObraSelected($event)">
-                    </app-cbo-obra>
-                </div>
-
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Usuario Genera:</label>
-                    <app-cbo-usuario class="w-100" [isId]="'usuarioGeneraSelect'"
-                        (usuarioSelected)="onUsuarioGeneraSelected($event)">
-                    </app-cbo-usuario>
-                </div>
-
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Usuario Responsable:</label>
-                    <app-cbo-usuario class="w-100" [isId]="'usuarioResponsableSelect'"
-                        (usuarioSelected)="onUsuarioResponsableSelected($event)">
-                    </app-cbo-usuario>
-                </div>
-            </div>
-
-            <!-- Row 3 -->
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Fecha Desde:</label>
-                    <input type="date" class="form-control" [(ngModel)]="filtroFechaDesde" (change)="onSearch()" />
-                </div>
-
-                <div class="col-md-3 col-sm-6">
-                    <label class="date-label">Fecha Hasta:</label>
-                    <input type="date" class="form-control" [(ngModel)]="filtroFechaHasta" (change)="onSearch()" />
-                </div>
-
-                <div class="col-md-6 col-sm-12 d-flex justify-content-end gap-2 mt-2 mt-md-0">
-                    <button *ngIf="hasActiveFilters()" type="button" class="reset-button-inline"
-                        (click)="onResetFilters()" [ngbTooltip]="'Limpiar todos los filtros'" placement="top"
-                        container="body" aria-label="Limpiar filtros">
-                        <i class="pi pi-filter-slash"></i>
-                        <span class="ms-1 d-none d-lg-inline">Limpiar</span>
-                    </button>
-
-                    <button type="button" class="search-button" (click)="onSearch()" [disabled]="!hasActiveFilters()"
-                        [ngbTooltip]="hasActiveFilters() ? 'Buscar' : 'Seleccione al menos un filtro'" placement="top"
-                        container="body" aria-label="Buscar">
-                        <i class="pi pi-search"></i>
-                    </button>
-                </div>
-            </div>
+  <div class="pyre-table-shell">
+    <!-- Filter bar -->
+    <div class="pyre-filter-bar container-fluid">
+      <!-- Row 1 - Filtros principales de herramienta -->
+      <div class="row g-3 align-items-end mb-3">
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <label class="date-label">Nombre Herramienta:</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="filtroNombreHerramienta"
+            placeholder="Buscar herramienta..."
+            (keyup.enter)="onSearch()"
+          />
         </div>
 
-
-        <!-- Loading indicator -->
-        <div *ngIf="loading" class="text-center py-4">
-            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-            <p>Cargando movimientos...</p>
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <label class="date-label">Familia:</label>
+          <app-cbo-familia-herramienta
+            class="w-100"
+            [isId]="'familiaHerramientaSelect'"
+            (familiaSelected)="onFamiliaHerramientaSelected($event)"
+          >
+          </app-cbo-familia-herramienta>
         </div>
 
-        <!-- Custom table -->
-        <div *ngIf="!loading" class="custom-table-container">
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Nombre</th>
-                        <th>Movimiento</th>
-                        <th style="width: 180px;">Fecha</th>
-                        <th>Genera</th>
-                        <th>Responsable</th>
-                        <th>Obra</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let movimiento of movimientos">
-                        <td>{{ movimiento.codigoHerramienta }}</td>
-                        <td>{{ movimiento.nombreHerramienta }}</td>
-                        <td style="text-align: center;">
-                            <i [ngClass]="[ getMovimientoIcon(movimiento.tipoMovimiento || movimiento.idTipoMovimiento || movimiento.nombreTipoMovimiento), 'movimiento-icon' ]"
-                                [ngbTooltip]="movimiento.tipoMovimiento || movimiento.nombreTipoMovimiento || ('Tipo: ' + (movimiento.idTipoMovimiento ?? 'N/A'))"
-                                placement="top" container="body"></i>
-                        </td>
-                        <td style="white-space: nowrap;">
-                            {{ movimiento.fecha | date:'EEE dd MMM yyyy, HH:mm':'es' }}
-                        </td>
-                        <td>{{ movimiento.nombreUsuarioGenera }}</td>
-                        <td>{{ movimiento.nombreUsuarioResponsable }}</td>
-                        <td>{{ movimiento.nombreObra }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button type="button" class="btn-icon btn-edit" (click)="abrirModalDetalle(movimiento)"
-                                    [ngbTooltip]="'Ver detalle'" placement="top" container="body"
-                                    aria-label="Ver detalle">
-                                    <i class="pi pi-eye"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr *ngIf="movimientos.length === 0">
-                        <td colspan="8" class="empty-message">No se encontraron movimientos.</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <label class="date-label">Tipo Movimiento:</label>
+          <app-cbo-tipo-movimiento-herramienta
+            class="w-100"
+            [isId]="'tipoMovimientoSelect'"
+            (tipoMovimientoSelected)="onTipoMovimientoSelected($event)"
+          >
+          </app-cbo-tipo-movimiento-herramienta>
+        </div>
+      </div>
+
+      <!-- Row 2 - Filtros de usuarios y obra -->
+      <div class="row g-3 align-items-end mb-3">
+        <div class="col-lg-3 col-md-6 col-sm-12">
+          <label class="date-label">Usuario Genera:</label>
+          <app-cbo-usuario
+            class="w-100"
+            [isId]="'usuarioGeneraSelect'"
+            (usuarioSelected)="onUsuarioGeneraSelected($event)"
+          >
+          </app-cbo-usuario>
         </div>
 
-        <!-- Paginator -->
-        <div *ngIf="!loading && totalItems > 0" class="paginator-container">
-            <app-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="currentPage - 1"
-                (pageChange)="onPageEvent($event)">
-            </app-paginator>
+        <div class="col-lg-3 col-md-6 col-sm-12">
+          <label class="date-label">Usuario Responsable:</label>
+          <app-cbo-usuario
+            class="w-100"
+            [isId]="'usuarioResponsableSelect'"
+            (usuarioSelected)="onUsuarioResponsableSelected($event)"
+          >
+          </app-cbo-usuario>
         </div>
 
-        <!-- Modal detalle movimiento -->
-        <app-modal-historial *ngIf="showDetalleModal" [data]="detalleMovimiento"
-            (close)="cerrarModalDetalle()"></app-modal-historial>
+        <div class="col-lg-3 col-md-6 col-sm-12">
+          <label class="date-label">Obra:</label>
+          <app-cbo-obra
+            class="w-100"
+            [isId]="'obraSelect'"
+            [showOnlyActive]="true"
+            (obraSelected)="onObraSelected($event)"
+          >
+          </app-cbo-obra>
+        </div>
+
+        <div class="col-lg-3 col-md-6 col-sm-12">
+          <label class="date-label">Proveedor:</label>
+          <app-cbo-proveedor
+            class="w-100"
+            [isId]="'proveedorSelect'"
+            (proveedorSelected)="onProveedorSelected($event)"
+          >
+          </app-cbo-proveedor>
+        </div>
+      </div>
+
+      <!-- Row 3 - Filtros de fecha y acciones -->
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-3 col-md-6 col-sm-12">
+          <label class="date-label">Fecha Desde:</label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="filtroFechaDesde"
+            (change)="onSearch()"
+          />
+        </div>
+
+        <div class="col-lg-3 col-md-6 col-sm-12">
+          <label class="date-label">Fecha Hasta:</label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="filtroFechaHasta"
+            (change)="onSearch()"
+          />
+        </div>
+
+        <div
+          class="col-lg-6 col-md-12 d-flex justify-content-end align-items-end gap-2"
+        >
+          <!-- Botón limpiar filtros -->
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="onResetFilters()"
+            [disabled]="!hasActiveFilters()"
+            [ngbTooltip]="
+              hasActiveFilters()
+                ? 'Limpiar todos los filtros'
+                : 'No hay filtros activos'
+            "
+            placement="top"
+            container="body"
+            aria-label="Limpiar todos los filtros"
+          >
+            <i class="pi pi-filter-slash"></i>
+            <span class="ms-2 d-none d-lg-inline">Limpiar Filtros</span>
+          </button>
+
+          <!-- Botón buscar -->
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="onSearch()"
+            [disabled]="!hasActiveFilters()"
+            [ngbTooltip]="
+              hasActiveFilters()
+                ? 'Buscar movimientos'
+                : 'Seleccione al menos un filtro para buscar'
+            "
+            placement="top"
+            container="body"
+            aria-label="Buscar movimientos"
+          >
+            <i class="pi pi-search"></i>
+            <span class="ms-2 d-none d-lg-inline">Buscar</span>
+          </button>
+        </div>
+      </div>
     </div>
+
+    <!-- Loading indicator -->
+    <div *ngIf="loading" class="text-center py-4">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <p>Cargando movimientos...</p>
+    </div>
+
+    <!-- Custom table -->
+    <div *ngIf="!loading" class="custom-table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Movimiento</th>
+            <th style="width: 180px">Fecha</th>
+            <th>Genera</th>
+            <th>Responsable</th>
+            <th>Obra</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let movimiento of movimientos">
+            <td>{{ movimiento.codigoHerramienta }}</td>
+            <td>{{ movimiento.nombreHerramienta }}</td>
+            <td style="text-align: center">
+              <i
+                [ngClass]="[
+                  getMovimientoIcon(
+                    movimiento.tipoMovimiento ||
+                      movimiento.idTipoMovimiento ||
+                      movimiento.nombreTipoMovimiento
+                  ),
+                  'movimiento-icon'
+                ]"
+                [ngbTooltip]="
+                  movimiento.tipoMovimiento ||
+                  movimiento.nombreTipoMovimiento ||
+                  'Tipo: ' + (movimiento.idTipoMovimiento ?? 'N/A')
+                "
+                placement="top"
+                container="body"
+              ></i>
+            </td>
+            <td style="white-space: nowrap">
+              {{ movimiento.fecha | date : "EEE dd MMM yyyy, HH:mm" : "es" }}
+            </td>
+            <td>{{ movimiento.nombreUsuarioGenera }}</td>
+            <td>
+              {{
+                (movimiento.nombreUsuarioResponsable &&
+                  movimiento.nombreUsuarioResponsable.trim()) ||
+                  movimiento.nombreProveedor ||
+                  "-"
+              }}
+            </td>
+            <td>{{ movimiento.nombreObra || "N/A" }}</td>
+            <td>
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="btn-icon btn-edit"
+                  (click)="abrirModalDetalle(movimiento)"
+                  [ngbTooltip]="'Ver detalle'"
+                  placement="top"
+                  container="body"
+                  aria-label="Ver detalle"
+                >
+                  <i class="pi pi-eye"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="movimientos.length === 0">
+            <td colspan="8" class="empty-message">
+              No se encontraron movimientos.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginator -->
+    <div *ngIf="!loading && totalItems > 0" class="paginator-container">
+      <app-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage - 1"
+        (pageChange)="onPageEvent($event)"
+      >
+      </app-paginator>
+    </div>
+
+    <!-- Modal detalle movimiento -->
+    <app-modal-historial
+      *ngIf="showDetalleModal"
+      [data]="detalleMovimiento"
+      (close)="cerrarModalDetalle()"
+    ></app-modal-historial>
+  </div>
 </div>

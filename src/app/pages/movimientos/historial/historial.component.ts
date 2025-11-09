@@ -10,7 +10,6 @@ import { AlertaService } from '../../../services/alerta.service';
 import { CboObraComponent } from '../../../shared/components/Cbo/cbo-obra/cbo-obra.component';
 import { CboTipoMovimientoHerramientaComponent } from '../../../shared/components/Cbo/cbo-tipo-movimiento-herramienta/cbo-tipo-movimiento-herramienta.component';
 import { CboProveedorComponent } from '../../../shared/components/Cbo/cbo-proveedor/cbo-proveedor.component';
-import { CboEstadoFisicoHerramientaComponent } from '../../../shared/components/Cbo/cbo-estado-fisico-herramienta/cbo-estado-fisico-herramienta.component';
 import { CboFamiliaHerramientaComponent } from "../../../shared/components/Cbo/cbo-familia-herramienta/cbo-familia-herramienta.component";
 import { CboUsuarioComponent } from "../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component";
 import { ModalHistorialComponent } from '../modal-historial/modal-historial.component';
@@ -22,13 +21,12 @@ import { PageTitleService } from '../../../services/page-title.service';
   imports: [
     CommonModule,
     FormsModule,
-  NgbTooltipModule,
+    NgbTooltipModule,
     PaginatorComponent,
     DatePipe,
     CboObraComponent,
     CboTipoMovimientoHerramientaComponent,
     CboProveedorComponent,
-    CboEstadoFisicoHerramientaComponent,
     CboFamiliaHerramientaComponent,
     CboUsuarioComponent
     ,
@@ -41,7 +39,7 @@ import { PageTitleService } from '../../../services/page-title.service';
 export class HistorialComponent implements OnInit {
   movimientos: any[] = [];
   currentPage = 1;
-  pageSize = 6; // Cambiado a 6 para mantener consistencia con visor-usuarios
+  pageSize = 10;
   totalItems = 0;
   loading = false;
 
@@ -53,7 +51,6 @@ export class HistorialComponent implements OnInit {
   filtroIdTipoMovimiento: number | null = null;
   filtroObra: number | null = null;
   filtroProveedor: number | null = null;
-  filtroEstadoFisico: string | null = null;
   filtroFechaDesde = '';
   filtroFechaHasta = '';
 
@@ -80,7 +77,6 @@ export class HistorialComponent implements OnInit {
       idTipoMovimiento: this.filtroIdTipoMovimiento ?? undefined,
       idObra: this.filtroObra ?? undefined,
       idProveedor: this.filtroProveedor ?? undefined,
-      idEstadoFisico: this.filtroEstadoFisico ?? undefined,
       fechaDesde: this.filtroFechaDesde,
       fechaHasta: this.filtroFechaHasta
     };
@@ -164,7 +160,6 @@ export class HistorialComponent implements OnInit {
       this.filtroIdTipoMovimiento !== null ||
       this.filtroObra !== null ||
       this.filtroProveedor !== null ||
-      this.filtroEstadoFisico !== null ||
       this.filtroFechaDesde ||
       this.filtroFechaHasta
     );
@@ -195,11 +190,6 @@ export class HistorialComponent implements OnInit {
     this.fetchMovimientos();
   }
 
-  onEstadoFisicoSelected(estadoFisico: any): void {
-    this.filtroEstadoFisico = estadoFisico?.idEstadoFisico || null;
-    this.fetchMovimientos();
-  }
-
   onFamiliaHerramientaSelected(familia: any): void {
     this.filtroFamiliaHerramienta = familia?.idFamilia || null;
     this.fetchMovimientos();
@@ -213,11 +203,42 @@ export class HistorialComponent implements OnInit {
     this.filtroIdTipoMovimiento = null;
     this.filtroObra = null;
     this.filtroProveedor = null;
-    this.filtroEstadoFisico = null;
     this.filtroFechaDesde = '';
     this.filtroFechaHasta = '';
     this.currentPage = 1;
     this.fetchMovimientos();
+  }
+
+  // Método auxiliar para limpiar filtro específico (para futura funcionalidad)
+  clearSpecificFilter(filterName: string): void {
+    switch (filterName) {
+      case 'nombreHerramienta':
+        this.filtroNombreHerramienta = '';
+        break;
+      case 'familia':
+        this.filtroFamiliaHerramienta = null;
+        break;
+      case 'tipoMovimiento':
+        this.filtroIdTipoMovimiento = null;
+        break;
+      case 'usuarioGenera':
+        this.filtroIdUsuarioGenera = null;
+        break;
+      case 'usuarioResponsable':
+        this.filtroIdUsuarioResponsable = null;
+        break;
+      case 'obra':
+        this.filtroObra = null;
+        break;
+      case 'proveedor':
+        this.filtroProveedor = null;
+        break;
+      case 'fechas':
+        this.filtroFechaDesde = '';
+        this.filtroFechaHasta = '';
+        break;
+    }
+    this.onSearch();
   }
 
   onPageEvent(event: { pageIndex: number; pageSize: number }): void {
