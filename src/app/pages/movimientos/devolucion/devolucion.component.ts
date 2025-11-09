@@ -176,19 +176,46 @@ export class DevolucionComponent implements OnInit {
       next: (response) => {
         this.isLoadingHerramientas = false;
         if (response.success && response.data) {
-          this.herramientasEnPrestamo = response.data.map((item: any) => ({
-            id: item.idHerramienta,
-            codigo: item.codigoHerramienta,
-            nombre: item.nombreHerramienta,
-            marca: item.marca || 'N/A',
-            fechaPrestamo: item.fechaPrestamo,
-            fechaEstimadaDevolucion: item.fechaEstimadaDevolucion,
-            nombreObra: item.nombreObra,
-            observacionesPrestamo: item.observaciones,
-            selected: false,
-            estadoFisicoId: null,
-            observaciones: ''
-          }));
+          // Para cada herramienta, obtener el último movimiento para tener datos completos
+          const herramientaPromises = response.data.map((item: any) =>
+            this.movimientoService.getUltimoMovimientoByHerramienta(item.idHerramienta).toPromise()
+              .then((movResp: any) => {
+                const movimiento = movResp?.data || {};
+                return {
+                  id: item.idHerramienta,
+                  codigo: item.codigoHerramienta,
+                  nombre: item.nombreHerramienta,
+                  marca: item.marca || 'N/A',
+                  fechaPrestamo: movimiento.fecha || item.fechaPrestamo,
+                  fechaEstimadaDevolucion: movimiento.fechaEstimadaDevolucion || item.fechaEstimadaDevolucion,
+                  nombreObra: movimiento.nombreObra || item.nombreObra,
+                  observacionesPrestamo: movimiento.observaciones || item.observaciones,
+                  selected: false,
+                  estadoFisicoId: item.estadoFisicoId || 1,
+                  observaciones: ''
+                };
+              })
+              .catch(() => {
+                // En caso de error, usar datos básicos
+                return {
+                  id: item.idHerramienta,
+                  codigo: item.codigoHerramienta,
+                  nombre: item.nombreHerramienta,
+                  marca: item.marca || 'N/A',
+                  fechaPrestamo: item.fechaPrestamo,
+                  fechaEstimadaDevolucion: item.fechaEstimadaDevolucion,
+                  nombreObra: item.nombreObra,
+                  observacionesPrestamo: item.observaciones,
+                  selected: false,
+                  estadoFisicoId: item.estadoFisicoId || 1,
+                  observaciones: ''
+                };
+              })
+          );
+
+          Promise.all(herramientaPromises).then(herramientasCompletas => {
+            this.herramientasEnPrestamo = herramientasCompletas;
+          });
         } else {
           this.herramientasEnPrestamo = [];
           this.alertService.error('Este usuario no tiene herramientas en préstamo actualmente.', 'Sin Herramientas');
@@ -206,25 +233,49 @@ export class DevolucionComponent implements OnInit {
   private loadHerramientasEnReparacion(proveedorId: number): void {
     this.isLoadingHerramientas = true;
 
-    // TODO: Implement service method for tools in repair by provider
-    // For now, using a placeholder structure similar to prestamo
     this.herramientaService.getHerramientasEnReparacionByProveedor(proveedorId).subscribe({
       next: (response) => {
         this.isLoadingHerramientas = false;
         if (response.success && response.data) {
-          this.herramientasEnPrestamo = response.data.map((item: any) => ({
-            id: item.idHerramienta,
-            codigo: item.codigoHerramienta,
-            nombre: item.nombreHerramienta,
-            marca: item.marca || 'N/A',
-            fechaPrestamo: item.fechaReparacion || item.fechaIngreso,
-            fechaEstimadaDevolucion: item.fechaEstimadaFinalizacion,
-            nombreObra: null, // No aplica para reparaciones
-            observacionesPrestamo: item.observaciones,
-            selected: false,
-            estadoFisicoId: null,
-            observaciones: ''
-          }));
+          // Para cada herramienta, obtener el último movimiento para tener datos completos
+          const herramientaPromises = response.data.map((item: any) =>
+            this.movimientoService.getUltimoMovimientoByHerramienta(item.idHerramienta).toPromise()
+              .then((movResp: any) => {
+                const movimiento = movResp?.data || {};
+                return {
+                  id: item.idHerramienta,
+                  codigo: item.codigoHerramienta,
+                  nombre: item.nombreHerramienta,
+                  marca: item.marca || 'N/A',
+                  fechaPrestamo: movimiento.fechaMovimiento || item.fechaReparacion || item.fechaIngreso,
+                  fechaEstimadaDevolucion: movimiento.fechaEstimadaDevolucion || item.fechaEstimadaFinalizacion,
+                  nombreObra: null, // No aplica para reparaciones
+                  observacionesPrestamo: movimiento.observaciones || item.observaciones,
+                  selected: false,
+                  estadoFisicoId: item.estadoFisicoId || 1,
+                  observaciones: ''
+                };
+              })
+              .catch(() => {
+                return {
+                  id: item.idHerramienta,
+                  codigo: item.codigoHerramienta,
+                  nombre: item.nombreHerramienta,
+                  marca: item.marca || 'N/A',
+                  fechaPrestamo: item.fechaReparacion || item.fechaIngreso,
+                  fechaEstimadaDevolucion: item.fechaEstimadaFinalizacion,
+                  nombreObra: null,
+                  observacionesPrestamo: item.observaciones,
+                  selected: false,
+                  estadoFisicoId: item.estadoFisicoId || 1,
+                  observaciones: ''
+                };
+              })
+          );
+
+          Promise.all(herramientaPromises).then(herramientasCompletas => {
+            this.herramientasEnPrestamo = herramientasCompletas;
+          });
         } else {
           this.herramientasEnPrestamo = [];
           this.alertService.error('Este proveedor no tiene herramientas en reparación actualmente.', 'Sin Herramientas');
@@ -242,8 +293,12 @@ export class DevolucionComponent implements OnInit {
   onHerramientaToggle(herramienta: HerramientaDevolucion): void {
     herramienta.selected = !herramienta.selected;
 
-    // If deselected, clear the fields
-    if (!herramienta.selected) {
+    // If selected, set default values
+    if (herramienta.selected) {
+      herramienta.estadoFisicoId = 1; // Default to "Excelente"
+      herramienta.observaciones = '';
+    } else {
+      // If deselected, clear the fields
       herramienta.estadoFisicoId = null;
       herramienta.observaciones = '';
     }
