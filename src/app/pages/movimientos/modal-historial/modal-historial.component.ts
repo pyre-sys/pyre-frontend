@@ -17,8 +17,8 @@ export class ModalHistorialComponent {
 
   constructor(private elementRef: ElementRef) { }
 
-  @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey(event: KeyboardEvent) {
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
     this.onClose();
   }
 
