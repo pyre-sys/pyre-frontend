@@ -23,6 +23,7 @@ interface HerramientaDevolucion {
   selected: boolean;
   estadoFisicoId: number | null;
   observaciones: string;
+  idObra?: number | null; // Agregar idObra para devoluciones de préstamo
 }
 
 type TipoOperacion = 'prestamo' | 'reparacion';
@@ -192,7 +193,8 @@ export class DevolucionComponent implements OnInit {
                   observacionesPrestamo: movimiento.observaciones || item.observaciones,
                   selected: false,
                   estadoFisicoId: item.estadoFisicoId || 1,
-                  observaciones: ''
+                  observaciones: '',
+                  idObra: movimiento.idObra || item.idObra || null // Capturar idObra del último movimiento
                 };
               })
               .catch(() => {
@@ -208,7 +210,8 @@ export class DevolucionComponent implements OnInit {
                   observacionesPrestamo: item.observaciones,
                   selected: false,
                   estadoFisicoId: item.estadoFisicoId || 1,
-                  observaciones: ''
+                  observaciones: '',
+                  idObra: item.idObra || null
                 };
               })
           );
@@ -253,7 +256,8 @@ export class DevolucionComponent implements OnInit {
                   observacionesPrestamo: movimiento.observaciones || item.observaciones,
                   selected: false,
                   estadoFisicoId: item.estadoFisicoId || 1,
-                  observaciones: ''
+                  observaciones: '',
+                  idObra: null // Para reparaciones no se usa idObra
                 };
               })
               .catch(() => {
@@ -268,7 +272,8 @@ export class DevolucionComponent implements OnInit {
                   observacionesPrestamo: item.observaciones,
                   selected: false,
                   estadoFisicoId: item.estadoFisicoId || 1,
-                  observaciones: ''
+                  observaciones: '',
+                  idObra: null
                 };
               })
           );
@@ -413,14 +418,16 @@ export class DevolucionComponent implements OnInit {
           ...baseMovimiento,
           idUsuarioResponsable: this.selectedUsuarioInfo!.id,
           idTipoMovimiento: 2, // Devolución de préstamo
-          idProveedor: null
+          idProveedor: null,
+          idObra: herramienta.idObra || null // Incluir idObra del último movimiento de préstamo
         };
       } else {
         return {
           ...baseMovimiento,
           idUsuarioResponsable: null,
           idTipoMovimiento: 2, // Devolución de reparación
-          idProveedor: this.selectedProveedorInfo!.idProveedor
+          idProveedor: this.selectedProveedorInfo!.idProveedor,
+          idObra: null // Para reparaciones no se incluye idObra
         };
       }
     });
