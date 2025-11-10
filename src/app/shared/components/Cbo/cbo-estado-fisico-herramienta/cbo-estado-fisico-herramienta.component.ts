@@ -1,7 +1,27 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, forwardRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnDestroy,
+  forwardRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR, FormControl } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, switchMap, catchError, of, Subject } from 'rxjs';
+import {
+  FormsModule,
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+  FormControl,
+} from '@angular/forms';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  catchError,
+  of,
+  Subject,
+} from 'rxjs';
 import { EstadoFisicoHerramientaService } from '../../../../services/estado-fisico-herramienta.service';
 
 @Component({
@@ -14,11 +34,13 @@ import { EstadoFisicoHerramientaService } from '../../../../services/estado-fisi
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CboEstadoFisicoHerramientaComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
-export class CboEstadoFisicoHerramientaComponent implements OnInit, OnDestroy, ControlValueAccessor {
+export class CboEstadoFisicoHerramientaComponent
+  implements OnInit, OnDestroy, ControlValueAccessor
+{
   @Input() isLabel: string = '';
   @Input() isId: string = 'estado-fisico-select';
   @Input() isDisabled: boolean = false;
@@ -29,6 +51,8 @@ export class CboEstadoFisicoHerramientaComponent implements OnInit, OnDestroy, C
 
   // Internal state
   estadosFisicos: any[] = [];
+  // Lista maestra para mantener los datos originales al filtrar
+  allEstadosFisicos: any[] = [];
   selectedEstadoFisico: any = null;
   searchControl = new FormControl('');
   isOpen = false; // Start collapsed
@@ -36,10 +60,10 @@ export class CboEstadoFisicoHerramientaComponent implements OnInit, OnDestroy, C
   placeholder = 'Seleccionar estado físico...';
 
   private destroy$ = new Subject<void>();
-  private onChange = (value: any) => { };
-  private onTouched = () => { };
+  private onChange = (value: any) => {};
+  private onTouched = () => {};
 
-  constructor(private estadoFisicoService: EstadoFisicoHerramientaService) { }
+  constructor(private estadoFisicoService: EstadoFisicoHerramientaService) {}
 
   ngOnInit(): void {
     this.setupSearch();
@@ -53,10 +77,41 @@ export class CboEstadoFisicoHerramientaComponent implements OnInit, OnDestroy, C
 
   // ControlValueAccessor implementation
   writeValue(value: any): void {
-    if (value && value !== this.selectedEstadoFisico) {
-      this.selectedEstadoFisico = value;
+    // Aceptar id (number) o objeto; comparar por id para evitar problemas de referencia
+    if (!value) {
+      this.selectedEstadoFisico = null;
       this.updatePlaceholder();
+      return;
     }
+
+    const incomingId = value?.idEstadoFisico ?? value?.id ?? value;
+    const currentId =
+      this.selectedEstadoFisico?.idEstadoFisico ??
+      this.selectedEstadoFisico?.id ??
+      null;
+
+    if (incomingId === currentId) {
+      return; // nada que cambiar
+    }
+
+    // Intentar encontrar el objeto en la lista maestra
+    const found =
+      this.allEstadosFisicos.find(
+        (e) => (e.idEstadoFisico ?? e.id) === incomingId
+      ) ?? null;
+
+    if (found) {
+      this.selectedEstadoFisico = found;
+    } else {
+      // Si no lo encontramos, crear un objeto mínimo para mostrar algo razonable
+      this.selectedEstadoFisico = {
+        idEstadoFisico: incomingId,
+        descripcionEstado:
+          value?.descripcionEstado ?? value?.nombre ?? value?.descripcion ?? '',
+      };
+    }
+
+    this.updatePlaceholder();
   }
 
   registerOnChange(fn: any): void {
@@ -72,41 +127,60 @@ export class CboEstadoFisicoHerramientaComponent implements OnInit, OnDestroy, C
   }
 
   private setupSearch(): void {
-    this.searchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(searchTerm => {
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe((searchTerm) => {
         if (!searchTerm || searchTerm.length < 2) {
-          return of(this.estadosFisicos);
+          // Restaurar lista maestra si hay menos de 2 caracteres
+          this.isLoading = false;
+          this.estadosFisicos = [...this.allEstadosFisicos];
+          return;
         }
         this.isLoading = true;
-        return this.searchEstadosFisicos(searchTerm);
-      })
-    ).subscribe((estadosFisicos: any) => {
-      if (!this.searchControl.value || this.searchControl.value.length < 2) {
-        // Don't update if it's just the initial load
-      } else {
-        this.estadosFisicos = estadosFisicos || [];
-      }
-      this.isLoading = false;
-    });
+        const lower = searchTerm.toLowerCase();
+        this.estadosFisicos = this.allEstadosFisicos.filter((estado) => {
+          const desc = (
+            estado.descripcionEstado ??
+            estado.nombre ??
+            estado.descripcion ??
+            ''
+          )
+            .toString()
+            .toLowerCase();
+          return desc.includes(lower);
+        });
+        this.isLoading = false;
+      });
   }
 
   private searchEstadosFisicos(searchTerm: string) {
     return this.estadoFisicoService.getEstadosFisicos().pipe(
-      switchMap(response => {
+      switchMap((response) => {
         const rawList = response.data || [];
 
+        // Normalizar cada elemento a la forma esperada por el componente
+        const normalized = (rawList as any[]).map((e) => ({
+          // Priorizar propiedades ya existentes, luego caer en variantes comunes
+          idEstadoFisico: e.idEstadoFisico ?? e.id ?? e.idEstado ?? null,
+          descripcionEstado:
+            e.descripcionEstado ?? e.nombre ?? e.descripcion ?? '',
+          activo: e.activo ?? e.isActive ?? true,
+          // Mantener todo lo demás por si se necesita
+          ...e,
+        }));
+
         // Filter client-side by search term
-        const filteredList = rawList.filter((estadoFisico: any) => {
-          const descripcion = (estadoFisico.descripcionEstado || '').toLowerCase();
+        const filteredList = normalized.filter((estadoFisico: any) => {
+          const descripcion = (
+            estadoFisico.descripcionEstado || ''
+          ).toLowerCase();
           const searchLower = searchTerm.toLowerCase();
           return descripcion.includes(searchLower);
         });
 
         return of(filteredList);
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('Error searching estados físicos:', error);
         return of([]);
       })
@@ -115,15 +189,31 @@ export class CboEstadoFisicoHerramientaComponent implements OnInit, OnDestroy, C
 
   private loadEstadosFisicos(): void {
     this.isLoading = true;
-    this.estadoFisicoService.getEstadosFisicos().pipe(
-      catchError(error => {
-        console.error('Error loading estados físicos:', error);
-        return of({ data: [] });
-      })
-    ).subscribe((response: any) => {
-      this.estadosFisicos = response.data || [];
-      this.isLoading = false;
-    });
+    this.estadoFisicoService
+      .getEstadosFisicos()
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading estados físicos:', error);
+          return of({ data: [] });
+        })
+      )
+      .subscribe((response: any) => {
+        const raw = response.data || [];
+        // Normalizar y guardar lista maestra
+        this.allEstadosFisicos = (raw as any[]).map((e) => ({
+          idEstadoFisico: e.idEstadoFisico ?? e.id ?? e.idEstado ?? null,
+          descripcionEstado:
+            e.descripcionEstado ?? e.nombre ?? e.descripcion ?? '',
+          activo: e.activo ?? e.isActive ?? true,
+          ...e,
+        }));
+        // Aplicar filtro showOnlyActive si corresponde
+        this.estadosFisicos = this.showOnlyActive
+          ? this.allEstadosFisicos.filter((e) => e.activo !== false)
+          : [...this.allEstadosFisicos];
+
+        this.isLoading = false;
+      });
   }
 
   onMainInputClick(): void {
@@ -180,12 +270,14 @@ export class CboEstadoFisicoHerramientaComponent implements OnInit, OnDestroy, C
   }
 
   onOptionClick(estadoFisico: any): void {
+    // Asegurarse de usar el objeto normalizado (está en estadosFisicos)
     this.selectedEstadoFisico = estadoFisico;
     this.isOpen = false;
     this.updatePlaceholder();
 
-    // Emit events
+    // Emit events: emitir objeto completo con idEstadoFisico y descripcion
     this.estadoFisicoSelected.emit(estadoFisico);
+    // Notificar a Angular forms con el id o el objeto según preferencia (usamos objeto completo)
     this.onChange(estadoFisico);
     this.onTouched();
   }
@@ -193,6 +285,8 @@ export class CboEstadoFisicoHerramientaComponent implements OnInit, OnDestroy, C
   clearSelection(): void {
     this.selectedEstadoFisico = null;
     this.searchControl.setValue('');
+    // Restaurar lista maestra
+    this.estadosFisicos = [...this.allEstadosFisicos];
     this.updatePlaceholder();
 
     // Emit events
@@ -203,14 +297,17 @@ export class CboEstadoFisicoHerramientaComponent implements OnInit, OnDestroy, C
 
   private updatePlaceholder(): void {
     if (this.selectedEstadoFisico) {
-      this.placeholder = this.selectedEstadoFisico.descripcionEstado || 'Estado físico seleccionado';
+      this.placeholder =
+        this.selectedEstadoFisico.descripcionEstado ||
+        this.selectedEstadoFisico.nombre ||
+        'Estado físico seleccionado';
     } else {
       this.placeholder = 'Seleccionar estado físico...';
     }
   }
 
   trackByEstadoFisico(index: number, estadoFisico: any): any {
-    return estadoFisico.idEstadoFisico || index;
+    return estadoFisico.idEstadoFisico ?? estadoFisico.id ?? index;
   }
 
   hasErrors(): boolean {

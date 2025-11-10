@@ -11,7 +11,7 @@ export class HerramientaService {
   private baseUrl =
     (environment?.apiUrl ? environment.apiUrl : '') + '/Herramienta';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   /**
    * Obtiene herramientas paginadas y opcionalmente filtradas.
@@ -222,7 +222,8 @@ export class HerramientaService {
       costoDolares = isNaN(valorNumerico) ? 0 : valorNumerico;
     }
 
-    return {
+    // Construir payload sin forzar idDisponibilidad ni activo por defecto
+    const payload: any = {
       idHerramienta: id,
       codigo: formData.codigo ?? '',
       nombreHerramienta:
@@ -246,25 +247,46 @@ export class HerramientaService {
         formData.Ubicacion ||
         formData.ubicacion ||
         '',
-      idEstadoFisico: this.mapEstadoFisicoToId(
-        formData.estadoFisico || formData.EstadoFisico || ''
-      ),
+      idEstadoFisico:
+        formData.EstadoFisico?.idEstadoFisico || formData.idEstadoFisico || 1,
       idPlanta: formData.idPlanta || formData.IdPlanta || 1,
       ubicacion: formData.ubicacion || formData.Ubicacion || '',
-      activo:
-        formData.activo !== undefined
-          ? formData.activo
-          : formData.Activo !== undefined
-            ? formData.Activo
-            : true,
-      idDisponibilidad: this.mapDisponibilidadToId(
-        formData.idDisponibilidad ||
-        formData.Disponibilidad ||
-        formData.disponibilidad ||
-        formData.estadoDisponibilidad ||
-        ''
-      ),
+      // activo y idDisponibilidad se añaden condicionalmente más abajo
     };
+
+    // Añadir 'activo' solo si viene explícito en formData (evita sobrescribir sin querer)
+    if (formData.activo !== undefined) {
+      payload.activo = formData.activo;
+    } else if (formData.Activo !== undefined) {
+      payload.activo = formData.Activo;
+    }
+
+    // Añadir idDisponibilidad sólo si se proporciona algún indicio en formData
+    const providedDisponibilidad =
+      formData.idDisponibilidad !== undefined &&
+      formData.idDisponibilidad !== null &&
+      formData.idDisponibilidad !== ''
+        ? formData.idDisponibilidad
+        : formData.IdDisponibilidad !== undefined &&
+          formData.IdDisponibilidad !== null &&
+          formData.IdDisponibilidad !== ''
+        ? formData.IdDisponibilidad
+        : formData.disponibilidad ||
+          formData.Disponibilidad ||
+          formData.estadoDisponibilidad ||
+          null;
+
+    if (
+      providedDisponibilidad !== null &&
+      providedDisponibilidad !== undefined &&
+      providedDisponibilidad !== ''
+    ) {
+      payload.idDisponibilidad = this.mapDisponibilidadToId(
+        providedDisponibilidad
+      );
+    }
+
+    return payload;
   }
 
   /**
@@ -285,29 +307,46 @@ export class HerramientaService {
   /**
    * Mapea el nombre de la disponibilidad a su ID correspondiente
    */
-  private mapDisponibilidadToId(disponibilidad: string): number {
+  private mapDisponibilidadToId(disponibilidad: any): number {
+    // Si nos pasan un número, devolverlo si es válido
+    if (
+      typeof disponibilidad === 'number' &&
+      Number.isInteger(disponibilidad)
+    ) {
+      const n = disponibilidad as number;
+      if (n >= 1 && n <= 5) return n;
+    }
+
+    const disponibilidadStr = (disponibilidad ?? '').toString().trim();
+
     const disponibilidadMap: { [key: string]: number } = {
       Disponible: 1,
       Prestada: 2,
       Mantenimiento: 3,
       Extraviada: 4,
+      Bloqueada: 5,
       // Mapeos adicionales para asegurar compatibilidad con diferentes nombres
       'No disponible': 2,
       'En mantenimiento': 3,
+      bloqueada: 5,
+      bloqueado: 5,
     };
 
-    return disponibilidadMap[disponibilidad] || 1; // Por defecto Disponible (1) si no se encuentra
+    // Buscar por coincidencia exacta (cuidado con mayúsculas/minúsculas)
+    if (disponibilidadMap[disponibilidadStr])
+      return disponibilidadMap[disponibilidadStr];
+
+    // Intentar normalizar por contenido (case-insensitive)
+    const lower = disponibilidadStr.toLowerCase();
+    if (lower.includes('prest')) return 2;
+    if (lower.includes('manten')) return 3;
+    if (lower.includes('extra')) return 4;
+    if (lower.includes('bloque')) return 5;
+    if (lower.includes('disp')) return 1;
+
+    return 1; // Por defecto Disponible (1) si no se encuentra
   }
 
-  deleteTool(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${id}`);
-  }
-
-  /**
-   * Actualiza el estado activo de una herramienta
-   * @param id ID de la herramienta
-   * @param activo Nuevo estado (true=activo, false=inactivo)
-   */
   updateToolStatus(id: number, activo: boolean): Observable<any> {
     const url = `${this.baseUrl}/status`;
     const data = {
@@ -335,6 +374,10 @@ export class HerramientaService {
       );
   }
 
+  deleteTool(id: number): Observable<any> {
+    return this.updateToolStatus(id, false); // Cambiamos el estado a inactivo
+  }
+
   /**
    * @deprecated Use updateToolStatus instead
    */
@@ -344,6 +387,26 @@ export class HerramientaService {
     );
     const url = `${this.baseUrl}/${id}/toggle-activo`;
     return this.http.patch(url, null);
+  }
+
+  /**
+   * Alterna bloqueo/desbloqueo de la herramienta en el backend.
+   * Endpoint: PUT /api/Herramienta/bloqueo/toggle/{id}
+   */
+  toggleBloqueo(id: number): Observable<any> {
+    const url = `${this.baseUrl}/bloqueo/toggle/${id}`;
+    console.debug('[HerramientaService] toggleBloqueo:', id);
+    return this.http
+      .put(url, null, { headers: { 'Content-Type': 'application/json' } })
+      .pipe(
+        tap((resp) =>
+          console.debug('[HerramientaService] toggleBloqueo response:', resp)
+        ),
+        catchError((err) => {
+          console.error('[HerramientaService] toggleBloqueo error:', err);
+          throw err;
+        })
+      );
   }
 
   // Endpoints adicionales
@@ -387,27 +450,41 @@ export class HerramientaService {
   }
 
   // [HttpGet("prestamo/usuario/{idUsuarioResponsable}")]
-  getHerramientasEnPrestamoByUsuario(idUsuarioResponsable: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/prestamo/usuario/${idUsuarioResponsable}`);
+  getHerramientasEnPrestamoByUsuario(
+    idUsuarioResponsable: number
+  ): Observable<any> {
+    return this.http.get<any>(
+      `${this.baseUrl}/prestamo/usuario/${idUsuarioResponsable}`
+    );
   }
 
   // [HttpGet("reparacion/proveedor/{idProveedor}")]
   getHerramientasEnReparacionByProveedor(idProveedor: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/reparacion/proveedor/${idProveedor}`);
+    return this.http.get<any>(
+      `${this.baseUrl}/reparacion/proveedor/${idProveedor}`
+    );
   }
 
   // [HttpGet("estado-fisico/{estadoFisicoId}")]
   getHerramientasPorEstadoFisico(estadoFisicoId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/estado-fisico/${estadoFisicoId}`);
+    return this.http.get<any>(
+      `${this.baseUrl}/estado-fisico/${estadoFisicoId}`
+    );
   }
 
   // [HttpGet("count-herramientas-by-estado-fisico/{estadoFisicoId}")]
   getCountHerramientasByEstadoFisico(estadoFisicoId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/count-herramientas-by-estado-fisico/${estadoFisicoId}`);
+    return this.http.get<any>(
+      `${this.baseUrl}/count-herramientas-by-estado-fisico/${estadoFisicoId}`
+    );
   }
 
   // [HttpGet("count-herramientas-by-disponibilidad/{disponibilidadId}")]
-  getCountHerramientasByDisponibilidad(disponibilidadId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/count-herramientas-by-disponibilidad/${disponibilidadId}`);
+  getCountHerramientasByDisponibilidad(
+    disponibilidadId: number
+  ): Observable<any> {
+    return this.http.get<any>(
+      `${this.baseUrl}/count-herramientas-by-disponibilidad/${disponibilidadId}`
+    );
   }
 }

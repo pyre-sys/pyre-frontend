@@ -22,6 +22,7 @@ import {
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../services/alerta.service';
 import { CboFamiliaHerramientaComponent } from '../../../shared/components/Cbo/cbo-familia-herramienta/cbo-familia-herramienta.component';
+import { CboEstadoFisicoHerramientaComponent } from '../../../shared/components/Cbo/cbo-estado-fisico-herramienta/cbo-estado-fisico-herramienta.component';
 
 @Component({
   selector: 'app-herramientas-modal',
@@ -30,7 +31,8 @@ import { CboFamiliaHerramientaComponent } from '../../../shared/components/Cbo/c
     CommonModule,
     ReactiveFormsModule,
     NgbTooltipModule,
-    CboFamiliaHerramientaComponent, // Ensure the component is imported
+    CboFamiliaHerramientaComponent,
+    CboEstadoFisicoHerramientaComponent, // Asegurar que esté incluido
   ],
   templateUrl: './modal-herramienta.component.html',
   styleUrls: ['./modal-herramienta.component.css'],
@@ -66,7 +68,7 @@ export class HerramientasModalComponent
   ) {}
 
   @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey(event: KeyboardEvent) {
+  onEscapeKey(event: Event | KeyboardEvent) {
     this.onCancel();
   }
 
@@ -93,6 +95,11 @@ export class HerramientasModalComponent
       this.mode = changes['mode'].currentValue || 'create';
       this.editingEnabled = this.mode !== 'edit';
       this.setControlsDisabled(!this.editingEnabled);
+    }
+    if (changes['mode'] && this.mode === 'create') {
+      this.form.patchValue({
+        EstadoFisico: { idEstadoFisico: 1, descripcionEstado: 'EXCELENTE' },
+      });
     }
   }
 
@@ -147,6 +154,12 @@ export class HerramientasModalComponent
       UbicacionFisica: ['', [Validators.maxLength(150)]],
       Activo: [true],
       Codigo: ['', [Validators.maxLength(50)]], // Agregar el campo Codigo
+      EstadoFisico: [
+        this.mode === 'create'
+          ? { idEstadoFisico: 1, descripcionEstado: 'EXCELENTE' }
+          : '',
+        [Validators.required],
+      ], // Agregar el campo EstadoFisico
     });
   }
 
@@ -197,6 +210,8 @@ export class HerramientasModalComponent
       activo: formValue.Activo !== undefined ? formValue.Activo : true,
       idDisponibilidad: 1, // Campo obligatorio con valor predeterminado
       diasAlerta: 5, // Valor predeterminado
+      idEstadoFisico:
+        formValue.EstadoFisico?.idEstadoFisico || formValue.EstadoFisico, // Validar idEstadoFisico
     };
 
     // Si estamos en modo edición, agregar el ID de la herramienta
@@ -210,6 +225,7 @@ export class HerramientasModalComponent
       idHerramienta: this.toolId,
       valorOriginal: formValue.Valor,
       costoDolaresCalculado: costoDolares,
+      idEstadoFisico: payload.idEstadoFisico, // Log del idEstadoFisico
       payloadCompleto: payload,
     });
 
@@ -257,6 +273,10 @@ export class HerramientasModalComponent
       UbicacionFisica: data?.ubicacionFisica ?? '',
       Activo: data?.activo ?? true,
       Codigo: data?.codigo ?? '', // Mapear el campo Codigo
+      EstadoFisico: {
+        idEstadoFisico: data?.idEstadoFisico ?? null,
+        descripcionEstado: data?.estadoFisico ?? '',
+      },
     };
 
     console.debug(

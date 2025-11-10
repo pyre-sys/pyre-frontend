@@ -110,6 +110,23 @@
             </div>
           </div>
 
+          <div class="field-group" *ngIf="mode !== 'create'">
+            <label>Estado Físico</label>
+            <app-cbo-estado-fisico-herramienta
+              formControlName="EstadoFisico"
+              [isDisabled]="!editingEnabled"
+            ></app-cbo-estado-fisico-herramienta>
+            <div
+              *ngIf="
+                form.get('EstadoFisico')?.invalid &&
+                form.get('EstadoFisico')?.touched
+              "
+              class="error-text"
+            >
+              Selecciona un estado físico
+            </div>
+          </div>
+
           <div class="field-group">
             <label>Ubicación Física</label>
             <input

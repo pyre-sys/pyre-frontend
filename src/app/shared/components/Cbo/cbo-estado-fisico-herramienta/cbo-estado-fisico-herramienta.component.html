@@ -1,74 +1,115 @@
 <div class="cbo-wrapper">
-    <!-- Conditional Label -->
-    <label *ngIf="isLabel" [for]="isId" class="form-label">
-        {{ isLabel }}
-        <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
-    </label>
+  <!-- Etiqueta condicional -->
+  <label *ngIf="isLabel" [for]="isId" class="form-label">
+    {{ isLabel }}
+    <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
+  </label>
 
-    <!-- Search input container -->
-    <div class="search-container" [class.has-error]="hasErrors()" [class.is-expanded]="isOpen">
-        <div class="search-input-group">
-            <!-- Main input - readonly when collapsed, editable when expanded -->
-            <input [id]="isId" [value]="isOpen ? (searchControl.value || '') : placeholder" [disabled]="isDisabled"
-                [readonly]="!isOpen" [class.error]="hasErrors()" class="search-input" (click)="onMainInputClick()"
-                (focus)="onMainInputFocus()" (blur)="onMainInputBlur()" (input)="onMainInputChange($event)"
-                autocomplete="off" />
+  <!-- Contenedor de búsqueda -->
+  <div
+    class="search-container"
+    [class.has-error]="hasErrors()"
+    [class.is-expanded]="isOpen"
+  >
+    <div class="search-input-group">
+      <!-- Input principal -->
+      <input
+        [id]="isId"
+        [value]="isOpen ? searchControl.value || '' : placeholder"
+        [disabled]="isDisabled"
+        [readonly]="!isOpen"
+        [class.error]="hasErrors()"
+        class="search-input"
+        (click)="onMainInputClick()"
+        (focus)="onMainInputFocus()"
+        (blur)="onMainInputBlur()"
+        (input)="onMainInputChange($event)"
+        autocomplete="off"
+      />
 
-            <!-- Clear button -->
-            <button *ngIf="selectedEstadoFisico && !isDisabled && isOpen" type="button" class="clear-button"
-                (click)="clearSelection()" title="Limpiar selección">
-                <i class="pi pi-times"></i>
-            </button>
+      <!-- Botón para limpiar selección -->
+      <button
+        *ngIf="selectedEstadoFisico && !isDisabled && isOpen"
+        type="button"
+        class="clear-button"
+        (click)="clearSelection()"
+        title="Limpiar selección"
+      >
+        <i class="pi pi-times"></i>
+      </button>
 
-            <!-- Loading spinner -->
-            <div *ngIf="isLoading" class="loading-spinner">
-                <i class="pi pi-spinner pi-spin"></i>
-            </div>
-
-            <!-- Dropdown arrow -->
-            <div *ngIf="!isLoading" class="dropdown-arrow" (click)="toggleDropdown($event)">
-                <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
-            </div>
-        </div>
-
-        <!-- Dropdown options -->
-        <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
-            <div class="dropdown-content">
-                <!-- No results message -->
-                <div *ngIf="estadosFisicos.length === 0 && !isLoading" class="no-results">
-                    <span *ngIf="searchControl.value && searchControl.value.length < 2">
-                        Ingrese al menos 2 caracteres para buscar
-                    </span>
-                    <span *ngIf="searchControl.value && searchControl.value.length >= 2">
-                        No se encontraron estados físicos
-                    </span>
-                    <span *ngIf="!searchControl.value">
-                        No hay estados físicos disponibles
-                    </span>
-                </div>
-
-                <!-- Options list -->
-                <div *ngFor="let estadoFisico of estadosFisicos; trackBy: trackByEstadoFisico" class="dropdown-option"
-                    [class.selected]="selectedEstadoFisico?.idEstadoFisico === estadoFisico.idEstadoFisico"
-                    (click)="onOptionClick(estadoFisico)">
-                    <div class="option-content">
-                        <div class="option-main">
-                            <span class="option-nombre">{{ estadoFisico.descripcionEstado }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Error message -->
-    <div *ngIf="hasErrors()" class="error-message">
-        {{ getErrorMessage() }}
-    </div>
-
-    <!-- Loading indicator -->
-    <div *ngIf="isLoading && !isOpen" class="loading-indicator">
+      <!-- Indicador de carga -->
+      <div *ngIf="isLoading" class="loading-spinner">
         <i class="pi pi-spinner pi-spin"></i>
-        <span>Cargando...</span>
+      </div>
+
+      <!-- Flecha del dropdown -->
+      <div
+        *ngIf="!isLoading"
+        class="dropdown-arrow"
+        (click)="toggleDropdown($event)"
+      >
+        <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
+      </div>
     </div>
+
+    <!-- Panel desplegable -->
+    <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
+      <div class="dropdown-content">
+        <!-- Mensaje de "sin resultados" -->
+        <div
+          *ngIf="estadosFisicos.length === 0 && !isLoading"
+          class="no-results"
+        >
+          <span *ngIf="searchControl.value && searchControl.value.length < 2">
+            Ingrese al menos 2 caracteres para buscar
+          </span>
+          <span *ngIf="searchControl.value && searchControl.value.length >= 2">
+            No se encontraron estados físicos
+          </span>
+          <span *ngIf="!searchControl.value">
+            No hay estados físicos disponibles
+          </span>
+        </div>
+
+        <!-- Lista de opciones -->
+        <div
+          *ngFor="
+            let estadoFisico of estadosFisicos;
+            trackBy: trackByEstadoFisico
+          "
+          class="dropdown-option"
+          [class.selected]="
+            (selectedEstadoFisico?.idEstadoFisico ??
+              selectedEstadoFisico?.id) ===
+            (estadoFisico.idEstadoFisico ?? estadoFisico.id)
+          "
+          (click)="onOptionClick(estadoFisico)"
+        >
+          <div class="option-content">
+            <div class="option-main">
+              <span class="option-nombre">
+                {{
+                  estadoFisico.descripcionEstado ||
+                    estadoFisico.nombre ||
+                    estadoFisico.descripcion
+                }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="hasErrors()" class="error-message">
+    {{ getErrorMessage() }}
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="isLoading && !isOpen" class="loading-indicator">
+    <i class="pi pi-spinner pi-spin"></i>
+    <span>Cargando...</span>
+  </div>
 </div>

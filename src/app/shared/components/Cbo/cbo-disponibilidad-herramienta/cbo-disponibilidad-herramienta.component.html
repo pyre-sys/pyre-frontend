@@ -1,75 +1,104 @@
 <div class="cbo-wrapper">
-    <!-- Conditional Label -->
-    <label *ngIf="isLabel" [for]="isId" class="form-label">
-        {{ isLabel }}
-        <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
-    </label>
+  <!-- Label -->
+  <label *ngIf="isLabel" [for]="isId" class="form-label">
+    {{ isLabel }}
+    <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
+  </label>
 
-    <!-- Search input container -->
-    <div class="search-container" [class.has-error]="hasErrors()" [class.is-expanded]="isOpen">
-        <div class="search-input-group">
-            <!-- Main input - readonly when collapsed, editable when expanded -->
-            <input [id]="isId" [value]="isOpen ? (searchControl.value || '') : placeholder" [disabled]="isDisabled"
-                [readonly]="!isOpen" [class.error]="hasErrors()" class="search-input" (click)="onMainInputClick()"
-                (focus)="onMainInputFocus()" (blur)="onMainInputBlur()" (input)="onMainInputChange($event)"
-                autocomplete="off" />
+  <!-- Search Container -->
+  <div
+    class="search-container"
+    [class.has-error]="hasErrors()"
+    [class.is-expanded]="isOpen"
+  >
+    <div class="search-input-group">
+      <!-- Input principal -->
+      <input
+        [id]="isId"
+        class="search-input"
+        [readonly]="!isOpen"
+        [disabled]="isDisabled"
+        [value]="isOpen ? searchControl.value || '' : placeholder"
+        (click)="onMainInputClick()"
+        (focus)="onMainInputFocus()"
+        (blur)="onMainInputBlur()"
+        (input)="onMainInputChange($event)"
+        [class.error]="hasErrors()"
+        autocomplete="off"
+      />
 
-            <!-- Clear button -->
-            <button *ngIf="selectedDisponibilidad && !isDisabled && isOpen" type="button" class="clear-button"
-                (click)="clearSelection()" title="Limpiar selección">
-                <i class="pi pi-times"></i>
-            </button>
+      <!-- Botón limpiar -->
+      <button
+        *ngIf="selectedDisponibilidad && !isDisabled && isOpen"
+        type="button"
+        class="clear-button"
+        (click)="clearSelection()"
+        title="Limpiar selección"
+      >
+        <i class="pi pi-times"></i>
+      </button>
 
-            <!-- Loading spinner -->
-            <div *ngIf="isLoading" class="loading-spinner">
-                <i class="pi pi-spinner pi-spin"></i>
-            </div>
-
-            <!-- Dropdown arrow -->
-            <div *ngIf="!isLoading" class="dropdown-arrow" (click)="toggleDropdown($event)">
-                <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
-            </div>
-        </div>
-
-        <!-- Dropdown options -->
-        <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
-            <div class="dropdown-content">
-                <!-- No results message -->
-                <div *ngIf="disponibilidades.length === 0 && !isLoading" class="no-results">
-                    <span *ngIf="searchControl.value && searchControl.value.length < 2">
-                        Ingrese al menos 2 caracteres para buscar
-                    </span>
-                    <span *ngIf="searchControl.value && searchControl.value.length >= 2">
-                        No se encontraron estados de disponibilidad
-                    </span>
-                    <span *ngIf="!searchControl.value">
-                        No hay estados disponibles
-                    </span>
-                </div>
-
-                <!-- Options list -->
-                <div *ngFor="let disponibilidad of disponibilidades; trackBy: trackByDisponibilidad"
-                    class="dropdown-option"
-                    [class.selected]="selectedDisponibilidad?.idEstadoDisponibilidad === disponibilidad.idEstadoDisponibilidad"
-                    (click)="onOptionClick(disponibilidad)">
-                    <div class="option-content">
-                        <div class="option-main">
-                            <span class="option-nombre">{{ disponibilidad.descripcionEstado }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Error message -->
-    <div *ngIf="hasErrors()" class="error-message">
-        {{ getErrorMessage() }}
-    </div>
-
-    <!-- Loading indicator -->
-    <div *ngIf="isLoading && !isOpen" class="loading-indicator">
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="loading-spinner">
         <i class="pi pi-spinner pi-spin"></i>
-        <span>Cargando...</span>
+      </div>
+
+      <!-- Flecha -->
+      <div class="dropdown-arrow" (click)="toggleDropdown($event)">
+        <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
+      </div>
     </div>
+
+    <!-- Panel desplegable -->
+    <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
+      <div class="dropdown-content">
+        <!-- Mensaje sin resultados -->
+        <div
+          *ngIf="disponibilidades.length === 0 && !isLoading"
+          class="no-results"
+        >
+          <span *ngIf="searchControl.value && searchControl.value.length < 2">
+            Ingrese al menos 2 caracteres para buscar
+          </span>
+          <span *ngIf="searchControl.value && searchControl.value.length >= 2">
+            No se encontraron estados de disponibilidad
+          </span>
+          <span *ngIf="!searchControl.value">No hay estados disponibles</span>
+        </div>
+
+        <!-- Opciones -->
+        <div
+          *ngFor="
+            let disponibilidad of disponibilidades;
+            trackBy: trackByDisponibilidad
+          "
+          class="dropdown-option"
+          [class.selected]="
+            selectedDisponibilidad?.idEstadoDisponibilidad ===
+            disponibilidad.idEstadoDisponibilidad
+          "
+          (click)="onOptionClick(disponibilidad)"
+        >
+          <div class="option-content">
+            <div class="option-main">
+              <span class="option-nombre">
+                {{ disponibilidad.descripcionEstado }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="hasErrors()" class="error-message">
+    {{ getErrorMessage() }}
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="isLoading && !isOpen" class="loading-indicator">
+    <i class="pi pi-spinner pi-spin"></i>
+    <span>Cargando...</span>
+  </div>
 </div>

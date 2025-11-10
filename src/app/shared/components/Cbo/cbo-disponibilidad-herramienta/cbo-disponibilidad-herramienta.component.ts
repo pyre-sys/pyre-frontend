@@ -1,7 +1,27 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, forwardRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnDestroy,
+  forwardRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR, FormControl } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, switchMap, catchError, of, Subject } from 'rxjs';
+import {
+  FormsModule,
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+  FormControl,
+} from '@angular/forms';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  catchError,
+  of,
+  Subject,
+} from 'rxjs';
 import { DisponibilidadHerramientaService } from '../../../../services/disponibilidad-herramienta.service';
 
 @Component({
@@ -14,32 +34,38 @@ import { DisponibilidadHerramientaService } from '../../../../services/disponibi
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CboDisponibilidadHerramientaComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
-export class CboDisponibilidadHerramientaComponent implements OnInit, OnDestroy, ControlValueAccessor {
+export class CboDisponibilidadHerramientaComponent
+  implements OnInit, OnDestroy, ControlValueAccessor
+{
   @Input() isLabel: string = '';
-  @Input() isId: string = 'disponibilidad-select';
+  @Input() isId: string = 'disponibilidad-herramienta-select';
   @Input() isDisabled: boolean = false;
   @Input() showOnlyActive: boolean = true;
   @Input() objectErrors: any = null;
+  @Input() selectedDisponibilidad: any; // Nueva entrada para soportar el binding
 
   @Output() disponibilidadSelected = new EventEmitter<any>();
+  @Output() selectedDisponibilidadChange = new EventEmitter<any>(); // Para soportar two-way binding
 
   // Internal state
   disponibilidades: any[] = [];
-  selectedDisponibilidad: any = null;
   searchControl = new FormControl('');
   isOpen = false;
   isLoading = false;
-  placeholder = 'Seleccionar disponibilidad...';
+  placeholder = 'Disponibilidad';
 
   private destroy$ = new Subject<void>();
-  private onChange = (value: any) => { };
-  private onTouched = () => { };
+  private onChange = (value: any) => {};
+  private onTouched = () => {};
+  private isDataLoaded = false; // evita llamadas redundantes
 
-  constructor(private disponibilidadService: DisponibilidadHerramientaService) { }
+  constructor(
+    private disponibilidadService: DisponibilidadHerramientaService
+  ) {}
 
   ngOnInit(): void {
     this.setupSearch();
@@ -72,41 +98,39 @@ export class CboDisponibilidadHerramientaComponent implements OnInit, OnDestroy,
   }
 
   private setupSearch(): void {
-    this.searchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(searchTerm => {
-        if (!searchTerm || searchTerm.length < 2) {
-          return of(this.disponibilidades);
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((searchTerm) => {
+          if (!searchTerm || searchTerm.length < 2) {
+            return of(this.disponibilidades);
+          }
+          this.isLoading = true;
+          return this.searchDisponibilidades(searchTerm);
+        })
+      )
+      .subscribe((disponibilidades: any) => {
+        if (this.searchControl.value && this.searchControl.value.length >= 2) {
+          this.disponibilidades = disponibilidades || [];
         }
-        this.isLoading = true;
-        return this.searchDisponibilidades(searchTerm);
-      })
-    ).subscribe((disponibilidades: any) => {
-      if (!this.searchControl.value || this.searchControl.value.length < 2) {
-        // Don't update if it's just the initial load
-      } else {
-        this.disponibilidades = disponibilidades || [];
-      }
-      this.isLoading = false;
-    });
+        this.isLoading = false;
+      });
   }
 
   private searchDisponibilidades(searchTerm: string) {
     return this.disponibilidadService.getDisponibilidades().pipe(
-      switchMap(response => {
+      switchMap((response) => {
         const rawList = response.data || [];
 
-        // Filter client-side by search term
-        const filteredList = rawList.filter((disponibilidad: any) => {
-          const descripcion = (disponibilidad.descripcionEstado || '').toLowerCase();
-          const searchLower = searchTerm.toLowerCase();
-          return descripcion.includes(searchLower);
+        const filteredList = rawList.filter((disp: any) => {
+          const descripcion = (disp.descripcionEstado || '').toLowerCase();
+          return descripcion.includes(searchTerm.toLowerCase());
         });
 
         return of(filteredList);
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('Error searching disponibilidades:', error);
         return of([]);
       })
@@ -114,21 +138,27 @@ export class CboDisponibilidadHerramientaComponent implements OnInit, OnDestroy,
   }
 
   private loadDisponibilidades(): void {
+    if (this.isDataLoaded) return;
+
     this.isLoading = true;
-    this.disponibilidadService.getDisponibilidades().pipe(
-      catchError(error => {
-        console.error('Error loading disponibilidades:', error);
-        return of({ data: [] });
-      })
-    ).subscribe((response: any) => {
-      this.disponibilidades = response.data || [];
-      this.isLoading = false;
-    });
+    this.disponibilidadService
+      .getDisponibilidades()
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading disponibilidades:', error);
+          return of({ data: [] });
+        })
+      )
+      .subscribe((response: any) => {
+        this.disponibilidades = response.data || [];
+        this.isLoading = false;
+        this.isDataLoaded = true;
+      });
   }
 
   onMainInputClick(): void {
     if (!this.isDisabled) {
-      this.toggleDropdown();
+      this.openDropdown();
     }
   }
 
@@ -153,6 +183,18 @@ export class CboDisponibilidadHerramientaComponent implements OnInit, OnDestroy,
     this.searchControl.setValue(target.value);
   }
 
+  private openDropdown(): void {
+    if (!this.isDataLoaded) {
+      this.loadDisponibilidades();
+    }
+    this.isOpen = true;
+  }
+
+  private closeDropdown(): void {
+    this.isOpen = false;
+    this.updatePlaceholder();
+  }
+
   toggleDropdown(event?: Event): void {
     if (event) {
       event.preventDefault();
@@ -171,10 +213,10 @@ export class CboDisponibilidadHerramientaComponent implements OnInit, OnDestroy,
 
   onOptionClick(disponibilidad: any): void {
     this.selectedDisponibilidad = disponibilidad;
+    this.selectedDisponibilidadChange.emit(disponibilidad); // Emitir el cambio
     this.isOpen = false;
     this.updatePlaceholder();
 
-    // Emit events
     this.disponibilidadSelected.emit(disponibilidad);
     this.onChange(disponibilidad);
     this.onTouched();
@@ -182,10 +224,10 @@ export class CboDisponibilidadHerramientaComponent implements OnInit, OnDestroy,
 
   clearSelection(): void {
     this.selectedDisponibilidad = null;
+    this.selectedDisponibilidadChange.emit(null); // Emitir el cambio
     this.searchControl.setValue('');
     this.updatePlaceholder();
 
-    // Emit events
     this.disponibilidadSelected.emit(null);
     this.onChange(null);
     this.onTouched();
@@ -193,9 +235,11 @@ export class CboDisponibilidadHerramientaComponent implements OnInit, OnDestroy,
 
   private updatePlaceholder(): void {
     if (this.selectedDisponibilidad) {
-      this.placeholder = this.selectedDisponibilidad.descripcionEstado || 'Disponibilidad seleccionada';
+      this.placeholder =
+        this.selectedDisponibilidad.descripcionEstado ||
+        'Disponibilidad seleccionada';
     } else {
-      this.placeholder = 'Seleccionar disponibilidad...';
+      this.placeholder = 'Disponibilidad';
     }
   }
 
