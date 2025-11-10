@@ -1,35 +1,38 @@
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  forwardRef,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  FormsModule,
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-cbo-estado',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule
-  ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cbo-estado.component.html',
   styleUrls: ['./cbo-estado.component.css'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CboEstadoComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
-export class CboEstadoComponent implements ControlValueAccessor {
-
-  // ControlValueAccessor callbacks
-  private onChange = (value: any) => { };
-  private onTouched = () => { };
-
+export class CboEstadoComponent implements ControlValueAccessor, OnInit {
   // Component inputs
   @Input() isLabel: string = '';
   @Input() isId: string = '';
   @Input() isDisabled: boolean = false;
-  @Input() placeholder: string = 'Todos los estados';
+  @Input() placeholder: string = 'Estados';
   @Input() objectErrors: any = null;
   @Input() isTouched: boolean = false;
 
@@ -39,14 +42,83 @@ export class CboEstadoComponent implements ControlValueAccessor {
 
   // Component state
   selectedEstado: string = '';
+  isOpen: boolean = false;
+  isLoading: boolean = false;
 
-  onSelectionChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.selectedEstado = target.value;
+  // Opciones fijas
+  opciones = [
+    { value: 'activo', label: 'Activo' },
+    { value: 'inactivo', label: 'Inactivo' },
+  ];
+
+  // ControlValueAccessor callbacks
+  private onChange = (value: any) => {};
+  private onTouched = () => {};
+
+  ngOnInit(): void {
+    // nada extra por ahora
+  }
+
+  // Helpers para template
+  displayLabel(value: string | null): string {
+    if (!value) return '';
+    const item = this.opciones.find((o) => o.value === value);
+    return item ? item.label : String(value);
+  }
+
+  trackByOption(index: number, item: any): any {
+    return item.value ?? index;
+  }
+
+  // Apertura / cierre del dropdown
+  onMainInputClick(): void {
+    if (!this.isDisabled) {
+      this.toggleDropdown();
+    }
+  }
+
+  onMainInputFocus(): void {
+    if (!this.isDisabled && !this.isOpen) this.isOpen = true;
+  }
+
+  onMainInputBlur(): void {
+    // pequeño delay para permitir click en opciones
+    setTimeout(() => {
+      if (this.isOpen) {
+        this.isOpen = false;
+        this.emitTouched();
+      }
+    }, 150);
+  }
+
+  toggleDropdown(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (this.isDisabled) return;
+    this.isOpen = !this.isOpen;
+  }
+
+  onOptionClick(opt: { value: string; label: string }): void {
+    this.selectedEstado = opt.value;
+    this.isOpen = false;
+
+    // Notificar ControlValueAccessor (ngModel)
+    this.onChange(this.selectedEstado);
+    this.onTouched();
+
+    // Outputs
+    this.isEmiterTouched.emit(true);
+    this.estadoSelected.emit(this.selectedEstado);
+  }
+
+  clearSelection(): void {
+    this.selectedEstado = '';
     this.onChange(this.selectedEstado);
     this.onTouched();
     this.isEmiterTouched.emit(true);
-    this.estadoSelected.emit(this.selectedEstado);
+    this.estadoSelected.emit(null);
   }
 
   // ControlValueAccessor implementation
@@ -66,9 +138,17 @@ export class CboEstadoComponent implements ControlValueAccessor {
     this.isDisabled = isDisabled;
   }
 
-  // Helper methods for template
+  private emitTouched(): void {
+    this.onTouched();
+    this.isEmiterTouched.emit(true);
+  }
+
+  // Validaciones / mensajes
   hasErrors(): boolean {
-    return !!(this.objectErrors && (this.isTouched || this.selectedEstado !== null));
+    return !!(
+      this.objectErrors &&
+      (this.isTouched || this.selectedEstado !== null)
+    );
   }
 
   getErrorMessage(): string {

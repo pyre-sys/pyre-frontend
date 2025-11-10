@@ -1,27 +1,91 @@
-<div class="form-group">
+<div class="cbo-wrapper">
+  <!-- Label -->
   <label *ngIf="isLabel" [for]="isId" class="form-label">
     {{ isLabel }}
     <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
   </label>
 
-  <select
-    [id]="isId"
-    [(ngModel)]="selectedRolId"
-    class="form-select"
-    [disabled]="isDisabled"
-  (change)="onSelectionChange()"
-    [class.is-invalid]="hasErrors()">
+  <div
+    class="search-container"
+    [class.has-error]="hasErrors()"
+    [class.is-expanded]="isOpen"
+  >
+    <div class="search-input-group">
+      <!-- Main input: muestra nombre del rol o placeholder -->
+      <input
+        [id]="isId"
+        class="search-input"
+        [readonly]="!isOpen"
+        [disabled]="isDisabled"
+        [value]="
+          isOpen
+            ? searchControl.value || selectedRolName() || ''
+            : selectedRolName() || placeholder
+        "
+        (click)="onMainInputClick()"
+        (focus)="onMainInputFocus()"
+        (blur)="onMainInputBlur()"
+        (input)="onMainInputChange($event)"
+        [class.error]="hasErrors()"
+        autocomplete="off"
+      />
 
-    <!-- Opción por defecto -->
-    <option [ngValue]="null">{{ placeholder }}</option>
+      <!-- Clear button -->
+      <button
+        *ngIf="selectedRolId !== null && !isDisabled && isOpen"
+        type="button"
+        class="clear-button"
+        (click)="clearSelection()"
+        title="Limpiar selección"
+      >
+        <i class="pi pi-times"></i>
+      </button>
 
-    <!-- Opciones dinámicas -->
-    <option *ngFor="let rol of roles" [ngValue]="rol.idRol">
-      {{ rol.nombreRol }}
-    </option>
-  </select>
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="loading-spinner">
+        <i class="pi pi-spinner pi-spin"></i>
+      </div>
 
-  <div *ngIf="hasErrors()" class="invalid-feedback">
+      <!-- Arrow -->
+      <div class="dropdown-arrow" (click)="toggleDropdown($event)">
+        <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
+      </div>
+    </div>
+
+    <!-- Dropdown panel -->
+    <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
+      <div class="dropdown-content">
+        <div *ngIf="roles.length === 0 && !isLoading" class="no-results">
+          <span *ngIf="searchControl.value && searchControl.value.length < 2">
+            Ingrese al menos 2 caracteres para buscar
+          </span>
+          <span *ngIf="searchControl.value && searchControl.value.length >= 2">
+            No se encontraron roles
+          </span>
+          <span *ngIf="!searchControl.value">No hay roles disponibles</span>
+        </div>
+
+        <div
+          *ngFor="let rol of roles; trackBy: trackByRol"
+          class="dropdown-option"
+          [class.selected]="rol.idRol === selectedRolId"
+          (click)="onOptionClick(rol)"
+        >
+          <div class="option-content">
+            <div class="option-main">
+              <span class="option-nombre">{{ rol.nombreRol }}</span>
+            </div>
+            <div class="option-details" *ngIf="rol.descripcion">
+              <small class="option-descripcion">{{ rol.descripcion }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="hasErrors()" class="error-message">
     {{ getErrorMessage() }}
   </div>
 </div>

@@ -1,26 +1,69 @@
-<div class="form-group">
+<div class="cbo-wrapper">
+  <!-- Label (reuse same style) -->
   <label *ngIf="isLabel" [for]="isId" class="form-label">
     {{ isLabel }}
     <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
   </label>
 
-  <select
-    [id]="isId"
-    [(ngModel)]="selectedEstado"
-    class="form-select"
-    [disabled]="isDisabled"
-    (change)="onSelectionChange($event)"
-    [class.is-invalid]="hasErrors()">
+  <!-- Container para mantener consistencia visual con otros combos -->
+  <div
+    class="search-container"
+    [class.has-error]="hasErrors()"
+    [class.is-expanded]="isOpen"
+  >
+    <div class="search-input-group">
+      <!-- Input principal (readonly cuando está cerrado) -->
+      <input
+        [id]="isId"
+        class="search-input"
+        [readonly]="!isOpen"
+        [disabled]="isDisabled"
+        [value]="selectedEstado ? displayLabel(selectedEstado) : placeholder"
+        (click)="onMainInputClick()"
+        (focus)="onMainInputFocus()"
+        (blur)="onMainInputBlur()"
+        [class.error]="hasErrors()"
+        autocomplete="off"
+      />
 
-    <!-- Opción por defecto -->
-    <option value="">{{ placeholder }}</option>
+      <!-- Botón limpiar -->
+      <button
+        *ngIf="selectedEstado && !isDisabled && isOpen"
+        type="button"
+        class="clear-button"
+        (click)="clearSelection()"
+        title="Limpiar selección"
+      >
+        <i class="pi pi-times"></i>
+      </button>
 
-    <!-- Opciones fijas -->
-    <option value="activo">Activo</option>
-    <option value="inactivo">Inactivo</option>
-  </select>
+      <!-- Flecha -->
+      <div class="dropdown-arrow" (click)="toggleDropdown($event)">
+        <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
+      </div>
+    </div>
 
-  <div *ngIf="hasErrors()" class="invalid-feedback">
+    <!-- Panel desplegable -->
+    <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
+      <div class="dropdown-content">
+        <div
+          *ngFor="let opt of opciones; let i = index; trackBy: trackByOption"
+          class="dropdown-option"
+          [class.selected]="opt.value === selectedEstado"
+          (click)="onOptionClick(opt)"
+        >
+          <div class="option-content">
+            <div class="option-main">
+              <span class="option-nombre">{{ opt.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje de error usando la clase global -->
+  <div *ngIf="hasErrors()" class="error-message">
     {{ getErrorMessage() }}
   </div>
 </div>
