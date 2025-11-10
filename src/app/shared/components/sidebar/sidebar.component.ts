@@ -195,7 +195,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     },
     {
       id: 54,
-      descripcion: 'Historial de Herramienta',
+      descripcion: 'Historial de Movimientos',
       icono: 'bi bi-clock-history',
       link: '/movimientos/historial',
       grupo: 'GM05',
