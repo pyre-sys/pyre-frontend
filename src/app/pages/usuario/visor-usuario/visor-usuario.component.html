@@ -2,8 +2,13 @@
 <div class="container-fluid page-shell page-header-container">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div></div>
-    <a class="btn btn-primary header-action" (click)="createNewUser()" role="button">
-      <i class="bx bx-user-plus bx-tada me-1" aria-hidden="true"></i> Nuevo Usuario
+    <a
+      class="btn btn-primary header-action"
+      (click)="createNewUser()"
+      role="button"
+    >
+      <i class="bx bx-user-plus bx-tada me-1" aria-hidden="true"></i> Nuevo
+      Usuario
     </a>
   </div>
 </div>
@@ -13,54 +18,109 @@
     <!-- Filter bar -->
     <div class="pyre-filter-bar container-fluid">
       <div class="row g-3 align-items-end">
-
         <!-- Legajo -->
         <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
-          <input type="text" class="form-control" [(ngModel)]="filtroLegajo" placeholder="Legajo"
-            (keyup.enter)="onSearch()" />
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="filtroLegajo"
+                placeholder="Legajo"
+                (keyup.enter)="onSearch()"
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Nombre -->
         <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
-          <input type="text" class="form-control" [(ngModel)]="filtroNombre" placeholder="Nombre"
-            (keyup.enter)="onSearch()" />
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="filtroNombre"
+                placeholder="Nombre"
+                (keyup.enter)="onSearch()"
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Apellido -->
         <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
-          <input type="text" class="form-control" [(ngModel)]="filtroApellido" placeholder="Apellido"
-            (keyup.enter)="onSearch()" />
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="filtroApellido"
+                placeholder="Apellido"
+                (keyup.enter)="onSearch()"
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Rol -->
         <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
-          <app-cbo-rol-usuario class="w-100" [(ngModel)]="filtroRol" [showOnlyActive]="true" [isId]="'filtroRolSelect'"
-            placeholder="Todos los roles">
-          </app-cbo-rol-usuario>
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <app-cbo-rol-usuario
+                class="w-100"
+                [(ngModel)]="filtroRol"
+                [showOnlyActive]="true"
+                [isId]="'filtroRolSelect'"
+              >
+              </app-cbo-rol-usuario>
+            </div>
+          </div>
         </div>
 
         <!-- Estado -->
         <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
-          <app-cbo-estado class="w-100" [(ngModel)]="filtroEstado" [isId]="'filtroEstadoSelect'"
-            placeholder="Todos los estados">
-          </app-cbo-estado>
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <app-cbo-estado
+                class="w-100"
+                [(ngModel)]="filtroEstado"
+                [isId]="'filtroEstadoSelect'"
+              >
+              </app-cbo-estado>
+            </div>
+          </div>
         </div>
 
         <!-- Reset + Buscar -->
-        <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 d-flex justify-content-end gap-2">
-          <button *ngIf="hasActiveFilters()" type="button" class="btn btn-outline-secondary" (click)="onResetFilters()"
-            title="Limpiar todos los filtros">
-            <i class="pi pi-filter-slash"></i>
-          </button>
+        <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 d-flex justify-content-end">
+          <div class="d-flex gap-2">
+            <button
+              type="button"
+              class="reset-button-inline"
+              (click)="onResetFilters()"
+              [disabled]="!hasActiveFilters()"
+              [title]="
+                hasActiveFilters()
+                  ? 'Limpiar filtros'
+                  : 'No hay filtros activos'
+              "
+            >
+              <i class="pi pi-filter-slash"></i>
+            </button>
 
-          <button type="button" class="btn btn-secondary" (click)="onSearch()" [disabled]="!hasActiveFilters()"
-            title="Buscar">
-            <i class="pi pi-search"></i>
-          </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="onSearch()"
+              title="Buscar"
+            >
+              <i class="pi pi-search"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-
 
     <!-- Loading indicator -->
     <div *ngIf="loading" class="text-center py-4">
@@ -89,28 +149,53 @@
             <td>{{ user.rol }}</td>
             <td>
               <div class="estado-toggle">
-                <label class="toggle-switch" [ngbTooltip]="user.activo ? 'Activo' : 'Inactivo'" placement="top"
-                  container="body">
-                  <input type="checkbox" [checked]="user.activo" (change)="toggleUserActive(user)" />
-                  <span class="toggle-slider modern" [class.active]="user.activo"></span>
+                <label
+                  class="toggle-switch"
+                  [ngbTooltip]="user.activo ? 'Activo' : 'Inactivo'"
+                  placement="top"
+                  container="body"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="user.activo"
+                    (change)="toggleUserActive(user)"
+                  />
+                  <span
+                    class="toggle-slider modern"
+                    [class.active]="user.activo"
+                  ></span>
                 </label>
               </div>
             </td>
             <td>
               <div class="action-buttons">
-                <button type="button" class="btn-icon btn-edit" (click)="editUser(user)" ngbTooltip="Ver/Editar usuario"
-                  placement="top" container="body">
+                <button
+                  type="button"
+                  class="btn-icon btn-edit"
+                  (click)="editUser(user)"
+                  ngbTooltip="Ver/Editar usuario"
+                  placement="top"
+                  container="body"
+                >
                   <i class="pi pi-eye"></i>
                 </button>
-                <button type="button" class="btn-icon btn-delete" (click)="deleteUser(user)"
-                  ngbTooltip="Eliminar usuario" placement="top" container="body">
+                <button
+                  type="button"
+                  class="btn-icon btn-delete"
+                  (click)="deleteUser(user)"
+                  ngbTooltip="Eliminar usuario"
+                  placement="top"
+                  container="body"
+                >
                   <i class="pi pi-trash"></i>
                 </button>
               </div>
             </td>
           </tr>
           <tr *ngIf="getPaginatedUsers().length === 0">
-            <td colspan="6" class="empty-message">No se encontraron usuarios.</td>
+            <td colspan="6" class="empty-message">
+              No se encontraron usuarios.
+            </td>
           </tr>
         </tbody>
       </table>
@@ -118,13 +203,22 @@
 
     <!-- Reemplazar el paginador personalizado con el componente app-paginator -->
     <div *ngIf="!loading && totalItems > 0" class="paginator-container">
-      <app-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="currentPage - 1"
-        (pageChange)="onPageEvent($event)">
+      <app-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage - 1"
+        (pageChange)="onPageEvent($event)"
+      >
       </app-paginator>
     </div>
   </div>
 
   <!-- Instancia del modal de usuario -->
-  <app-usuarios-modal *ngIf="showUserModal" [initialData]="modalInitialData" [mode]="modalMode"
-    (submit)="onModalSubmit($event)" (close)="closeUserModal()"></app-usuarios-modal>
+  <app-usuarios-modal
+    *ngIf="showUserModal"
+    [initialData]="modalInitialData"
+    [mode]="modalMode"
+    (submit)="onModalSubmit($event)"
+    (close)="closeUserModal()"
+  ></app-usuarios-modal>
 </div>
