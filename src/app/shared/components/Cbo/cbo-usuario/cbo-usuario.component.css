@@ -1,74 +1,10 @@
-/* Import generic combo styles */
-@import '../cbo.component.css';
+/* Importar estilos compartidos para combos (módulo movimientos/cbo) */
+@import "../cbo-movimientos.css";
 
-/* Specific styles for usuario combo */
-.option-legajo {
-    font-family: monospace;
-    font-weight: 600;
-    color: var(--color-primary, #3b82f6);
-    font-size: 0.9rem;
-    min-width: 60px;
+/* Overrides locales (mínimos) */
+.cbo-usuario-wrapper {
+  /* mantener posicionamiento contextual si hace falta */
+  position: relative;
 }
 
-.dropdown-option.selected .option-legajo {
-    color: var(--color-white, #ffffff);
-}
-
-.option-nombre {
-    flex: 1;
-    font-size: 0.95rem;
-    font-weight: 500;
-}
-
-.option-rol {
-    color: var(--color-text-secondary, #6b7280);
-    font-style: italic;
-    font-size: 0.8rem;
-}
-
-.dropdown-option.selected .option-rol {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.option-estado {
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 12px;
-    background: var(--color-error, #ef4444);
-    color: var(--color-white, #ffffff);
-}
-
-.option-estado.activo {
-    background: var(--color-success, #10b981);
-}
-
-.option-estado.inactivo {
-    background: var(--color-error, #ef4444);
-}
-
-.dropdown-option.selected .option-estado {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--color-white, #ffffff);
-}
-
-/* Responsive adjustments for usuario-specific elements */
-@media (max-width: 768px) {
-    .option-legajo {
-        font-size: 0.85rem;
-        min-width: 50px;
-    }
-
-    .option-nombre {
-        font-size: 0.9rem;
-    }
-
-    .option-rol {
-        font-size: 0.75rem;
-    }
-
-    .option-estado {
-        font-size: 0.75rem;
-        padding: 1px 4px;
-    }
-}
+/* Si necesita reglas específicas de este combo, añadirlas aquí. */

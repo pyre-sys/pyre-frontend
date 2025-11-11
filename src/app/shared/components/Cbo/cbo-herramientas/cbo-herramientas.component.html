@@ -1,81 +1,121 @@
 <div class="cbo-herramientas-wrapper">
-    <!-- Conditional Label -->
-    <label *ngIf="isLabel" [for]="isId" class="form-label">
-        {{ isLabel }}
-        <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
-    </label>
+  <!-- Conditional Label -->
+  <label *ngIf="isLabel" [for]="isId" class="form-label">
+    {{ isLabel }}
+    <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
+  </label>
 
-    <!-- Search input container -->
-    <div class="search-container" [class.has-error]="hasErrors()" [class.is-expanded]="isOpen">
-        <div class="search-input-group">
-            <!-- Main input - readonly when collapsed, editable when expanded -->
-            <input [id]="isId" [value]="isOpen ? (searchControl.value || '') : placeholder" [disabled]="isDisabled"
-                [readonly]="!isOpen" [class.error]="hasErrors()" class="search-input" (click)="onMainInputClick()"
-                (focus)="onMainInputFocus()" (blur)="onMainInputBlur()" (input)="onMainInputChange($event)"
-                autocomplete="off" />
+  <!-- Search input container -->
+  <div
+    class="search-container"
+    [class.has-error]="hasErrors()"
+    [class.is-expanded]="isOpen"
+  >
+    <div class="search-input-group">
+      <!-- Main input - readonly when collapsed, editable when expanded -->
+      <input
+        [id]="isId"
+        [value]="isOpen ? searchControl.value || '' : placeholder"
+        [disabled]="isDisabled"
+        [readonly]="!isOpen"
+        [class.error]="hasErrors()"
+        class="search-input"
+        (click)="onMainInputClick()"
+        (focus)="onMainInputFocus()"
+        (blur)="onMainInputBlur()"
+        (input)="onMainInputChange($event)"
+        autocomplete="off"
+      />
 
-            <!-- Clear button -->
-            <button *ngIf="selectedHerramienta && !isDisabled && isOpen" type="button" class="clear-button"
-                (click)="clearSelection()" title="Limpiar selección">
-                <i class="pi pi-times"></i>
-            </button>
+      <!-- Clear button -->
+      <button
+        *ngIf="selectedHerramienta && !isDisabled && isOpen"
+        type="button"
+        class="clear-button"
+        (click)="clearSelection()"
+        title="Limpiar selección"
+      >
+        <i class="pi pi-times"></i>
+      </button>
 
-            <!-- Loading spinner -->
-            <div *ngIf="isLoading" class="loading-spinner">
-                <i class="pi pi-spinner pi-spin"></i>
-            </div>
-
-            <!-- Dropdown arrow -->
-            <div *ngIf="!isLoading" class="dropdown-arrow" (click)="toggleDropdown($event)">
-                <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
-            </div>
-        </div>
-
-        <!-- Dropdown options -->
-        <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
-            <div class="dropdown-content">
-                <!-- No results message -->
-                <div *ngIf="herramientas.length === 0 && !isLoading" class="no-results">
-                    <span *ngIf="searchControl.value && searchControl.value.length < 3">
-                        Ingrese al menos 3 caracteres para buscar
-                    </span>
-                    <span *ngIf="searchControl.value && searchControl.value.length >= 3">
-                        No se encontraron herramientas
-                    </span>
-                    <span *ngIf="!searchControl.value">
-                        No hay herramientas disponibles
-                    </span>
-                </div>
-
-                <!-- Options list -->
-                <div *ngFor="let herramienta of herramientas; trackBy: trackByHerramienta" class="dropdown-option"
-                    [class.selected]="selectedHerramienta?.id === herramienta.id" (click)="onOptionClick(herramienta)">
-                    <div class="option-content">
-                        <div class="option-main">
-                            <span class="option-codigo">{{ herramienta.codigo }}</span>
-                            <span class="option-nombre">{{ herramienta.nombre }}</span>
-                        </div>
-                        <div class="option-details">
-                            <span *ngIf="herramienta.marca" class="option-marca">{{ herramienta.marca }}</span>
-                            <span class="option-disponibilidad"
-                                [class.disponible]="herramienta.disponibilidad === 'Disponible'">
-                                {{ herramienta.disponibilidad }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Error message -->
-    <div *ngIf="hasErrors()" class="error-message">
-        {{ getErrorMessage() }}
-    </div>
-
-    <!-- Loading indicator -->
-    <div *ngIf="isLoading && !isOpen" class="loading-indicator">
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="loading-spinner">
         <i class="pi pi-spinner pi-spin"></i>
-        <span>Cargando...</span>
+      </div>
+
+      <!-- Dropdown arrow -->
+      <div
+        *ngIf="!isLoading"
+        class="dropdown-arrow"
+        (click)="toggleDropdown($event)"
+      >
+        <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
+      </div>
     </div>
+
+    <!-- Dropdown options -->
+    <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
+      <div class="dropdown-content">
+        <!-- No results message -->
+        <div *ngIf="herramientas.length === 0 && !isLoading" class="no-results">
+          <i
+            class="pi pi-search"
+            style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5"
+          ></i>
+          <div *ngIf="searchControl.value && searchControl.value.length < 3">
+            Ingrese al menos 3 caracteres para buscar
+          </div>
+          <div *ngIf="searchControl.value && searchControl.value.length >= 3">
+            No se encontraron herramientas que coincidan
+          </div>
+          <div *ngIf="!searchControl.value">
+            No hay herramientas disponibles
+          </div>
+        </div>
+
+        <!-- Options list -->
+        <div
+          *ngFor="let herramienta of herramientas; trackBy: trackByHerramienta"
+          class="dropdown-option"
+          [class.selected]="selectedHerramienta?.id === herramienta.id"
+          (click)="onOptionClick(herramienta)"
+        >
+          <div class="option-content">
+            <!-- Left side: codigo + nombre -->
+            <div class="option-main">
+              <span class="option-codigo">{{ herramienta.codigo }}</span>
+              <span class="option-nombre" [title]="herramienta.nombre">{{
+                herramienta.nombre
+              }}</span>
+            </div>
+
+            <!-- Right side: disponibilidad (marca eliminada) -->
+            <div class="option-details">
+              <span
+                class="option-disponibilidad"
+                [class.disponible]="herramienta.disponibilidad === 'Disponible'"
+              >
+                {{
+                  herramienta.disponibilidad === "Disponible"
+                    ? "Disponible"
+                    : "No Disp."
+                }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="hasErrors()" class="error-message">
+    {{ getErrorMessage() }}
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading && !isOpen" class="loading-indicator">
+    <i class="pi pi-spinner pi-spin"></i>
+    <span>Cargando herramientas...</span>
+  </div>
 </div>
