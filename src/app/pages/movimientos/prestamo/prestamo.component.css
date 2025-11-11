@@ -14,6 +14,36 @@
   flex-direction: column;
   height: auto !important;
   min-height: 100%;
+  overflow: visible;
+}
+
+.prestamo-form-card .card-body {
+  overflow: visible;
+}
+
+/* Fix for combo dropdown overflow */
+.form-field-wrapper {
+  position: relative;
+  z-index: auto;
+}
+
+.form-field-wrapper app-cbo-herramientas {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure container allows dropdown expansion */
+.prestamo-container {
+  overflow: visible;
+}
+
+.prestamo-container .row {
+  overflow: visible;
+}
+
+.prestamo-container .col-lg-8,
+.prestamo-container .col-md-10 {
+  overflow: visible;
 }
 
 /* ========================================
@@ -31,7 +61,7 @@
 }
 
 .info-card.responsable-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -50,7 +80,7 @@
 .info-card.responsable-card:hover {
   transform: translateY(-1px) scale(1.002);
   box-shadow: 0 6px 12px rgba(13, 202, 240, 0.1),
-              0 0 0 1px rgba(13, 202, 240, 0.06);
+    0 0 0 1px rgba(13, 202, 240, 0.06);
   z-index: 1;
 }
 
@@ -64,13 +94,18 @@
 }
 
 .info-card.responsable-card .card-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: left 0.5s ease;
 }
 
@@ -91,8 +126,13 @@
 }
 
 @keyframes personPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 /* Body con efectos */
@@ -116,7 +156,7 @@
 }
 
 .info-card.obra-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -135,7 +175,7 @@
 .info-card.obra-card:hover {
   transform: translateY(-1px) scale(1.002);
   box-shadow: 0 6px 12px rgba(255, 193, 7, 0.1),
-              0 0 0 1px rgba(255, 193, 7, 0.06);
+    0 0 0 1px rgba(255, 193, 7, 0.06);
   z-index: 1;
 }
 
@@ -149,13 +189,18 @@
 }
 
 .info-card.obra-card .card-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: left 0.5s ease;
 }
 
@@ -176,8 +221,13 @@
 }
 
 @keyframes buildingPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 /* Body con efectos */
@@ -224,7 +274,7 @@
 }
 
 .info-item-responsable::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -337,7 +387,7 @@
 }
 
 .info-item-obra::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
