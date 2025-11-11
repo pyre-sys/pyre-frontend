@@ -14,6 +14,7 @@ import { Roles } from '../../enums/roles';
 import { Subscription } from 'rxjs';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { SidebarService } from '../../../services/sidebar.service';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap'; // Asegurar la importación
 
 interface MenuItem {
   id: number;
@@ -31,7 +32,7 @@ interface MenuItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, TopbarComponent],
+  imports: [CommonModule, RouterModule, TopbarComponent, NgbTooltipModule], // Agregar NgbTooltipModule
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css'],
 })
@@ -50,7 +51,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
   userLegajo: string = '';
   displayLegajo: string = '';
   displayRole: string = '';
-  displayUserLabel: string = '';
+  displayUserLabel: string = ''; // Agregar la propiedad que falta
+
+  // Tooltip dinámico para el legajo y rol
+  get pillTooltip(): string {
+    const leg = this.userLegajo || this.displayLegajo || '';
+    const role = this.displayRole || '';
+    return role ? `${leg} — ${role}` : leg;
+  }
 
   private subscription = new Subscription();
 
@@ -440,11 +448,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
           ? this.userLegajo.slice(0, 9) + '...'
           : this.userLegajo;
 
+      this.displayRole = user.rolNombre || user.role || user.rol || '';
+
       const legInfo = this.userLegajo ? `Legajo: ${this.userLegajo}` : '';
       const nameInfo = this.nombreCompleto ? ` — ${this.nombreCompleto}` : '';
-      this.displayUserLabel = (legInfo + nameInfo).trim() || 'Usuario';
-
-      this.displayRole = roleName ? String(roleName) : '';
+      this.displayUserLabel = (legInfo + nameInfo).trim() || 'Usuario'; // Asignar valor a displayUserLabel
 
       console.log('Usuario cargado:', {
         roleName,
@@ -459,7 +467,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.displayEmail = '';
       this.userLegajo = '';
       this.displayLegajo = '';
-      this.displayUserLabel = 'Usuario';
+      this.displayUserLabel = 'Usuario'; // Valor por defecto
       this.displayRole = '';
     }
   }
@@ -601,5 +609,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
 
     this.isPerfilModalVisible = false;
+  }
+
+  // Helper method para verificar roles
+  isRole(roleName: string): boolean {
+    return this.displayRole?.toLowerCase() === roleName.toLowerCase();
   }
 }

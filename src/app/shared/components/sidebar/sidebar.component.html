@@ -1,4 +1,7 @@
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400&display=swap" rel="stylesheet">
+<link
+  href="https://fonts.googleapis.com/css2?family=Nunito:wght@400&display=swap"
+  rel="stylesheet"
+/>
 
 <!-- Topbar Component -->
 <app-topbar
@@ -14,16 +17,23 @@
   (perfilModalToggled)="onPerfilModalToggled($event)"
   (homeNavigation)="navigateToHome()"
   (logoutRequested)="confirmLogout()"
-  (sidebarToggled)="toggleSidebar()">
+  (sidebarToggled)="toggleSidebar()"
+>
 </app-topbar>
 
 <!-- Sidebar -->
 <div *ngIf="isLoggedIn">
-  <div class="sidebar" [ngClass]="{'hidden': !isSidebarVisible, 'visible': isSidebarVisible}">
-
+  <div
+    class="sidebar"
+    [ngClass]="{ hidden: !isSidebarVisible, visible: isSidebarVisible }"
+  >
     <!-- Logo -->
     <div class="sidebar-img">
-      <img src="assets/images/logos/logo.png" alt="Logo" (click)="navigateToHome()">
+      <img
+        src="assets/images/logos/logo.png"
+        alt="Logo"
+        (click)="navigateToHome()"
+      />
     </div>
 
     <!-- Lista de menús principales -->
@@ -31,18 +41,28 @@
       <li *ngFor="let menu of visibleMenuItems" class="nav-item">
         <!-- Enlace del menú principal -->
         <a class="nav-link" (click)="toggleSubMenu(menu)">
-          <i class="{{ menu.icono }}"></i> <!-- Icono del menú principal -->
+          <i class="{{ menu.icono }}"></i>
+          <!-- Icono del menú principal -->
           <span>{{ menu.descripcion }}</span>
-          <i class="arrow" [ngClass]="{'rotate': isMenuExpanded(menu)}"
-              *ngIf="getSubMenus(menu).length > 0"></i>
+          <i
+            class="arrow"
+            [ngClass]="{ rotate: isMenuExpanded(menu) }"
+            *ngIf="getSubMenus(menu).length > 0"
+          ></i>
         </a>
 
         <!-- Submenús -->
-        <ul [ngClass]="{'sub-menu': true, 'expanded': isMenuExpanded(menu)}"
-            *ngIf="getSubMenus(menu).length > 0">
+        <ul
+          [ngClass]="{ 'sub-menu': true, expanded: isMenuExpanded(menu) }"
+          *ngIf="getSubMenus(menu).length > 0"
+        >
           <li *ngFor="let subMenu of getSubMenus(menu)" class="nav-item">
-            <a class="nav-link" [routerLink]="subMenu.link" routerLinkActive="active"
-                (click)="navigateToSubMenu(subMenu)">
+            <a
+              class="nav-link"
+              [routerLink]="subMenu.link"
+              routerLinkActive="active"
+              (click)="navigateToSubMenu(subMenu)"
+            >
               <i class="{{ subMenu.icono }}" *ngIf="subMenu.icono"></i>
               <span>{{ subMenu.descripcion }}</span>
             </a>
@@ -51,6 +71,25 @@
       </li>
     </ul>
 
+    <!-- Información del usuario logueado -->
+    <div class="sidebar-user-info" *ngIf="isLoggedIn">
+      <div class="user-pill" [ngbTooltip]="displayUserLabel" placement="top">
+        <i class="bi bi-person-badge"></i>
+        <span class="user-legajo">{{
+          displayLegajo || userLegajo || "Sin legajo"
+        }}</span>
+      </div>
+      <div
+        class="user-role-badge"
+        [class.superadmin]="isRole('SuperAdmin')"
+        [class.supervisor]="isRole('Supervisor')"
+        [class.operario]="isRole('Operario')"
+        [class.administrativo]="isRole('Administrativo')"
+        *ngIf="displayRole"
+      >
+        {{ displayRole }}
+      </div>
+    </div>
   </div>
 </div>
 
