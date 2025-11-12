@@ -386,8 +386,8 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
 
     console.log('🔍 Patching form with data:', data); // Debug log
 
-    // ✅ Guardar el ID del usuario para edición
-    this.userId = data?.id ?? data?.Id ?? data?.usuario_id ?? null;
+    // ✅ Guardar el ID del usuario para edición - probemos múltiples posibles nombres de campo
+    this.userId = data?.id ?? data?.Id ?? data?.usuario_id ?? data?.usuarioId ?? null;
     console.log('💾 User ID saved:', this.userId);
 
     const mapped = {
@@ -466,11 +466,16 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
 
     // ✅ En modo edición, incluir el ID del usuario
     if (this.mode === 'edit' && this.userId) {
-      value.Id = this.userId; // ⚠️ Incluir ID para validación del backend
-      console.log('🔄 Including user ID in update:', this.userId);
+      value.Id = this.userId; // ✅ Incluir ID para validación del backend
+      console.log('🔄 Updating user with ID:', this.userId);
+      console.log('📤 Update payload:', value);
+    } else if (this.mode === 'create') {
+      console.log('🆕 Creating new user with payload:', value);
+    } else {
+      console.error('❌ Missing userId for edit mode');
+      this.alertService.error('Error: No se pudo identificar el usuario a editar');
+      return;
     }
-
-    console.log('📤 Final data being sent:', value); // Debug: ver datos finales
 
     this.submit.emit({
       mode: this.mode,
@@ -485,6 +490,8 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
         this.close.emit();
       },
       onError: (error: any) => {
+        console.error('❌ Error from server:', error);
+        this.handleServerErrors(error);
         const errorMessage = error?.error?.message || error?.message || 'Ocurrió un error inesperado';
         this.alertService.error(
           `Error al ${this.mode === 'create' ? 'crear' : 'actualizar'} el usuario: ${errorMessage}`,

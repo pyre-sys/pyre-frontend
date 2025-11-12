@@ -129,12 +129,36 @@ export class UsuarioService {
 
   updateUser(id: number, user: any): Observable<any> {
     try {
+      console.log(`🔄 UsuarioService.updateUser called with ID: ${id}`);
+      console.log('📤 User data being sent:', user);
+
+      // Ensure the user object has the Id property matching the URL parameter
+      if (!user.Id) {
+        user.Id = id;
+        console.log('✅ Added Id to user object:', user.Id);
+      }
+
+      if (user.Id !== id) {
+        console.warn('⚠️ Mismatch between URL ID and user.Id:', { urlId: id, userId: user.Id });
+      }
+
       const validBody = JSON.stringify(user);
-      return this.http.put(`${this.baseUrl}/${id}`, JSON.parse(validBody), {
+      const url = `${this.baseUrl}/${id}`;
+      console.log(`🌐 PUT request to: ${url}`);
+
+      return this.http.put(url, JSON.parse(validBody), {
         headers: { 'Content-Type': 'application/json' }
-      });
+      }).pipe(
+        tap(response => {
+          console.log('✅ Update successful:', response);
+        }),
+        catchError(error => {
+          console.error('❌ Update failed:', error);
+          throw error;
+        })
+      );
     } catch (error) {
-      console.error('El cuerpo de la solicitud no es un JSON válido:', error);
+      console.error('❌ Error preparing update request:', error);
       throw new Error('El cuerpo de la solicitud no es un JSON válido.');
     }
   }
