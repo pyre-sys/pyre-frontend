@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
@@ -12,10 +17,9 @@ declare var Swal: any;
   selector: 'app-login',
   imports: [ReactiveFormsModule, CommonModule, NgbTooltipModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit {
-
   loginForm: FormGroup;
   errorMessage: string | null = null;
   isDarkMode: boolean = true;
@@ -25,7 +29,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private loginService: LoginService,
     private router: Router,
-    private authService: AuthService,
+    private authService: AuthService
   ) {
     this.loginForm = this.fb.group({
       legajo: ['', Validators.required],
@@ -37,6 +41,13 @@ export class LoginComponent implements OnInit {
     // Check if already logged in
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
+    }
+
+    // Asegurar que estamos en la URL correcta
+    const currentUrl = this.router.url;
+    if (currentUrl === '/login' || currentUrl === '/login/') {
+      // Mantener la URL actual sin redirigir
+      // No hacer navigate aquí para evitar bucles
     }
   }
 
@@ -69,16 +80,26 @@ export class LoginComponent implements OnInit {
         },
         error: (error) => {
           console.error('Login error:', error);
-          let errorMessage = 'Hubo un problema al intentar iniciar sesión. Por favor, intente nuevamente.';
+
+          // ⚠️ NO hacer navegación aquí - mantener en la misma página
+          // this.router.navigate(['/login']); // <- REMOVER si existe
+
+          let errorMessage =
+            'Hubo un problema al intentar iniciar sesión. Por favor, intente nuevamente.';
 
           if (error.status === 401) {
-            errorMessage = 'Credenciales incorrectas. Verifique su legajo y contraseña.';
+            errorMessage =
+              'Credenciales incorrectas. Verifique su legajo y contraseña.';
           } else if (error.error?.message) {
             errorMessage = error.error.message;
           }
 
           this.showErrorToast(errorMessage);
-        }
+
+          // Limpiar el formulario de contraseña pero mantener legajo
+          this.loginForm.get('password')?.setValue('');
+          this.loginForm.get('password')?.markAsUntouched();
+        },
       });
     }
   }
@@ -95,7 +116,10 @@ export class LoginComponent implements OnInit {
 
     // Validar que el legajo solo contenga números
     if (!/^\d+$/.test(legajoControl.value)) {
-      this.showValidationToast('El legajo debe contener solo números', 'legajo');
+      this.showValidationToast(
+        'El legajo debe contener solo números',
+        'legajo'
+      );
       return false;
     }
 
@@ -119,8 +143,8 @@ export class LoginComponent implements OnInit {
       timer: 3000,
       timerProgressBar: true,
       customClass: {
-        popup: 'swal-validation-toast'
-      }
+        popup: 'swal-validation-toast',
+      },
     }).then(() => {
       // Focus en el campo con error
       const element = document.getElementById(field) as HTMLInputElement;
@@ -141,8 +165,8 @@ export class LoginComponent implements OnInit {
       timer: 4000,
       timerProgressBar: true,
       customClass: {
-        popup: 'swal-error-toast'
-      }
+        popup: 'swal-error-toast',
+      },
     });
   }
 
@@ -174,5 +198,4 @@ export class LoginComponent implements OnInit {
     event.preventDefault();
     this.showPassword = false;
   }
-
 }
