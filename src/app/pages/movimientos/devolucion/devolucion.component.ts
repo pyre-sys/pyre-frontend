@@ -250,7 +250,7 @@ export class DevolucionComponent implements OnInit {
                   codigo: item.codigoHerramienta,
                   nombre: item.nombreHerramienta,
                   marca: item.marca || 'N/A',
-                  fechaPrestamo: movimiento.fechaMovimiento || item.fechaReparacion || item.fechaIngreso,
+                  fechaPrestamo: movimiento.fecha || item.fechaReparacion || item.fechaIngreso,
                   fechaEstimadaDevolucion: movimiento.fechaEstimadaDevolucion || item.fechaEstimadaFinalizacion,
                   nombreObra: null, // No aplica para reparaciones
                   observacionesPrestamo: movimiento.observaciones || item.observaciones,

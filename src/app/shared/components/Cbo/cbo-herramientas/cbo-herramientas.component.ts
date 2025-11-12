@@ -66,7 +66,7 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
 
   ngOnInit(): void {
     this.setupSearchSubscription();
-    this.loadInitialHerramientas();
+    // this.loadInitialHerramientas();
     this.updateDisabledState();
     this.updatePlaceholderText();
   }
@@ -85,9 +85,9 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
             return of([] as HerramientaOption[]);
           }
           const searchTerm = (term || '').toString().trim();
-          if (searchTerm.length >= 1) {
+          if (searchTerm.length >= 3) {
             return this.searchHerramientas(searchTerm);
-          } else if (searchTerm.length === 0) {
+          } else if (searchTerm.length === 3) {
             return this.loadInitialData();
           } else {
             return of([] as HerramientaOption[]);
