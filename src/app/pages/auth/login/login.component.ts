@@ -34,8 +34,9 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Check if already logged in
+    // Check if already logged in and redirect only if coming from login
     if (this.authService.isLoggedIn()) {
+      // Solo redirigir al dashboard si el usuario ya está autenticado
       this.router.navigate(['/dashboard']);
     }
   }
@@ -51,7 +52,7 @@ export class LoginComponent implements OnInit {
 
       this.loginService.login(legajo, password).subscribe({
         next: (response) => {
-          console.log('Login response:', response);
+          // console.log('Login response:', response);
 
           // La respuesta viene con esta estructura:
           // { status: 200, message: "...", token: "...", usuario: { id, nombre, email, etc. } }
@@ -59,7 +60,7 @@ export class LoginComponent implements OnInit {
           // Usar directamente la estructura del usuario que viene en la respuesta
           const userData = response.usuario;
 
-          console.log('User data from response:', userData);
+          // console.log('User data from response:', userData);
 
           // Save token and user data - usar los datos tal como vienen
           this.authService.saveAuthData(response.token, userData);
@@ -72,12 +73,32 @@ export class LoginComponent implements OnInit {
           let errorMessage = 'Hubo un problema al intentar iniciar sesión. Por favor, intente nuevamente.';
 
           if (error.status === 401) {
-            errorMessage = 'Credenciales incorrectas. Verifique su legajo y contraseña.';
+            // Manejo específico para error 401 Unauthorized
+            errorMessage = error.error?.message || 'Legajo o contraseña incorrectos.';
+            
+            // Limpiar el campo de contraseña para que el usuario pueda reintentar
+            this.loginForm.patchValue({ password: '' });
+            
+            // Mostrar modal de error y mantener al usuario en la pantalla de login
+            this.showErrorToast(errorMessage);
+            
+            // Focus en el campo de legajo para facilitar el reintento
+            setTimeout(() => {
+              const legajoElement = document.getElementById('legajo') as HTMLInputElement;
+              if (legajoElement) {
+                legajoElement.focus();
+              }
+            }, 100);
+            
           } else if (error.error?.message) {
             errorMessage = error.error.message;
+            this.showErrorToast(errorMessage);
+          } else {
+            this.showErrorToast(errorMessage);
           }
 
-          this.showErrorToast(errorMessage);
+          // Resetear cualquier estado de error previo
+          this.errorMessage = null;
         }
       });
     }

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-// Rutas para la sección "Rutinas"
+// Rutas para la sección "Login"
 export const loginRoutes: Routes = [
-    { path: 'login', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) }
+    { path: '', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) }
 ];

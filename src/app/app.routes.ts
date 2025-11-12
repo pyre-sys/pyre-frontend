@@ -1,22 +1,16 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/auth/login/login.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: '/dashboard',
+        redirectTo: '/login',
         pathMatch: 'full'
     },
     {
         path: 'login',
         loadChildren: () => import('./pages/auth/login.routes').then(m => m.loginRoutes)
     },
-    // {
-    //     path: 'inicio',
-    //     loadChildren: () => import('./pages/home/inicio.routes').then(m => m.inicioRoutes),
-    //     canActivate: [authGuard]
-    // },
     {
         path: 'dashboard',
         loadChildren: () => import('./pages/dashboard/dashboard.routes').then(m => m.dashboardRoutes),
@@ -53,5 +47,5 @@ export const routes: Routes = [
         loadComponent: () => import('./shared/components/access-denied/access-denied.component').then(m => m.AccessDeniedComponent)
     },
     // Redirección por defecto para rutas no encontradas
-    { path: '**', redirectTo: '/dashboard' }
+    { path: '**', redirectTo: '/login' }
 ];
