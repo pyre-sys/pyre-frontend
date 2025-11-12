@@ -5,6 +5,8 @@ import {
   EventEmitter,
   forwardRef,
   OnInit,
+  ElementRef,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -55,6 +57,9 @@ export class CboEstadoComponent implements ControlValueAccessor, OnInit {
   private onChange = (value: any) => {};
   private onTouched = () => {};
 
+  // Añadir constructor para ElementRef
+  constructor(private elementRef: ElementRef) {}
+
   ngOnInit(): void {
     // nada extra por ahora
   }
@@ -72,8 +77,9 @@ export class CboEstadoComponent implements ControlValueAccessor, OnInit {
 
   // Apertura / cierre del dropdown
   onMainInputClick(): void {
+    // Abrir (no toggle) para evitar abrir y cerrar rápidamente si el blur se dispara
     if (!this.isDisabled) {
-      this.toggleDropdown();
+      this.isOpen = true;
     }
   }
 
@@ -82,13 +88,9 @@ export class CboEstadoComponent implements ControlValueAccessor, OnInit {
   }
 
   onMainInputBlur(): void {
-    // pequeño delay para permitir click en opciones
-    setTimeout(() => {
-      if (this.isOpen) {
-        this.isOpen = false;
-        this.emitTouched();
-      }
-    }, 150);
+    // No cerrar aquí para evitar "pestañeo" al hacer click dentro del componente.
+    // Solo marcar como touched (emitido), el cierre se maneja con click fuera.
+    this.emitTouched();
   }
 
   toggleDropdown(event?: Event): void {
@@ -98,6 +100,19 @@ export class CboEstadoComponent implements ControlValueAccessor, OnInit {
     }
     if (this.isDisabled) return;
     this.isOpen = !this.isOpen;
+  }
+
+  // Cerrar si se hace click fuera del componente
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (this.isDisabled) return;
+    const target = event.target as Node;
+    if (!this.elementRef.nativeElement.contains(target)) {
+      if (this.isOpen) {
+        this.isOpen = false;
+        this.emitTouched();
+      }
+    }
   }
 
   onOptionClick(opt: { value: string; label: string }): void {
