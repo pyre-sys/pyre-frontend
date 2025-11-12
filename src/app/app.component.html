@@ -3,9 +3,18 @@
     <app-sidebar></app-sidebar>
   </div>
 
-  <div class="main-wrapper"
-       [class.with-sidebar]="isLoggedIn && isSidebarVisible"
-       [class.logged-in]="isLoggedIn">
+  <div
+    class="main-wrapper"
+    [class.with-sidebar]="isLoggedIn && isSidebarVisible"
+    [class.logged-in]="isLoggedIn"
+  >
     <router-outlet></router-outlet>
+    <!-- Global toast placed at app root so it renders outside page-specific containers -->
+    <app-modal-toast
+      [message]="toastMessage"
+      [isVisible]="toastVisible"
+      [type]="toastType"
+    >
+    </app-modal-toast>
   </div>
 </div>
