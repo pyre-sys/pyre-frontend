@@ -1,357 +1,361 @@
 /* Reset básico (mantener) */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: var(--font-family-primary);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-family-primary);
 }
 
 /* El fondo ahora es global (ver src/styles.css). Aquí solo nos aseguramos
    de que los contenedores del login sean transparentes para dejar ver
    la imagen de fondo aplicable a todo el sitio. */
-.login-page,
-.fullscreen-background,
-.container {
-  background: transparent;
+.login-page, .fullscreen-background, .container {
+    background: transparent;
 }
 
 /* Centrar el formulario en el viewport */
 .fullscreen-background {
-  /* Asegurar que ocupe todo el viewport y centre el formulario */
-  position: fixed;
-  inset: 0; /* top:0; right:0; bottom:0; left:0 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem; /* espacio en móviles */
-  min-height: 100vh; /* garantizar altura completa incluso con mobile browsers */
-  z-index: 2; /* estar por encima del overlay global (ver src/styles.css .bg-blanch) */
+    /* Asegurar que ocupe todo el viewport y centre el formulario */
+    position: fixed;
+    inset: 0; /* top:0; right:0; bottom:0; left:0 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem; /* espacio en móviles */
+    min-height: 100vh; /* garantizar altura completa incluso con mobile browsers */
+    z-index: 2; /* estar por encima del overlay global (ver src/styles.css .bg-blanch) */
 }
 
 /* Container con más contraste para destacar sobre la imagen */
 .container {
-  width: 400px;
-  max-width: calc(100% - 2rem); /* asegurar margen en pantallas pequeñas */
-  background: var(--card-background); /* 🎯 ¡Usamos variable! */
-  color: var(--text-color); /* 🎯 ¡Usamos variable! */
-  padding: var(--spacing-xl) var(--spacing-lg); /* 🎯 ¡Espaciado con variables! */
-  border-radius: var(--border-radius-lg); /* 🎯 ¡Radio con variable! */
-  box-shadow: var(--shadow-strong); /* 🎯 ¡Sombra con variable! */
-  position: relative;
-  border: 1px solid var(--white);
-  backdrop-filter: blur(5px);
+    width: 400px;
+    max-width: calc(100% - 2rem); /* asegurar margen en pantallas pequeñas */
+    background: var(--card-background);           /* 🎯 ¡Usamos variable! */
+    color: var(--text-color);                    /* 🎯 ¡Usamos variable! */
+    padding: var(--spacing-xl) var(--spacing-lg); /* 🎯 ¡Espaciado con variables! */
+    border-radius: var(--border-radius-lg);      /* 🎯 ¡Radio con variable! */
+    box-shadow: var(--shadow-strong);            /* 🎯 ¡Sombra con variable! */
+    position: relative;
+    border: 1px solid var(--white);
+    backdrop-filter: blur(5px);
 }
 
 /* Garantizar que el formulario tenga prioridad en stacking context para inputs/modals internos */
 .container * {
-  position: relative;
-  z-index: 3;
+    position: relative;
+    z-index: 3;
 }
 
 /* Header section corporativo */
 .header-section {
-  text-align: center;
-  margin-bottom: 30px;
+    text-align: center;
+    margin-bottom: 30px;
 }
 
 .logo-container {
-  margin-bottom: 15px;
+    margin-bottom: 15px;
 }
 
 .company-logo {
-  max-width: 120px;
-  height: auto;
-  max-height: 60px;
-  object-fit: contain;
+    max-width: 120px;
+    height: auto;
+    max-height: 60px;
+    object-fit: contain;
 }
 
 /* Subtítulo */
 .subtitle {
-  font-size: var(--font-size-md); /* 🎯 ¡Tamaño de fuente con variable! */
-  color: var(--text-secondary); /* 🎯 ¡Color secundario! */
-  margin: 0;
-  font-weight: 400;
+    font-size: var(--font-size-md);  /* 🎯 ¡Tamaño de fuente con variable! */
+    color: var(--text-secondary);    /* 🎯 ¡Color secundario! */
+    margin: 0;
+    font-weight: 400;
 }
 
 .form-group {
-  position: relative;
-  width: 100%;
-  margin: 20px 0;
+    position: relative;
+    width: 100%;
+    margin: 20px 0;
 }
 
 .form-group input {
-  width: 100%;
-  height: var(--input-height); /* 🎯 ¡Altura estándar! */
-  background: var(--input-background);
-  border: 1px solid var(--input-border);
-  color: var(--text-color);
-  border-radius: var(--border-radius); /* 🎯 ¡Radio estándar! */
-  font-size: var(--font-size-md); /* 🎯 ¡Tamaño consistente! */
-  padding: 0 45px 0 15px;
-  transition: var(--transition-normal); /* 🎯 ¡Transición suave! */
-  outline: none;
-  position: relative;
+    width: 100%;
+    height: var(--input-height);        /* 🎯 ¡Altura estándar! */
+    background: var(--input-background);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    border-radius: var(--border-radius); /* 🎯 ¡Radio estándar! */
+    font-size: var(--font-size-md);     /* 🎯 ¡Tamaño consistente! */
+    padding: 0 45px 0 15px;
+    transition: var(--transition-normal); /* 🎯 ¡Transición suave! */
+    outline: none;
+    position: relative;
 }
 
 .form-group input::placeholder {
-  color: var(--input-placeholder);
+    color: var(--input-placeholder);
 }
 
 .form-group input:focus {
-  border-color: var(--input-border-focus);
+    border-color: var(--input-border-focus);
 }
 
 .form-group i {
-  position: absolute;
-  right: 15px;
-  top: 50%; /* centrar respecto al alto del input/label */
-  transform: translateY(-50%); /* centrado vertical preciso */
-  font-size: var(--font-size-lg); /* 🎯 ¡Tamaño consistente! */
-  color: var(--text-light); /* 🎯 ¡Color claro! */
-  pointer-events: none; /* Para que no interfiera con clicks */
+    position: absolute;
+    right: 15px;
+    top: 50%; /* centrar respecto al alto del input/label */
+    transform: translateY(-50%); /* centrado vertical preciso */
+    font-size: var(--font-size-lg);     /* 🎯 ¡Tamaño consistente! */
+    color: var(--text-light);           /* 🎯 ¡Color claro! */
+    pointer-events: none; /* Para que no interfiera con clicks */
 }
 
 /* Asegurar que el icono de mostrar/ocultar contraseña sea clickable
    y muestre el cursor de mano, sobrescribiendo la regla general
    que desactiva pointer-events para otros iconos dentro de .form-group. */
 .form-group .password-toggle-icon {
-  pointer-events: auto;
-  cursor: pointer;
+    pointer-events: auto;
+    cursor: pointer;
 }
 
 /* Ícono para mostrar/ocultar contraseña - override de los estilos generales */
 .password-toggle-icon {
-  position: absolute;
-  right: 15px;
-  top: 50%; /* centrar respecto al input */
-  transform: translateY(-50%);
-  font-size: var(--font-size-xl); /* 🎯 ¡Tamaño grande! */
-  cursor: pointer;
-  user-select: none;
-  transition: var(--transition-normal); /* 🎯 ¡Transición suave! */
-  color: var(--text-secondary); /* 🎯 ¡Color secundario! */
-  z-index: 100;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2px;
-  border-radius: 3px;
-  pointer-events: auto; /* Permitir clicks en este ícono */
+    position: absolute;
+    right: 15px;
+    top: 50%; /* centrar respecto al input */
+    transform: translateY(-50%);
+    font-size: var(--font-size-xl);       /* 🎯 ¡Tamaño grande! */
+    cursor: pointer;
+    user-select: none;
+    transition: var(--transition-normal);  /* 🎯 ¡Transición suave! */
+    color: var(--text-secondary);         /* 🎯 ¡Color secundario! */
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px;
+    border-radius: 3px;
+    pointer-events: auto; /* Permitir clicks en este ícono */
 }
 
 .password-toggle-icon:hover {
-  color: var(--primary-blue); /* 🎯 ¡Azul principal al hover! */
-  background: rgba(0, 123, 255, 0.1);
-  transform: scale(1.1);
+    color: var(--primary-blue);           /* 🎯 ¡Azul principal al hover! */
+    background: rgba(0, 123, 255, 0.1);
+    transform: scale(1.1);
 }
 
 .password-toggle-icon:active {
-  color: var(--primary-blue-dark); /* 🎯 ¡Azul oscuro al hacer click! */
-  transform: scale(0.95);
+    color: var(--primary-blue-dark);      /* 🎯 ¡Azul oscuro al hacer click! */
+    transform: scale(0.95);
 }
 
 /* Estados para dispositivos táctiles */
 .password-toggle-icon:focus {
-  outline: 2px solid #007bff;
-  outline-offset: 2px;
-  border-radius: 2px;
+    outline: 2px solid #007BFF;
+    outline-offset: 2px;
+    border-radius: 2px;
 }
 
 /* Labels para los campos */
 .field-label {
-  display: block;
-  font-size: var(--font-size-sm); /* 🎯 ¡Tamaño pequeño! */
-  font-weight: 500;
-  color: var(--text-color); /* 🎯 ¡Color principal! */
-  margin-bottom: 6px;
-  margin-left: 2px;
+    display: block;
+    font-size: var(--font-size-sm);      /* 🎯 ¡Tamaño pequeño! */
+    font-weight: 500;
+    color: var(--text-color);            /* 🎯 ¡Color principal! */
+    margin-bottom: 6px;
+    margin-left: 2px;
 }
 
 /* Texto de ayuda */
 .help-text {
-  font-size: var(--font-size-xs); /* 🎯 ¡Tamaño extra pequeño! */
-  color: var(--text-secondary); /* 🎯 ¡Color secundario! */
-  margin-top: 4px;
-  margin-left: 10px;
-  font-style: italic;
+    font-size: var(--font-size-xs);      /* 🎯 ¡Tamaño extra pequeño! */
+    color: var(--text-secondary);        /* 🎯 ¡Color secundario! */
+    margin-top: 4px;
+    margin-left: 10px;
+    font-style: italic;
 }
 
 /* Estilos específicos para el campo de legajo */
 input[name="employee-id"] {
-  font-family: var(--font-family-mono); /* 🎯 ¡Fuente monospace! */
-  letter-spacing: 1px;
+    font-family: var(--font-family-mono); /* 🎯 ¡Fuente monospace! */
+    letter-spacing: 1px;
 }
 
 /* Tamaño aumentado para el campo de legajo y su icono */
 input[name="employee-id"] {
-  height: 54px; /* un poco más alto que el input estándar */
-  font-size: 16px;
-  padding: 0 50px 0 16px; /* dar espacio extra para el icono */
+    height: 54px; /* un poco más alto que el input estándar */
+    font-size: 16px;
+    padding: 0 50px 0 16px; /* dar espacio extra para el icono */
 }
 
 .form-group i.employee-icon {
-  font-size: 20px; /* icono más grande */
-  right: 14px;
+    font-size: 20px; /* icono más grande */
+    right: 14px;
 }
 
 /* Prevenir zoom en móviles para campos numéricos */
 input[inputmode="numeric"] {
-  font-size: 16px;
+    font-size: 16px;
 }
 
 @media (max-width: 480px) {
-  input[inputmode="numeric"] {
-    font-size: 16px !important;
-  }
+    input[inputmode="numeric"] {
+        font-size: 16px !important;
+    }
 
-  /* Hacer el ícono más grande y fácil de tocar en móviles */
-  .password-toggle-icon {
-    font-size: 18px;
-    padding: 5px;
-    margin: -5px;
-  }
+    /* Hacer el ícono más grande y fácil de tocar en móviles */
+    .password-toggle-icon {
+        font-size: 18px;
+        padding: 5px;
+        margin: -5px;
+    }
 
-  .password-toggle-icon:hover {
-    transform: scale(1.2);
-  }
+    .password-toggle-icon:hover {
+        transform: scale(1.2);
+    }
 
-  /* Ajustar posición de íconos en móviles */
-  .form-group i,
-  .password-toggle-icon {
-    top: 30px;
-  }
+    /* Ajustar posición de íconos en móviles */
+    .form-group i, .password-toggle-icon {
+        top: 30px;
+    }
 }
 
 @media (max-width: 480px) {
-  /* Ajustes para legajo en pantallas pequeñas */
-  input[name="employee-id"] {
-    height: 48px;
-    font-size: 15px;
-    padding: 0 44px 0 12px;
-  }
+    /* Ajustes para legajo en pantallas pequeñas */
+    input[name="employee-id"] {
+        height: 48px;
+        font-size: 15px;
+        padding: 0 44px 0 12px;
+    }
 
-  .form-group i.employee-icon {
-    font-size: 18px;
-    right: 12px;
-  }
+    .form-group i.employee-icon {
+        font-size: 18px;
+        right: 12px;
+    }
 }
 
-/* Estilos de toasts eliminados: el login usa alert() nativo ahora */
+/* Estilos custom para toasts de SweetAlert2 */
+:global(.swal-validation-toast) {
+    background-color: #fff3cd !important;
+    border-left: 4px solid #ffc107 !important;
+}
 
-/* Mensajes de error */
+:global(.swal-error-toast) {
+    background-color: #f8d7da !important;
+    border-left: 4px solid #dc3545 !important;
+}/* Mensajes de error */
 .error-message {
-  color: #dc3545;
-  font-size: 12px;
-  margin-top: 5px;
-  margin-left: 10px;
+    color: #DC3545;
+    font-size: 12px;
+    margin-top: 5px;
+    margin-left: 10px;
 }
 
 /* Botón simplificado */
 .btn {
-  width: 100%;
-  height: var(--button-height); /* 🎯 ¡Altura estándar! */
-  background: var(--primary-blue-darker); /* 🎯 ¡Color principal! */
-  border: none;
-  border-radius: var(--border-radius); /* 🎯 ¡Radio consistente! */
-  color: var(--white); /* 🎯 ¡Blanco puro! */
-  font-weight: 500;
-  font-size: var(--font-size-md); /* 🎯 ¡Tamaño consistente! */
-  margin-top: 15px;
-  cursor: pointer;
-  transition: var(--transition-normal); /* 🎯 ¡Transición suave! */
+    width: 100%;
+    height: var(--button-height);        /* 🎯 ¡Altura estándar! */
+    background: var(--primary-blue-darker); /* 🎯 ¡Color principal! */
+    border: none;
+    border-radius: var(--border-radius);  /* 🎯 ¡Radio consistente! */
+    color: var(--white);                  /* 🎯 ¡Blanco puro! */
+    font-weight: 500;
+    font-size: var(--font-size-md);      /* 🎯 ¡Tamaño consistente! */
+    margin-top: 15px;
+    cursor: pointer;
+    transition: var(--transition-normal); /* 🎯 ¡Transición suave! */
 }
 
 .btn:hover:not(:disabled) {
-  background: var(--button-hover);
-  color: var(--white); /* Aseguramos que el texto sea blanco para contraste */
+    background: var(--button-hover);
+    color: var(--white); /* Aseguramos que el texto sea blanco para contraste */
 }
 
 .btn:disabled {
-  background: var(--border-disabled); /* 🎯 ¡Color deshabilitado! */
-  color: var(--text-secondary); /* 🎯 ¡Texto secundario! */
-  cursor: not-allowed;
+    background: var(--border-disabled);    /* 🎯 ¡Color deshabilitado! */
+    color: var(--text-secondary);          /* 🎯 ¡Texto secundario! */
+    cursor: not-allowed;
 }
 
 /* Información de la empresa */
 .company-info {
-  text-align: center;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
 }
 
 .company-info p {
-  font-size: 12px;
-  color: #666;
-  margin: 0;
-  font-weight: 300;
-  letter-spacing: 0.5px;
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+    font-weight: 300;
+    letter-spacing: 0.5px;
 }
 
 /* Ajustes para pantallas pequeñas */
 @media (max-width: 480px) {
-  .container {
-    width: 90%;
-    padding: 30px 20px;
-    margin: 20px;
-  }
+    .container {
+        width: 90%;
+        padding: 30px 20px;
+        margin: 20px;
+    }
 
-  .container h1 {
-    font-size: 24px;
-    margin-bottom: 25px;
-  }
+    .container h1 {
+        font-size: 24px;
+        margin-bottom: 25px;
+    }
 
-  .form-group {
-    margin: 15px 0;
-  }
+    .form-group {
+        margin: 15px 0;
+    }
 
-  .form-group input {
-    height: 40px;
-    font-size: 14px;
-    padding: 0 40px 0 12px;
-  }
+    .form-group input {
+        height: 40px;
+        font-size: 14px;
+        padding: 0 40px 0 12px;
+    }
 
-  .form-group i {
-    right: 12px;
-    font-size: 14px;
-  }
+    .form-group i {
+        right: 12px;
+        font-size: 14px;
+    }
 
-  .btn {
-    height: 40px;
-    font-size: 14px;
-  }
+    .btn {
+        height: 40px;
+        font-size: 14px;
+    }
 
-  .company-logo {
-    max-width: 100px;
-    max-height: 50px;
-  }
+    .company-logo {
+        max-width: 100px;
+        max-height: 50px;
+    }
 }
 
 @media (max-width: 360px) {
-  .container {
-    width: 95%;
-    padding: 25px 15px;
-  }
+    .container {
+        width: 95%;
+        padding: 25px 15px;
+    }
 
-  .container h1 {
-    font-size: 22px;
-  }
+    .container h1 {
+        font-size: 22px;
+    }
 
-  .form-group {
-    margin: 12px 0;
-  }
+    .form-group {
+        margin: 12px 0;
+    }
 
-  .form-group input {
-    height: 38px;
-    font-size: 13px;
-    padding: 0 35px 0 10px;
-  }
+    .form-group input {
+        height: 38px;
+        font-size: 13px;
+        padding: 0 35px 0 10px;
+    }
 
-  .btn {
-    height: 38px;
-    font-size: 13px;
-  }
+    .btn {
+        height: 38px;
+        font-size: 13px;
+    }
 
-  .company-logo {
-    max-width: 80px;
-    max-height: 40px;
-  }
+    .company-logo {
+        max-width: 80px;
+        max-height: 40px;
+    }
 }
