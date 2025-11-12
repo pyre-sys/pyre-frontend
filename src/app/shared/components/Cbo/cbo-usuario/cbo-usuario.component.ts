@@ -1,7 +1,27 @@
-import { Component, OnInit, Input, Output, EventEmitter, forwardRef, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  forwardRef,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, Subscription, switchMap, of, catchError } from 'rxjs';
+import {
+  ReactiveFormsModule,
+  FormControl,
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+} from '@angular/forms';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  Subscription,
+  switchMap,
+  of,
+  catchError,
+} from 'rxjs';
 import { UsuarioService } from '../../../../services/usuario.service';
 
 export interface UsuarioOption {
@@ -18,22 +38,20 @@ export interface UsuarioOption {
 @Component({
   selector: 'app-cbo-usuario',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './cbo-usuario.component.html',
-  styleUrls: ['./cbo-usuario.component.css'],
+  styleUrls: ['../cbo.component.css', '../cbo-movimientos.css'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CboUsuarioComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
-export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAccessor {
-
+export class CboUsuarioComponent
+  implements OnInit, OnDestroy, ControlValueAccessor
+{
   // Internal FormControl for search
   searchControl = new FormControl('');
   selectedControl = new FormControl<UsuarioOption | null>(null);
@@ -42,8 +60,8 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
   private subscriptions: Subscription[] = [];
 
   // ControlValueAccessor callbacks
-  private onChange = (value: any) => { };
-  private onTouched = () => { };
+  private onChange = (value: any) => {};
+  private onTouched = () => {};
 
   // Component inputs
   @Input() isLabel: string = '';
@@ -64,7 +82,7 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
   isOpen = false; // Start collapsed
   selectedUsuario: UsuarioOption | null = null;
 
-  constructor(private usuarioService: UsuarioService) { }
+  constructor(private usuarioService: UsuarioService) {}
 
   ngOnInit(): void {
     this.setupSearchSubscription();
@@ -74,7 +92,7 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   private setupSearchSubscription(): void {
@@ -82,7 +100,7 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        switchMap(term => {
+        switchMap((term) => {
           // Only search when dropdown is open
           if (!this.isOpen) {
             return of([]);
@@ -99,7 +117,7 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
           }
         })
       )
-      .subscribe(usuarios => {
+      .subscribe((usuarios) => {
         this.usuarios = usuarios;
       });
 
@@ -107,7 +125,7 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
   }
 
   private loadInitialUsuarios(): void {
-    this.loadInitialData().subscribe(usuarios => {
+    this.loadInitialData().subscribe((usuarios) => {
       this.usuarios = usuarios;
     });
   }
@@ -116,20 +134,19 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
     this.isLoading = true;
     const filters = this.showOnlyActive ? { estado: true } : {};
 
-    return this.usuarioService.getUsers(1, 10, filters)
-      .pipe(
-        switchMap(response => {
-          const rawList = response.data || [];
-          const usuarios = this.mapUsuariosToOptions(rawList);
-          this.isLoading = false;
-          return of(usuarios);
-        }),
-        catchError(error => {
-          console.error('Error loading usuarios:', error);
-          this.isLoading = false;
-          return of([]);
-        })
-      );
+    return this.usuarioService.getUsers(1, 10, filters).pipe(
+      switchMap((response) => {
+        const rawList = response.data || [];
+        const usuarios = this.mapUsuariosToOptions(rawList);
+        this.isLoading = false;
+        return of(usuarios);
+      }),
+      catchError((error) => {
+        console.error('Error loading usuarios:', error);
+        this.isLoading = false;
+        return of([]);
+      })
+    );
   }
 
   private searchUsuarios(searchTerm: string) {
@@ -149,46 +166,44 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
       filters.nombre = searchTerm;
     }
 
-    return this.usuarioService.getUsers(1, 20, filters)
-      .pipe(
-        switchMap(response => {
-          let rawList = response.data || [];
+    return this.usuarioService.getUsers(1, 20, filters).pipe(
+      switchMap((response) => {
+        let rawList = response.data || [];
 
-          // If no results with nombre, try apellido
-          if (rawList.length === 0 && !filters.legajo) {
-            delete filters.nombre;
-            filters.apellido = searchTerm;
+        // If no results with nombre, try apellido
+        if (rawList.length === 0 && !filters.legajo) {
+          delete filters.nombre;
+          filters.apellido = searchTerm;
 
-            return this.usuarioService.getUsers(1, 20, filters)
-              .pipe(
-                switchMap(secondResponse => {
-                  rawList = secondResponse.data || [];
-                  const usuarios = this.mapUsuariosToOptions(rawList);
-                  this.isLoading = false;
-                  return of(usuarios);
-                }),
-                catchError(error => {
-                  console.error('Error searching usuarios by apellido:', error);
-                  this.isLoading = false;
-                  return of([]);
-                })
-              );
-          }
+          return this.usuarioService.getUsers(1, 20, filters).pipe(
+            switchMap((secondResponse) => {
+              rawList = secondResponse.data || [];
+              const usuarios = this.mapUsuariosToOptions(rawList);
+              this.isLoading = false;
+              return of(usuarios);
+            }),
+            catchError((error) => {
+              console.error('Error searching usuarios by apellido:', error);
+              this.isLoading = false;
+              return of([]);
+            })
+          );
+        }
 
-          const usuarios = this.mapUsuariosToOptions(rawList);
-          this.isLoading = false;
-          return of(usuarios);
-        }),
-        catchError(error => {
-          console.error('Error searching usuarios:', error);
-          this.isLoading = false;
-          return of([]);
-        })
-      );
+        const usuarios = this.mapUsuariosToOptions(rawList);
+        this.isLoading = false;
+        return of(usuarios);
+      }),
+      catchError((error) => {
+        console.error('Error searching usuarios:', error);
+        this.isLoading = false;
+        return of([]);
+      })
+    );
   }
 
   private mapUsuariosToOptions(usuarios: any[]): UsuarioOption[] {
-    return usuarios.map(u => ({
+    return usuarios.map((u) => ({
       id: u.id || u.idUsuario,
       legajo: u.legajo || '',
       nombre: u.nombre || u.firstName || '',
@@ -196,7 +211,7 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
       dni: u.dni || '',
       rolNombre: u.rolNombre || u.rol || '',
       activo: u.activo !== undefined ? u.activo : true,
-      displayText: this.buildDisplayText(u)
+      displayText: this.buildDisplayText(u),
     }));
   }
 
@@ -213,9 +228,11 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
     return text;
   }
 
-  // New methods for handling input interactions
+  // New methods for handling input interactions (igual que herramientas)
   onMainInputClick(): void {
-    if (!this.isDisabled) {
+    if (this.isDisabled) return;
+
+    if (!this.isOpen) {
       this.openDropdown();
     }
   }
@@ -263,9 +280,16 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
 
   private openDropdown(): void {
     this.isOpen = true;
-    this.loadInitialData().subscribe(usuarios => {
+
+    // Load initial data when opening
+    this.loadInitialData().subscribe((usuarios) => {
       this.usuarios = usuarios;
     });
+
+    // Clear search when opening if no selection
+    if (!this.selectedUsuario) {
+      this.searchControl.setValue('', { emitEvent: false });
+    }
   }
 
   private closeDropdown(): void {
@@ -329,7 +353,7 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
 
   private findUsuarioById(id: number): void {
     // First check if it's in current list
-    const found = this.usuarios.find(u => u.id === id);
+    const found = this.usuarios.find((u) => u.id === id);
     if (found) {
       this.selectUsuario(found);
       return;
@@ -347,7 +371,7 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
       error: () => {
         // If request fails, just set the ID
         this.onChange(id);
-      }
+      },
     });
   }
 
@@ -366,7 +390,10 @@ export class CboUsuarioComponent implements OnInit, OnDestroy, ControlValueAcces
 
   // Helper methods for template
   hasErrors(): boolean {
-    return !!(this.objectErrors && (this.isTouched || this.selectedControl.touched));
+    return !!(
+      this.objectErrors &&
+      (this.isTouched || this.selectedControl.touched)
+    );
   }
 
   getErrorMessage(): string {

@@ -1,68 +1,10 @@
-/* Import generic combo styles */
-@import '../cbo.component.css';
+/* Importar estilos compartidos para combos (módulo movimientos/cbo) */
+@import "../cbo-movimientos.css";
 
-/* Specific styles for herramientas combo */
+/* Overrides locales (mínimos) */
 .cbo-herramientas-wrapper {
-    /* Use the generic .cbo-wrapper class instead */
-    @extend .cbo-wrapper;
+  /* mantener posicionamiento contextual si hace falta */
+  position: relative;
 }
 
-.option-codigo {
-    font-family: monospace;
-    font-weight: 600;
-    color: var(--color-primary, #3b82f6);
-    font-size: 0.9rem;
-    min-width: 60px;
-}
-
-.dropdown-option.selected .option-codigo {
-    color: var(--color-white, #ffffff);
-}
-
-.option-nombre {
-    flex: 1;
-    font-size: 0.95rem;
-}
-
-.option-marca {
-    color: var(--color-text-secondary, #6b7280);
-    font-style: italic;
-}
-
-.dropdown-option.selected .option-marca {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.option-disponibilidad {
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 12px;
-    background: var(--color-error, #ef4444);
-    color: var(--color-white, #ffffff);
-}
-
-.option-disponibilidad.disponible {
-    background: var(--color-success, #10b981);
-}
-
-.dropdown-option.selected .option-disponibilidad {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--color-white, #ffffff);
-}
-
-/* Responsive adjustments for herramientas-specific elements */
-@media (max-width: 768px) {
-    .option-codigo {
-        font-size: 0.85rem;
-        min-width: 50px;
-    }
-
-    .option-nombre {
-        font-size: 0.9rem;
-    }
-
-    .option-marca {
-        font-size: 0.8rem;
-    }
-}
+/* Si necesita reglas específicas de este combo, añadirlas aquí. */

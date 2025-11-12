@@ -130,88 +130,66 @@
       </div>
     </div>
 
-    <!-- SECCIÓN DE ALERTAS (Centro-Derecha) -->
-    <div class="topbar-alerts-section" *ngIf="isLoggedIn && !isSmallScreen">
-      <div
-        class="alerts-card"
-        (click)="navigateToAlertas()"
-        [class.has-alerts]="totalAlertas > 0"
-        [class.has-critical]="alertasVencidas > 0"
-        [ngbTooltip]="alertsTooltip"
-        placement="bottom"
-        [@alertsPulse]="alertasVencidas > 0 ? 'critical' : 'normal'"
-      >
-        <!-- Icono de campana -->
-        <div class="alerts-icon">
-          <i class="bi bi-bell" [class.bi-bell-fill]="totalAlertas > 0"></i>
-
-          <!-- Indicador de alertas críticas -->
-          <div *ngIf="alertasVencidas > 0" class="critical-indicator"></div>
-        </div>
-
-        <!-- Contador de alertas -->
-        <div class="alerts-counter" *ngIf="totalAlertas > 0">
-          <div class="alerts-stats">
-            <!-- Alertas pendientes -->
-            <span *ngIf="alertasPendientes > 0" class="alert-count pending">
-              <i class="bi bi-exclamation-triangle"></i>
-              {{ alertasPendientes }}
-            </span>
-
-            <!-- Alertas vencidas -->
-            <span *ngIf="alertasVencidas > 0" class="alert-count overdue">
-              <i class="bi bi-exclamation-octagon"></i>
-              {{ alertasVencidas }}
-            </span>
+    <!-- Sección de notificaciones unificada (REEMPLAZA la anterior) -->
+    <div class="topbar-alerts-section">
+      <div class="notifications-container">
+        <!-- Versión desktop -->
+        <div
+          class="notifications-btn"
+          [class.empty]="getTotalNotifications() === 0"
+          [class.has-normal]="hasNormalAlerts()"
+          [class.has-warning]="hasWarningAlerts()"
+          [class.has-critical]="hasCriticalAlerts()"
+          (click)="navigateToAlertas()"
+          [title]="getNotificationsTooltip()"
+        >
+          <!-- Icono principal -->
+          <div class="notifications-icon">
+            <i class="bi bi-bell"></i>
+            <div *ngIf="hasCriticalAlerts()" class="critical-dot"></div>
           </div>
 
-          <!-- Badge total -->
-          <div
-            class="total-badge"
-            [class.critical]="alertasVencidas > 0"
-            [class.warning]="alertasVencidas === 0 && alertasPendientes > 0"
-          >
-            {{ totalAlertas }}
+          <!-- Contenido textual -->
+          <div class="notifications-content">
+            <div class="notifications-title">
+              {{
+                getTotalNotifications() === 0
+                  ? "Sin alertas"
+                  : getTotalNotifications() +
+                    " alerta" +
+                    (getTotalNotifications() > 1 ? "s" : "")
+              }}
+            </div>
+            <div class="notifications-subtitle">
+              {{ getNotificationsSubtitle() }}
+            </div>
           </div>
-        </div>
 
-        <!-- Estado sin alertas -->
-        <div *ngIf="totalAlertas === 0" class="no-alerts">
-          <span class="no-alerts-text">Sin alertas</span>
+          <!-- REMOVIDO: Badge contador redundante -->
         </div>
       </div>
     </div>
 
-    <!-- SECCIÓN DE ALERTAS MÓVIL (Simplificada) -->
+    <!-- Versión móvil -->
     <div
-      class="topbar-alerts-mobile"
-      *ngIf="isLoggedIn && isSmallScreen && totalAlertas > 0"
+      class="notifications-mobile"
+      [class.critical]="hasCriticalAlerts()"
+      [title]="getNotificationsTooltip()"
+      (click)="navigateToAlertas()"
     >
-      <button
-        class="alerts-mobile-btn"
-        (click)="navigateToAlertas()"
-        [class.critical]="alertasVencidas > 0"
-        [ngbTooltip]="alertsTooltip"
-        placement="bottom"
+      <i class="bi bi-bell"></i>
+      <div
+        *ngIf="getTotalNotifications() > 0"
+        class="mobile-counter"
+        [class.normal]="!hasWarningAlerts() && !hasCriticalAlerts()"
+        [class.warning]="hasWarningAlerts() && !hasCriticalAlerts()"
       >
-        <i class="bi bi-bell-fill"></i>
-        <span class="mobile-badge">{{ totalAlertas }}</span>
-      </button>
+        {{ getTotalNotifications() > 99 ? "99+" : getTotalNotifications() }}
+      </div>
     </div>
 
     <!-- SECCIÓN DE USUARIO (Derecha) -->
     <div class="topbar-user-section" *ngIf="isLoggedIn">
-      <!-- Información del usuario (desktop) -->
-      <div class="user-info" *ngIf="!isSmallScreen">
-        <span class="user-pill" [ngbTooltip]="pillTooltip" placement="bottom">
-          <i class="bi bi-person-badge me-1"></i>
-          {{ displayLegajo || userLegajo }}
-        </span>
-        <span class="user-role-badge" *ngIf="displayRole">
-          {{ displayRole }}
-        </span>
-      </div>
-
       <!-- Botón de logout (icono) -->
       <button
         class="logout-icon-btn"

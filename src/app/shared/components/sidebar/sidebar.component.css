@@ -2,590 +2,625 @@
    Reset y configuración base
    ========================================================== */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* ==========================================================
    Barra Superior (Top-Bar) - Siempre visible
    ========================================================== */
 .top-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: var(--topbar-height);        /* 🎯 ¡Altura estándar! */
-    background: var(--white);            /* 🎯 ¡Blanco puro! */
-    z-index: 1003;
-    display: flex;
-    align-items: center;
-    padding: 0 1.5rem;
-    box-shadow: var(--shadow-light);     /* 🎯 ¡Sombra consistente! */
-    border-bottom: 1px solid var(--border-light); /* 🎯 ¡Borde consistente! */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--topbar-height); /* 🎯 ¡Altura estándar! */
+  background: var(--white); /* 🎯 ¡Blanco puro! */
+  z-index: 1003;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  box-shadow: var(--shadow-light); /* 🎯 ¡Sombra consistente! */
+  border-bottom: 1px solid var(--border-light); /* 🎯 ¡Borde consistente! */
 }
 
 /* Layout Desktop - Sin menú hamburguesa */
 .topbar-desktop {
-    display: flex;
-    align-items: center;
-    width: 100%;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
 .topbar-desktop .topbar-center {
-    flex: 1;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .topbar-desktop .topbar-right {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 /* Layout Mobile - Con menú hamburguesa y logo */
 .topbar-mobile {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .topbar-mobile .topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .topbar-mobile .topbar-center {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .topbar-mobile .topbar-right {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .logo-small img {
-    height: 40px;
-    width: auto;
-    cursor: pointer;
+  height: 40px;
+  width: auto;
+  cursor: pointer;
 }
 
 .hamburger-menu {
-    font-size: 1.5rem;
-    color: var(--text-color);            /* 🎯 ¡Color de texto! */
-    cursor: pointer;
-    transition: var(--transition-slow);  /* 🎯 ¡Transición suave! */
-    padding: 0.5rem;
-    border-radius: var(--border-radius); /* 🎯 ¡Radio consistente! */
+  font-size: 1.5rem;
+  color: var(--text-color); /* 🎯 ¡Color de texto! */
+  cursor: pointer;
+  transition: var(--transition-slow); /* 🎯 ¡Transición suave! */
+  padding: 0.5rem;
+  border-radius: var(--border-radius); /* 🎯 ¡Radio consistente! */
 }
 
 .hamburger-menu:hover {
-    background-color: rgba(0, 0, 0, 0.05); /* Hover más suave */
-    transform: scale(1.05);
+  background-color: rgba(0, 0, 0, 0.05); /* Hover más suave */
+  transform: scale(1.05);
 }
 
 .app-title {
-    color: var(--text-color);            /* 🎯 ¡Color de texto! */
-    font-weight: 600;
-    font-size: 1.2rem;
-    margin: 0;
-    text-align: center;
-    letter-spacing: 0.5px;
+  color: var(--text-color); /* 🎯 ¡Color de texto! */
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.5px;
 }
 
 .user-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-color);            /* 🎯 ¡Color de texto! */
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--border-radius-lg); /* 🎯 ¡Radio grande! */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-color); /* 🎯 ¡Color de texto! */
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-lg); /* 🎯 ¡Radio grande! */
 }
 
 .user-name {
-    font-size: 0.9rem;
-    font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .user-info i {
-    font-size: 1.5rem;
+  font-size: 1.5rem;
 }
 
 /* Email pill en el topbar */
 .user-email-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    /* Hacer el fondo opaco para que no se vea afectado por el hover del contenedor */
-    background: var(--white);            /* 🎯 ¡Blanco puro! */
-    padding: 0.35rem 0.6rem;
-    border-radius: 999px;
-    margin-right: 0.5rem;
-    max-width: 220px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    border: 1px solid rgba(0,0,0,0.06);
-    box-shadow: var(--shadow-light);     /* 🎯 ¡Sombra consistente! */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* Hacer el fondo opaco para que no se vea afectado por el hover del contenedor */
+  background: var(--white); /* 🎯 ¡Blanco puro! */
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  margin-right: 0.5rem;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-light); /* 🎯 ¡Sombra consistente! */
 }
 
 /* El pill de email no debe parecer un botón: sin cursor pointer ni cambios en hover */
-.user-email-pill { cursor: default; }
+.user-email-pill {
+  cursor: default;
+}
 
 /* Interacción solo en el icono de perfil */
-.profile-toggle { display: inline-flex; align-items: center; border-radius: 6px; padding: 0.25rem; }
-.profile-toggle .profile-icon { font-size: 1.5rem; color: var(--text-color); /* 🎯 ¡Color de texto! */ }
-.profile-toggle { cursor: pointer; }
-.profile-toggle:hover { background: rgba(0,0,0,0.04); }
+.profile-toggle {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  padding: 0.25rem;
+}
+.profile-toggle .profile-icon {
+  font-size: 1.5rem;
+  color: var(--text-color); /* 🎯 ¡Color de texto! */
+}
+.profile-toggle {
+  cursor: pointer;
+}
+.profile-toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
 
 /* Dropdown de perfil */
 .profile-dropdown {
-    position: absolute;
-    top: 64px; /* justo debajo del topbar */
-    right: 1.5rem;
-    background: var(--white);            /* 🎯 ¡Blanco puro! */
-    border: 1px solid rgba(0,0,0,0.06);
-    box-shadow: var(--shadow-medium);    /* 🎯 ¡Sombra media! */
-    border-radius: var(--border-radius-lg); /* 🎯 ¡Radio grande! */
-    z-index: 1200;
-    min-width: 190px; /* más ancho */
+  position: absolute;
+  top: 64px; /* justo debajo del topbar */
+  right: 1.5rem;
+  background: var(--white); /* 🎯 ¡Blanco puro! */
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-medium); /* 🎯 ¡Sombra media! */
+  border-radius: var(--border-radius-lg); /* 🎯 ¡Radio grande! */
+  z-index: 1200;
+  min-width: 190px; /* más ancho */
 }
 .profile-dropdown ul {
-    list-style: none;
-    margin: 0;
-    padding: 0.5rem 0;
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
 }
 .profile-dropdown li {
-    padding: 0.36rem 0.9rem; /* menos espacio vertical y horizontal */
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background 0.12s ease;
-    display: flex;
-    align-items: center;
-    font-size: 0.86rem; /* más sutil */
-    color: rgba(0,0,0,0.75); /* tono más claro */
+  padding: 0.36rem 0.9rem; /* menos espacio vertical y horizontal */
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  display: flex;
+  align-items: center;
+  font-size: 0.86rem; /* más sutil */
+  color: rgba(0, 0, 0, 0.75); /* tono más claro */
 }
 .profile-dropdown li:hover {
-    background: rgba(0,0,0,0.035);
+  background: rgba(0, 0, 0, 0.035);
 }
 
 /* Iconos más pequeños y con espacio reducido */
 .profile-dropdown li i {
-    font-size: 0.95rem; /* icono más pequeño */
-    margin-right: 0.5rem; /* espacio entre icono y texto */
-    color: rgba(0,0,0,0.6);
+  font-size: 0.95rem; /* icono más pequeño */
+  margin-right: 0.5rem; /* espacio entre icono y texto */
+  color: rgba(0, 0, 0, 0.6);
 }
 
 .user-email-pill .email-icon {
-    font-size: 0.9rem;
-    color: var(--dominant-color);        /* 🎯 ¡Color corporativo! */
+  font-size: 0.9rem;
+  color: var(--dominant-color); /* 🎯 ¡Color corporativo! */
 }
 
 .user-email-pill .email-text {
-    font-size: 0.85rem;
-    color: var(--text-color);            /* 🎯 ¡Color de texto! */
-    display: inline-block;
-    max-width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  font-size: 0.85rem;
+  color: var(--text-color); /* 🎯 ¡Color de texto! */
+  display: inline-block;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 575.98px) {
-    .user-email-pill { display: none; } /* ocultar email en móviles muy pequeños */
+  .user-email-pill {
+    display: none;
+  } /* ocultar email en móviles muy pequeños */
 }
 
 /* ==========================================================
    Sidebar Principal
    ========================================================== */
 .sidebar {
-    position: fixed;
-    top: 0; /* Comenzar desde la parte superior, cubriendo parte del topbar */
-    left: 0;
-    width: var(--sidebar-width);
-    height: 100vh; /* Altura completa de la pantalla */
-    background: linear-gradient(180deg, rgba(44, 44, 44, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%); /* Gradiente con transparencia */
-    backdrop-filter: blur(10px); /* Efecto de desenfoque para mejorar la transparencia */
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3); /* Sombra más intensa */
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    z-index: 1002; /* Mayor que el topbar para estar por encima */
-    overflow-y: auto; /* Scroll solo en el sidebar */
-    overflow-x: hidden;
-    padding-top: 70px; /* Espacio para que el contenido no se oculte detrás del topbar */
-    padding-bottom: 20px; /* Espacio reducido en la parte inferior */
+  position: fixed;
+  top: 0; /* Comenzar desde la parte superior, cubriendo parte del topbar */
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh; /* Altura completa de la pantalla */
+  background: linear-gradient(
+    180deg,
+    rgba(44, 44, 44, 0.95) 0%,
+    rgba(26, 26, 26, 0.95) 100%
+  ); /* Gradiente con transparencia */
+  backdrop-filter: blur(
+    10px
+  ); /* Efecto de desenfoque para mejorar la transparencia */
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3); /* Sombra más intensa */
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 1002; /* Mayor que el topbar para estar por encima */
+  overflow-y: auto; /* Scroll solo en el sidebar */
+  overflow-x: hidden;
+  padding-top: 70px; /* Espacio para que el contenido no se oculte detrás del topbar */
+  padding-bottom: 20px; /* Espacio reducido en la parte inferior */
 
-    /* Aplicar Inter solo al menú y submenú del sidebar */
-    .sidebar .sidebar-menu,
-    .sidebar .sidebar-menu .nav-link,
-    .sidebar .sidebar-submenu,
-    .sidebar .sidebar-submenu .nav-link {
-        font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial;
-        font-weight: 400; /* peso normal, menos grueso */
-    }
+  /* Aplicar Inter solo al menú y submenú del sidebar */
+  .sidebar .sidebar-menu,
+  .sidebar .sidebar-menu .nav-link,
+  .sidebar .sidebar-submenu,
+  .sidebar .sidebar-submenu .nav-link {
+    font-family: "Roboto", system-ui, -apple-system, "Segoe UI",
+      "Helvetica Neue", Arial;
+    font-weight: 400; /* peso normal, menos grueso */
+  }
 }
 
 .sidebar::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 
 .sidebar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* Estados del sidebar */
 .sidebar.hidden {
-    transform: translateX(-100%);
+  transform: translateX(-100%);
 }
 
 .sidebar.visible {
-    transform: translateX(0);
+  transform: translateX(0);
 }
 
 /* ==========================================================
    Logo del sidebar
    ========================================================== */
 .sidebar-img {
-    text-align: left; /* Alinear a la izquierda en lugar de centrar */
-    padding: 0.5rem 1rem; /* Padding mínimo */
-    height: 70px; /* Misma altura que el topbar */
-    display: flex;
-    align-items: center; /* Centrar verticalmente */
-    justify-content: flex-start; /* Alinear a la izquierda */
-    margin-top: -70px; /* Subir el logo para alinearlo con el topbar */
-    margin-bottom: 0; /* Sin margen inferior para mantener el espacio */
+  text-align: left; /* Alinear a la izquierda en lugar de centrar */
+  padding: 0.5rem 1rem; /* Padding mínimo */
+  height: 70px; /* Misma altura que el topbar */
+  display: flex;
+  align-items: center; /* Centrar verticalmente */
+  justify-content: flex-start; /* Alinear a la izquierda */
+  margin-top: -70px; /* Subir el logo para alinearlo con el topbar */
+  margin-bottom: 0; /* Sin margen inferior para mantener el espacio */
 }
 
 .sidebar-img img {
-    height: 45px; /* Reducir tamaño de 60px a 45px */
-    width: auto;
-    cursor: pointer;
-    transition: transform 0.3s ease;
+  height: 45px; /* Reducir tamaño de 60px a 45px */
+  width: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
 .sidebar-img img:hover {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 /* ==========================================================
    Perfil de usuario
    ========================================================== */
 .user-profile {
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .profile-content {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .profile-content i {
-    font-size: 2rem;
-    color: var(--corporate-red);         /* 🎯 ¡Rojo corporativo! */
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+  font-size: 2rem;
+  color: var(--corporate-red); /* 🎯 ¡Rojo corporativo! */
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
 }
 
 .profile-info {
-    flex: 1;
+  flex: 1;
 }
 
-.user-name, .user-lastname {
-    color: white;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin: 0;
-    line-height: 1.2;
+.user-name,
+.user-lastname {
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .profile-type {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.75rem;
-    margin-top: 0.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
 }
 
 /* Estilos específicos por perfil */
 .perfil-admin .profile-content i {
-    color: var(--corporate-red);         /* 🎯 ¡Rojo corporativo! */
+  color: var(--corporate-red); /* 🎯 ¡Rojo corporativo! */
 }
 
 .perfil-usuario .profile-content i {
-    color: var(--info-color);            /* 🎯 ¡Azul información! */
+  color: var(--info-color); /* 🎯 ¡Azul información! */
 }
 
 /* ==========================================================
    Navegación principal
    ========================================================== */
 .nav {
-    padding: 0.5rem 0;
+  padding: 0.5rem 0;
 }
 
 .nav-item {
-    margin-bottom: 0.1rem;
+  margin-bottom: 0.1rem;
 }
 
 .nav-link {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    color: rgba(255, 255, 255, 0.9);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    position: relative;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
 }
 
 .nav-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateX(5px);
 }
 
 .nav-link i {
-    width: 20px;
-    text-align: center;
-    margin-right: 1rem;
-    font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+  margin-right: 1rem;
+  font-size: 1.1rem;
 }
 
 .nav-link span {
-    flex: 1;
+  flex: 1;
 }
 
 /* Flecha para submenús */
 .arrow {
-    font-size: 0.8rem;
-    transition: transform 0.3s ease;
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
 }
 
 .arrow:before {
-    content: '\F285'; /* Bootstrap icon chevron-right (cerrado por defecto) */
-    font-family: "bootstrap-icons";
+  content: "\F285"; /* Bootstrap icon chevron-right (cerrado por defecto) */
+  font-family: "bootstrap-icons";
 }
 
 .arrow.rotate {
-    transform: rotate(90deg); /* Rotar 90 grados para mostrar chevron hacia abajo */
+  transform: rotate(
+    90deg
+  ); /* Rotar 90 grados para mostrar chevron hacia abajo */
 }
 
 /* ==========================================================
    Submenús
    ========================================================== */
 .sub-menu {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    /* Hacer el fondo transparente para integrarse con el sidebar */
-    background: transparent;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Hacer el fondo transparente para integrarse con el sidebar */
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .sub-menu.expanded {
-    max-height: 500px;
+  max-height: 500px;
 }
 
 .sub-menu .nav-item {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .sub-menu .nav-link {
-    padding: 0.75rem 1.5rem 0.75rem 3.5rem;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.9);
-    border-left: 3px solid transparent;
-    background: transparent; /* asegurar transparencia */
+  padding: 0.75rem 1.5rem 0.75rem 3.5rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  border-left: 3px solid transparent;
+  background: transparent; /* asegurar transparencia */
 }
 
 .sub-menu .nav-link:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-left-color: var(--corporate-red); /* 🎯 ¡Rojo corporativo! */
-    transform: translateX(3px);
+  background: rgba(255, 255, 255, 0.15);
+  border-left-color: var(--corporate-red); /* 🎯 ¡Rojo corporativo! */
+  transform: translateX(3px);
 }
 
 .sub-menu .nav-link.active {
-    background: rgba(255, 255, 255, 0.12); /* menos contraste para evitar sensación de letras anchas */
-    border-left-color: var(--corporate-red); /* 🎯 ¡Rojo corporativo! */
-    color: white;
-    font-weight: 500; /* reducir peso para que no se vea tan grueso */
-    letter-spacing: -0.2px; /* disminuir el tracking para que las letras no parezcan tan anchas */
-    padding-left: 1.45rem; /* ajustar ligeramente para compensar el border-left */
+  background: rgba(
+    255,
+    255,
+    255,
+    0.12
+  ); /* menos contraste para evitar sensación de letras anchas */
+  border-left-color: var(--corporate-red); /* 🎯 ¡Rojo corporativo! */
+  color: white;
+  font-weight: 500; /* reducir peso para que no se vea tan grueso */
+  letter-spacing: -0.2px; /* disminuir el tracking para que las letras no parezcan tan anchas */
+  padding-left: 1.45rem; /* ajustar ligeramente para compensar el border-left */
 }
 
 /* Estilo para el item actualmente activo en el nav principal (no submenú) */
 .nav-link.active {
-    background: rgba(255, 255, 255, 0.12);
-    color: white;
-    font-weight: 500; /* mismo peso para consistencia */
-    letter-spacing: -0.2px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-weight: 500; /* mismo peso para consistencia */
+  letter-spacing: -0.2px;
 }
 
 /* ==========================================================
    Botón de logout (estilo de menú)
    ========================================================== */
 .sidebar-logout {
-    position: absolute; /* Posicionamiento absoluto */
-    bottom: 0; /* Pegado al fondo */
-    left: 0;
-    right: 0; /* Ocupa todo el ancho */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1rem 0.5rem 1.5rem 0.5rem; /* Padding superior e inferior */
-    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%); /* Sutil degradado de fondo */
+  position: absolute; /* Posicionamiento absoluto */
+  bottom: 0; /* Pegado al fondo */
+  left: 0;
+  right: 0; /* Ocupa todo el ancho */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 0.5rem 1.5rem 0.5rem; /* Padding superior e inferior */
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.1) 100%
+  ); /* Sutil degradado de fondo */
 }
 
 .logout-link {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    color: rgba(255, 255, 255, 0.9);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-radius: 8px;
-    margin: 0.25rem 0.5rem;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin: 0.25rem 0.5rem;
+  cursor: pointer;
 }
 
 .logout-link:hover {
-    background: rgba(220, 38, 27, 0.15); /* Hover sutil en rojo */
-    color: var(--corporate-red);         /* 🎯 ¡Rojo corporativo! */
-    transform: translateX(5px);
+  background: rgba(220, 38, 27, 0.15); /* Hover sutil en rojo */
+  color: var(--corporate-red); /* 🎯 ¡Rojo corporativo! */
+  transform: translateX(5px);
 }
 
 .logout-link i {
-    font-size: 1.2rem;
-    margin-right: 0.75rem;
-    width: 20px;
-    text-align: center;
-    color: inherit;
+  font-size: 1.2rem;
+  margin-right: 0.75rem;
+  width: 20px;
+  text-align: center;
+  color: inherit;
 }
 
 .logout-link span {
-    font-weight: 500;
-    font-size: 0.95rem;
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 /* ==========================================================
    Contenido principal
    ========================================================== */
 .main-content {
-    /* Reservar espacio equivalente al ancho real del sidebar (260px) */
-    margin-left: var(--sidebar-width);
-    /* Asegurar que la página entre en pantalla sin hacer scroll (reserva topbar) */
-    min-height: calc(100vh - var(--topbar-height));
-    width: calc(100% - var(--sidebar-width));
-    max-width: calc(100% - var(--sidebar-width));
-    overflow-x: hidden; /* Prevenir scroll horizontal */
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-sizing: border-box;
-    position: relative; /* mantener apilamiento correcto */
-    z-index: 900; /* Por debajo del sidebar (sidebar tiene z-index:1002) */
+  /* Reservar espacio equivalente al ancho real del sidebar (260px) */
+  margin-left: var(--sidebar-width);
+  /* Asegurar que la página entre en pantalla sin hacer scroll (reserva topbar) */
+  min-height: calc(100vh - var(--topbar-height));
+  width: calc(100% - var(--sidebar-width));
+  max-width: calc(100% - var(--sidebar-width));
+  overflow-x: hidden; /* Prevenir scroll horizontal */
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-sizing: border-box;
+  position: relative; /* mantener apilamiento correcto */
+  z-index: 900; /* Por debajo del sidebar (sidebar tiene z-index:1002) */
 }
 
 .main-content.expanded {
-    margin-left: 0;
-    width: 100%;
-    max-width: 100%;
+  margin-left: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* ==========================================================
    Responsive Design
    ========================================================== */
 @media (max-width: 991.98px) {
-    .topbar-desktop {
-        padding-left: 0; /* Remover espacio del sidebar en tablets/móviles */
-    }
+  .topbar-desktop {
+    padding-left: 0; /* Remover espacio del sidebar en tablets/móviles */
+  }
 
-    .sidebar {
-        transform: translateX(-100%);
-        z-index: 1002;
-        top: 0; /* Comenzar desde arriba en móviles también */
-        height: 100vh; /* Altura completa */
-        padding-top: 70px; /* Espacio para el topbar */
-        padding-bottom: 20px; /* Espacio reducido */
-    }
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 1002;
+    top: 0; /* Comenzar desde arriba en móviles también */
+    height: 100vh; /* Altura completa */
+    padding-top: 70px; /* Espacio para el topbar */
+    padding-bottom: 20px; /* Espacio reducido */
+  }
 
-    .sidebar.visible {
-        transform: translateX(0);
-    }
+  .sidebar.visible {
+    transform: translateX(0);
+  }
 
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-        max-width: 100%;
-    }
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 575.98px) {
-    .sidebar {
-        width: 100%;
-        max-width: 100vw;
-        top: 0; /* Comenzar desde arriba */
-        height: 100vh; /* Altura completa */
-        padding-top: 60px; /* Espacio para topbar más pequeño en móviles */
-        padding-bottom: 20px; /* Espacio reducido */
-    }
+  .sidebar {
+    width: 100%;
+    max-width: 100vw;
+    top: 0; /* Comenzar desde arriba */
+    height: 100vh; /* Altura completa */
+    padding-top: 60px; /* Espacio para topbar más pequeño en móviles */
+    padding-bottom: 20px; /* Espacio reducido */
+  }
 
-    .top-bar {
-        height: 60px;
-        padding: 0 0.75rem;
-    }
+  .top-bar {
+    height: 60px;
+    padding: 0 0.75rem;
+  }
 
-    .hamburger-menu {
-        font-size: 1.3rem;
-    }
+  .hamburger-menu {
+    font-size: 1.3rem;
+  }
 
-    .app-title {
-        font-size: 1rem; /* Título más pequeño en móviles */
-    }
+  .app-title {
+    font-size: 1rem; /* Título más pequeño en móviles */
+  }
 
-    .topbar-mobile .user-name {
-        display: none; /* Ocultar nombre en pantallas muy pequeñas */
-    }
-}/* ==========================================================
+  .topbar-mobile .user-name {
+    display: none; /* Ocultar nombre en pantallas muy pequeñas */
+  }
+} /* ==========================================================
    Botón Flotante para Mostrar el Sidebar
    ========================================================== */
 
 .floating-sidebar-toggle {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 40px;
-    height: 40px;
-    background-color: rgba(43, 1, 75, 0.74);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 1001;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(43, 1, 75, 0.74);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
 }
 
 .floating-sidebar-toggle i {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 /* ==========================================================
@@ -593,198 +628,374 @@
    ========================================================== */
 
 .user-profile {
-    padding: 20px 15px;
-    margin: 15px 10px;
-    border-radius: 12px;
-    background: rgba(50, 50, 50, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    /* DIMENSIONES FIJAS PARA EVITAR REDUCCIÓN */
-    min-height: 80px;
-    max-height: 80px;
-    height: 80px;
-    flex-shrink: 0;
-    /* Evita que se comprima */
-    flex-grow: 0;
-    /* Evita que crezca */
+  padding: 20px 15px;
+  margin: 15px 10px;
+  border-radius: 12px;
+  background: rgba(50, 50, 50, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  /* DIMENSIONES FIJAS PARA EVITAR REDUCCIÓN */
+  min-height: 80px;
+  max-height: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  /* Evita que se comprima */
+  flex-grow: 0;
+  /* Evita que crezca */
 }
 
 .user-profile:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
 .profile-content {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    position: relative;
-    z-index: 1;
-    /* ALTURA FIJA */
-    height: 100%;
-    flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  z-index: 1;
+  /* ALTURA FIJA */
+  height: 100%;
+  flex-shrink: 0;
 }
 
 .profile-content i {
-    font-size: 2.2rem;
-    padding: 12px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-    /* TAMAÑO FIJO */
-    min-width: 50px;
-    width: 50px;
-    height: 50px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+  font-size: 2.2rem;
+  padding: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  /* TAMAÑO FIJO */
+  min-width: 50px;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .profile-info {
-    /* CONTENEDOR PARA NOMBRE Y TIPO DE PERFIL */
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex-shrink: 0;
-    overflow: hidden;
-    min-width: 0;
-    /* Permite que el texto se corte con ellipsis */
+  /* CONTENEDOR PARA NOMBRE Y TIPO DE PERFIL */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  overflow: hidden;
+  min-width: 0;
+  /* Permite que el texto se corte con ellipsis */
 }
 
 .user-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--white);                 /* 🎯 ¡Blanco puro! */
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    line-height: 1.2;
-    letter-spacing: 0.3px;
-    /* EVITAR CAMBIO DE TAMAÑO */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--white); /* 🎯 ¡Blanco puro! */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+  letter-spacing: 0.3px;
+  /* EVITAR CAMBIO DE TAMAÑO */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
 }
 
 .profile-type {
-    font-size: 0.85rem;
-    font-weight: 400;
-    opacity: 0.85;
-    color: var(--text-muted);            /* 🎯 ¡Texto muy claro! */
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-family: 'Nunito', sans-serif;
-    /* EVITAR CAMBIO DE TAMAÑO */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin: 0;
+  font-size: 0.85rem;
+  font-weight: 400;
+  opacity: 0.85;
+  color: var(--text-muted); /* 🎯 ¡Texto muy claro! */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: "Nunito", sans-serif;
+  /* EVITAR CAMBIO DE TAMAÑO */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
 }
 
 /* Perfiles específicos */
 .perfil-admin {
-    background: var(--gradient-gold);        /* 🎯 ¡Gradiente dorado! */
-    color: #2c3e50;
+  background: var(--gradient-gold); /* 🎯 ¡Gradiente dorado! */
+  color: #2c3e50;
 }
 
 .perfil-entrenador {
-    background: var(--gradient-green);       /* 🎯 ¡Gradiente verde! */
+  background: var(--gradient-green); /* 🎯 ¡Gradiente verde! */
 }
 
 .perfil-atleta {
-    background: var(--gradient-blue);        /* 🎯 ¡Gradiente azul! */
+  background: var(--gradient-blue); /* 🎯 ¡Gradiente azul! */
 }
 
 .perfil-gimnasio {
-    background: linear-gradient(135deg, #FF9800, #F57C00); /* 🚧 Este aún no tiene variable */
+  background: linear-gradient(
+    135deg,
+    #ff9800,
+    #f57c00
+  ); /* 🚧 Este aún no tiene variable */
 }
 
 /* Responsive optimizado */
 @media (max-width: 991.98px) {
-    .top-bar {
-        display: flex;
-        /* Mostrar la barra superior */
-    }
+  .top-bar {
+    display: flex;
+    /* Mostrar la barra superior */
+  }
 
-    /* Contenido principal */
-    .main-content {
-        padding-top: 0px;
-        margin-left: 0;
-        /* Sin margen en pantallas pequeñas */
-        max-width: 100%;
-        margin-top: 10px;
-        /* Siempre deja espacio para la top-bar en móvil */
-    }
+  /* Contenido principal */
+  .main-content {
+    padding-top: 0px;
+    margin-left: 0;
+    /* Sin margen en pantallas pequeñas */
+    max-width: 100%;
+    margin-top: 10px;
+    /* Siempre deja espacio para la top-bar en móvil */
+  }
 
-    /* Sidebar */
-    .sidebar {
-        display: none;
-        /* Ocultar el sidebar inicialmente */
-    }
+  /* Sidebar */
+  .sidebar {
+    display: none;
+    /* Ocultar el sidebar inicialmente */
+  }
 
-    .sidebar.visible {
-        top: 80px;
-        height: calc(100vh - 80px);
-        display: block;
-        /* Mostrar cuando se activa */
-        width: 250px;
-        /* Ancho fijo */
-    }
+  .sidebar.visible {
+    top: 80px;
+    height: calc(100vh - 80px);
+    display: block;
+    /* Mostrar cuando se activa */
+    width: 250px;
+    /* Ancho fijo */
+  }
 
-    .sidebar.hidden {
-        display: none;
-        /* Asegurar que el sidebar esté oculto */
-    }
+  .sidebar.hidden {
+    display: none;
+    /* Asegurar que el sidebar esté oculto */
+  }
 
-    /* Botón de toggle (hamburguesa) */
-    .sidebar-toggle {
-        display: block;
-        /* Mostrar el botón de toggle */
-    }
+  /* Botón de toggle (hamburguesa) */
+  .sidebar-toggle {
+    display: block;
+    /* Mostrar el botón de toggle */
+  }
 
-    .sidebar-img img {
-        width: 80px;
-        /* Puedes ajustar el tamaño del logo si es necesario */
-        height: auto;
-        object-fit: contain;
-        margin-bottom: 0px;
-        /* Espacio debajo del logo */
-        margin-top: 100px;
-        /* Subir un poco el logo */
-    }
+  .sidebar-img img {
+    width: 80px;
+    /* Puedes ajustar el tamaño del logo si es necesario */
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 0px;
+    /* Espacio debajo del logo */
+    margin-top: 100px;
+    /* Subir un poco el logo */
+  }
 
-    /* Ajuste de los menús */
-    .nav {
-        margin-top: 40px;
-        /* Baja los menús para que no estén pegados al logo */
-    }
+  /* Ajuste de los menús */
+  .nav {
+    margin-top: 40px;
+    /* Baja los menús para que no estén pegados al logo */
+  }
 
-    /* Ajuste del botón de logout */
-    .sidebar-logout {
-        margin-top: auto;
-        padding: 15px 0;
-        position: static;
-        width: 100%;
-    }
+  /* Ajuste del botón de logout */
+  .sidebar-logout {
+    margin-top: auto;
+    padding: 15px 0;
+    position: static;
+    width: 100%;
+  }
 
-    /* Estilo del logout en móviles */
-    .logout-link {
-        padding: 0.75rem 1rem;
-        margin: 0.25rem 0.5rem;
-    }
+  /* Estilo del logout en móviles */
+  .logout-link {
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0.5rem;
+  }
 
-    .logout-link i {
-        font-size: 1.2rem;
-        margin-right: 0.75rem;
-    }
+  .logout-link i {
+    font-size: 1.2rem;
+    margin-right: 0.75rem;
+  }
 
-    .logout-link span {
-        font-size: 0.95rem;
-    }
+  .logout-link span {
+    font-size: 0.95rem;
+  }
+}
+
+/* Información del usuario logueado - Rediseñada para sidebar oscuro */
+.sidebar-user-info {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: var(--sidebar-width, 260px);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Contenedor principal del pill del usuario */
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 0; /* Permitir truncamiento del texto */
+}
+
+.user-pill:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.user-pill i {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.user-pill .user-legajo {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  font-family: "Courier New", monospace;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Badge del rol del usuario */
+.user-role-badge {
+  font-size: 0.7rem;
+  padding: 0.35rem 0.6rem;
+  background: linear-gradient(
+    135deg,
+    rgba(13, 110, 253, 0.8),
+    rgba(13, 110, 253, 0.6)
+  );
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  border: 1px solid rgba(13, 110, 253, 0.3);
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.user-role-badge:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(13, 110, 253, 0.9),
+    rgba(13, 110, 253, 0.7)
+  );
+  box-shadow: 0 3px 12px rgba(13, 110, 253, 0.3);
+  transform: scale(1.05);
+}
+
+/* Variantes de color para diferentes roles */
+.user-role-badge.superadmin {
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 38, 0.8),
+    rgba(220, 38, 38, 0.6)
+  );
+  border-color: rgba(220, 38, 38, 0.3);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.user-role-badge.supervisor {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 191, 36, 0.8),
+    rgba(251, 191, 36, 0.6)
+  );
+  border-color: rgba(251, 191, 36, 0.3);
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+  color: #1f2937;
+}
+
+.user-role-badge.operario {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.8),
+    rgba(34, 197, 94, 0.6)
+  );
+  border-color: rgba(34, 197, 94, 0.3);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+.user-role-badge.administrativo {
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.8),
+    rgba(168, 85, 247, 0.6)
+  );
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.2);
+}
+
+/* Animación sutil en la entrada */
+.sidebar-user-info {
+  animation: slideUpUser 0.5s ease-out;
+}
+
+@keyframes slideUpUser {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive: ajustar para móviles */
+@media (max-width: 768px) {
+  .sidebar-user-info {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .user-pill {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .user-role-badge {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.5rem;
+  }
+}
+
+/* Estado colapsado del sidebar */
+.sidebar.hidden .sidebar-user-info {
+  transform: translateX(-100%);
 }

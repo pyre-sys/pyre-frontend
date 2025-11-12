@@ -94,6 +94,14 @@ export class TopbarComponent implements OnInit, OnDestroy {
   alertasVencidas = 0;
   isLoadingAlertas = false;
 
+  // Datos de notificaciones (ejemplo - reemplazar con tu servicio real)
+  private notifications = {
+    pending: 3, // Herramientas próximas a vencer
+    overdue: 2, // Herramientas vencidas
+    maintenance: 1, // Herramientas que necesitan mantenimiento
+    low_stock: 0, // Stock bajo (si aplicara)
+  };
+
   private alertsSubscription?: Subscription;
   private alertsInterval?: Subscription;
   private sidebarSubscription?: Subscription;
@@ -207,6 +215,89 @@ export class TopbarComponent implements OnInit, OnDestroy {
     }: ${parts.join(', ')}`;
   }
 
+  // Métodos para manejo de notificaciones
+  getTotalNotifications(): number {
+    return (
+      this.notifications.pending +
+      this.notifications.overdue +
+      this.notifications.maintenance +
+      this.notifications.low_stock
+    );
+  }
+
+  hasNormalAlerts(): boolean {
+    return (
+      this.notifications.pending > 0 &&
+      !this.hasWarningAlerts() &&
+      !this.hasCriticalAlerts()
+    );
+  }
+
+  hasWarningAlerts(): boolean {
+    return (
+      this.notifications.maintenance > 0 || this.notifications.low_stock > 0
+    );
+  }
+
+  hasCriticalAlerts(): boolean {
+    return this.notifications.overdue > 0;
+  }
+
+  getNotificationsSubtitle(): string {
+    if (this.getTotalNotifications() === 0) {
+      return 'Todo en orden';
+    }
+
+    if (this.hasCriticalAlerts()) {
+      return `${this.notifications.overdue} vencida${
+        this.notifications.overdue > 1 ? 's' : ''
+      }`;
+    }
+
+    if (this.hasWarningAlerts()) {
+      const maintenance = this.notifications.maintenance;
+      const lowStock = this.notifications.low_stock;
+      if (maintenance > 0) return `${maintenance} mantenimiento`;
+      if (lowStock > 0) return `Stock bajo`;
+    }
+
+    return `${this.notifications.pending} pendiente${
+      this.notifications.pending > 1 ? 's' : ''
+    }`;
+  }
+
+  getNotificationsTooltip(): string {
+    if (this.getTotalNotifications() === 0) {
+      return 'No hay alertas pendientes';
+    }
+
+    let tooltip = 'Alertas: ';
+    const parts = [];
+
+    if (this.notifications.overdue > 0) {
+      parts.push(
+        `${this.notifications.overdue} vencida${
+          this.notifications.overdue > 1 ? 's' : ''
+        }`
+      );
+    }
+    if (this.notifications.pending > 0) {
+      parts.push(
+        `${this.notifications.pending} próxima${
+          this.notifications.pending > 1 ? 's' : ''
+        } a vencer`
+      );
+    }
+    if (this.notifications.maintenance > 0) {
+      parts.push(`${this.notifications.maintenance} mantenimiento`);
+    }
+    if (this.notifications.low_stock > 0) {
+      parts.push(`${this.notifications.low_stock} stock bajo`);
+    }
+
+    return tooltip + parts.join(', ');
+  }
+
   togglePerfilModal(): void {
     this.isPerfilModalVisible = !this.isPerfilModalVisible;
     this.perfilModalToggled.emit(this.isPerfilModalVisible);
@@ -281,7 +372,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
   }
 
   navigateToAlertas(): void {
-    // Navegar a la página de alertas
-    this.router.navigate(['/dashboard/alertas']);
+    // Asegurar navegación a la ruta correcta
+    this.router.navigate(['/dashboard/alertas']).catch((error) => {
+      console.error('Error al navegar a /dashboard/alertas:', error);
+    });
   }
 }

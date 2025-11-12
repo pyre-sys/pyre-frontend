@@ -1,7 +1,28 @@
-import { Component, OnInit, Input, Output, EventEmitter, forwardRef, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  forwardRef,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, Subscription, switchMap, of, catchError, map } from 'rxjs';
+import {
+  ReactiveFormsModule,
+  FormControl,
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+} from '@angular/forms';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  Subscription,
+  switchMap,
+  of,
+  catchError,
+  map,
+} from 'rxjs';
 import { HerramientaService } from '../../../../services/herramienta.service';
 
 export interface HerramientaOption {
@@ -16,22 +37,20 @@ export interface HerramientaOption {
 @Component({
   selector: 'app-cbo-herramientas',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './cbo-herramientas.component.html',
-  styleUrls: ['./cbo-herramientas.component.css', '../cbo.component.css'],
+  styleUrls: ['../cbo.component.css', '../cbo-movimientos.css'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CboHerramientasComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
-export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValueAccessor {
-
+export class CboHerramientasComponent
+  implements OnInit, OnDestroy, ControlValueAccessor
+{
   // Internal FormControl for search
   searchControl = new FormControl('');
   selectedControl = new FormControl<HerramientaOption | null>(null);
@@ -40,8 +59,8 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
   private subscriptions: Subscription[] = [];
 
   // ControlValueAccessor callbacks
-  private onChange = (value: any) => { };
-  private onTouched = () => { };
+  private onChange = (value: any) => {};
+  private onTouched = () => {};
 
   // Component inputs
   @Input() isLabel: string = '';
@@ -62,7 +81,7 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
   isOpen = false; // Start collapsed
   selectedHerramienta: HerramientaOption | null = null;
 
-  constructor(private herramientaService: HerramientaService) { }
+  constructor(private herramientaService: HerramientaService) {}
 
   ngOnInit(): void {
     this.setupSearchSubscription();
@@ -72,7 +91,7 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   private setupSearchSubscription(): void {
@@ -80,7 +99,7 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        switchMap(term => {
+        switchMap((term) => {
           if (!this.isOpen) {
             return of([] as HerramientaOption[]);
           }
@@ -94,7 +113,7 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
           }
         })
       )
-      .subscribe(herramientas => {
+      .subscribe((herramientas) => {
         this.herramientas = Array.isArray(herramientas) ? herramientas : [];
       });
 
@@ -102,7 +121,7 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
   }
 
   private loadInitialHerramientas(): void {
-    this.loadInitialData().subscribe(herramientas => {
+    this.loadInitialData().subscribe((herramientas) => {
       this.herramientas = Array.isArray(herramientas) ? herramientas : [];
     });
   }
@@ -111,73 +130,76 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
     console.log('idDisponibilidad:', this.idDisponibilidad); // Debug log
     if (Array.isArray(this.idDisponibilidad)) {
       console.log('Using array endpoint with IDs:', this.idDisponibilidad); // Debug log
-      return this.herramientaService.getHerramientasPorDisponibilidadArray(this.idDisponibilidad, searchTerm);
+      return this.herramientaService.getHerramientasPorDisponibilidadArray(
+        this.idDisponibilidad,
+        searchTerm
+      );
     } else {
       console.log('Using single endpoint with ID:', this.idDisponibilidad); // Debug log
-      return this.herramientaService.getHerramientasPorDisponibilidadArray([this.idDisponibilidad], searchTerm);
+      return this.herramientaService.getHerramientasPorDisponibilidadArray(
+        [this.idDisponibilidad],
+        searchTerm
+      );
     }
   }
 
   private loadInitialData() {
     this.isLoading = true;
-    return this.getHerramientasByDisponibilidad()
-      .pipe(
-        switchMap(response => {
-          const rawList = response.data || [];
-          const herramientas = this.mapHerramientasToOptions(rawList);
-          this.isLoading = false;
-          return of(herramientas as HerramientaOption[]);
-        }),
-        catchError(error => {
-          console.error('Error loading herramientas:', error);
-          this.isLoading = false;
-          return of([] as HerramientaOption[]);
-        })
-      );
+    return this.getHerramientasByDisponibilidad().pipe(
+      switchMap((response) => {
+        const rawList = response.data || [];
+        const herramientas = this.mapHerramientasToOptions(rawList);
+        this.isLoading = false;
+        return of(herramientas as HerramientaOption[]);
+      }),
+      catchError((error) => {
+        console.error('Error loading herramientas:', error);
+        this.isLoading = false;
+        return of([] as HerramientaOption[]);
+      })
+    );
   }
 
   // Método para cargar herramientas sin filtro
   loadAllHerramientas() {
     // Aquí está la corrección: pasar un objeto vacío o una cadena vacía como filtro
-    return this.herramientaService.getTools(1, 10, { search: '' })
-      .pipe(
-        map((response: { data: any[], total: number }) => {
-          const rawData = response.data || [];
-          return this.mapHerramientasToOptions(rawData) as HerramientaOption[];
-        }),
-        catchError(error => {
-          console.error('Error cargando herramientas:', error);
-          return of([] as HerramientaOption[]);
-        })
-      );
+    return this.herramientaService.getTools(1, 10, { search: '' }).pipe(
+      map((response: { data: any[]; total: number }) => {
+        const rawData = response.data || [];
+        return this.mapHerramientasToOptions(rawData) as HerramientaOption[];
+      }),
+      catchError((error) => {
+        console.error('Error cargando herramientas:', error);
+        return of([] as HerramientaOption[]);
+      })
+    );
   }
 
   private searchHerramientas(searchTerm: string) {
     this.isLoading = true;
-    return this.getHerramientasByDisponibilidad(searchTerm)
-      .pipe(
-        switchMap(response => {
-          const rawList = response.data || [];
-          const herramientas = this.mapHerramientasToOptions(rawList);
-          this.isLoading = false;
-          return of(herramientas as HerramientaOption[]);
-        }),
-        catchError(error => {
-          console.error('Error buscando herramientas:', error);
-          this.isLoading = false;
-          return of([] as HerramientaOption[]);
-        })
-      );
+    return this.getHerramientasByDisponibilidad(searchTerm).pipe(
+      switchMap((response) => {
+        const rawList = response.data || [];
+        const herramientas = this.mapHerramientasToOptions(rawList);
+        this.isLoading = false;
+        return of(herramientas as HerramientaOption[]);
+      }),
+      catchError((error) => {
+        console.error('Error buscando herramientas:', error);
+        this.isLoading = false;
+        return of([] as HerramientaOption[]);
+      })
+    );
   }
 
   private mapHerramientasToOptions(herramientas: any[]): HerramientaOption[] {
-    return herramientas.map(h => ({
+    return herramientas.map((h) => ({
       id: h.id || h.idHerramienta,
       codigo: h.codigo || '',
       nombre: h.nombre || h.nombreHerramienta || '',
       marca: h.marca || '',
       disponibilidad: h.disponibilidad || h.estadoDisponibilidad || '',
-      displayText: this.buildDisplayText(h)
+      displayText: this.buildDisplayText(h),
     }));
   }
 
@@ -242,7 +264,7 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
     this.isOpen = true;
 
     // Load initial data when opening
-    this.loadInitialData().subscribe(herramientas => {
+    this.loadInitialData().subscribe((herramientas) => {
       this.herramientas = herramientas;
     });
 
@@ -313,7 +335,7 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
 
   private findHerramientaById(id: number): void {
     // First check if it's in current list
-    const found = this.herramientas.find(h => h.id === id);
+    const found = this.herramientas.find((h) => h.id === id);
     if (found) {
       this.selectHerramienta(found);
       return;
@@ -340,7 +362,10 @@ export class CboHerramientasComponent implements OnInit, OnDestroy, ControlValue
 
   // Helper methods for template
   hasErrors(): boolean {
-    return !!(this.objectErrors && (this.isTouched || this.selectedControl.touched));
+    return !!(
+      this.objectErrors &&
+      (this.isTouched || this.selectedControl.touched)
+    );
   }
 
   getErrorMessage(): string {

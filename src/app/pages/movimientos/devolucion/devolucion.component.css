@@ -5,3 +5,69 @@
    Los estilos comunes se han movido a movimientos-style.css
    Este archivo contiene solo estilos específicos de devolución, si los hay.
    ======================================== */
+
+/* ========================================
+   CARD DEL FORMULARIO - DEVOLUCIÓN
+   ======================================== */
+.prestamo-form-card {
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  min-height: 100%;
+  overflow: visible;
+}
+
+.prestamo-form-card .card-body {
+  overflow: visible;
+}
+
+/* Fix for combo dropdown overflow */
+.form-field-wrapper {
+  position: relative;
+  z-index: auto;
+}
+
+.form-field-wrapper app-cbo-usuario,
+.form-field-wrapper app-cbo-proveedor {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure container allows dropdown expansion */
+.prestamo-container {
+  overflow: visible;
+}
+
+.prestamo-container .row {
+  overflow: visible;
+}
+
+.prestamo-container .col-lg-8,
+.prestamo-container .col-md-6 {
+  overflow: visible;
+}
+
+/* Asegurar que los contenedores de formulario no generen scroll */
+.devolucion-container,
+.prestamo-container {
+  overflow: visible !important;
+}
+
+.devolucion-container .card-body,
+.prestamo-container .card-body {
+  overflow: visible !important;
+}
+
+/* Fix para combos específicos en devolución */
+app-cbo-usuario,
+app-cbo-proveedor {
+  position: relative;
+  z-index: 10;
+}
+
+/* Evitar que los wrappers de combos generen scroll */
+.cbo-usuario-wrapper,
+.cbo-proveedor-wrapper {
+  overflow: visible !important;
+  position: relative;
+}
