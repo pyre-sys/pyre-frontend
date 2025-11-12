@@ -153,14 +153,22 @@
               <div class="estado-toggle">
                 <label
                   class="toggle-switch"
-                  [ngbTooltip]="user.activo ? 'Activo' : 'Inactivo'"
+                  [ngbTooltip]="
+                    isCurrentUser(user)
+                      ? 'No puedes cambiar el estado de tu propio usuario'
+                      : user.activo
+                      ? 'Activo'
+                      : 'Inactivo'
+                  "
                   placement="top"
                   container="body"
+                  [attr.aria-disabled]="isCurrentUser(user) ? 'true' : null"
                 >
                   <input
                     type="checkbox"
                     [checked]="user.activo"
                     (change)="toggleUserActive(user)"
+                    [disabled]="isCurrentUser(user)"
                   />
                   <span
                     class="toggle-slider modern"
