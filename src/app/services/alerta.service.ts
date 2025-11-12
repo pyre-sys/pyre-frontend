@@ -2,47 +2,86 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
+declare const Swal: any;
+
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AlertaService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
 
   // Modal de confirmación
   confirm(message: string, title: string = '¿Estás seguro?'): Promise<any> {
-    // Usar confirm nativo como alternativa ligera a SweetAlert2
-    return new Promise<boolean>((resolve) => {
-      try {
-        const result = window.confirm(title + '\n\n' + message);
-        resolve(result);
-      } catch (e) {
-        // En entornos donde window.confirm puede fallar, resolver false
-        console.error('confirm fallback', e);
-        resolve(false);
-      }
+    return Swal.fire({
+      title,
+      html: message,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, confirmar',
+      cancelButtonText: 'Cancelar',
+      // Evitar que SweetAlert2 enfoque automáticamente el botón confirmar
+      focusConfirm: false,
+      // Al abrir el modal, desenfocar cualquier elemento que pudiera venir seleccionado
+      // (esto evita que el botón aparezca 'seleccionado' inicialmente).
+      didOpen: () => {
+        try {
+          // Small timeout to allow Swal internals a terminar su trabajo
+          setTimeout(() => {
+            const active = document.activeElement as HTMLElement | null;
+            if (active && typeof active.blur === 'function') {
+              active.blur();
+            }
+          }, 0);
+        } catch (e) {
+          // Silenciar errores de compatibilidad
+        }
+      },
+      customClass: {
+        popup: 'swal2-popup swal2-themed',
+        title: 'swal2-title',
+        confirmButton: 'swal2-confirm',
+        cancelButton: 'swal2-cancel',
+      },
     });
   }
 
   // Modal de éxito
   success(message: string, title: string = '¡Éxito!'): void {
-    // Mensaje simple usando alert nativo
-    try {
-      window.alert(title + '\n\n' + message);
-    } catch (e) {
-      console.error('success alert failed', e);
-    }
+    Swal.fire({
+      title,
+      text: message,
+      icon: 'success',
+      confirmButtonText: 'Aceptar',
+      focusConfirm: false,
+      didOpen: () => {
+        try { setTimeout(() => { const active = document.activeElement as HTMLElement | null; if (active && typeof active.blur === 'function') active.blur(); }, 0); } catch (e) { }
+      },
+      customClass: {
+        popup: 'swal2-popup swal2-themed',
+        title: 'swal2-title',
+        confirmButton: 'swal2-confirm',
+      },
+    });
   }
 
   // Modal de error
   error(message: string, title: string = 'Error'): void {
-    // Mensaje de error usando alert nativo
-    try {
-      window.alert(title + '\n\n' + message);
-    } catch (e) {
-      console.error('error alert failed', e);
-    }
+    Swal.fire({
+      title,
+      text: message,
+      icon: 'error',
+      confirmButtonText: 'Aceptar',
+      focusConfirm: false,
+      didOpen: () => { try { setTimeout(() => { const active = document.activeElement as HTMLElement | null; if (active && typeof active.blur === 'function') active.blur(); }, 0); } catch (e) { } },
+      customClass: {
+        popup: 'swal2-popup swal2-themed',
+        title: 'swal2-title',
+        confirmButton: 'swal2-confirm',
+      },
+    });
   }
 
   // GET /api/Alerta/alertas-pendientes
@@ -62,16 +101,11 @@ export class AlertaService {
 
   // PUT /api/Alerta/{id}/marcar-leida - Mark alert as read/unread
   marcarAlertaLeida(idAlerta: number, leida: boolean) {
-    return this.http.put<any>(
-      `${this.apiUrl}/Alerta/${idAlerta}/marcar-leida`,
-      { leida }
-    );
+    return this.http.put<any>(`${this.apiUrl}/Alerta/${idAlerta}/marcar-leida`, { leida });
   }
 
   // PUT /api/Alerta/marcar-multiples-leidas - Mark multiple alerts as read
   marcarMultiplesAlertasLeidas(idsAlertas: number[]) {
-    return this.http.put<any>(`${this.apiUrl}/Alerta/marcar-multiples-leidas`, {
-      idsAlertas,
-    });
+    return this.http.put<any>(`${this.apiUrl}/Alerta/marcar-multiples-leidas`, { idsAlertas });
   }
 }
