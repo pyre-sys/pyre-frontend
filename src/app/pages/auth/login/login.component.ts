@@ -10,11 +10,11 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { LoginService } from '../../../services/login.service';
-
-declare var Swal: any;
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [ReactiveFormsModule, CommonModule, NgbTooltipModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
@@ -24,12 +24,14 @@ export class LoginComponent implements OnInit {
   errorMessage: string | null = null;
   isDarkMode: boolean = true;
   showPassword: boolean = false;
+  // Use global toast service instead of local toast element
 
   constructor(
     private fb: FormBuilder,
     private loginService: LoginService,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService
   ) {
     this.loginForm = this.fb.group({
       legajo: ['', Validators.required],
@@ -133,41 +135,25 @@ export class LoginComponent implements OnInit {
   }
 
   showValidationToast(message: string, field: string): void {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Campo requerido',
-      text: message,
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      customClass: {
-        popup: 'swal-validation-toast',
-      },
-    }).then(() => {
-      // Focus en el campo con error
-      const element = document.getElementById(field) as HTMLInputElement;
-      if (element) {
-        element.focus();
-      }
-    });
+    // Mostrar toast (tipo error) y enfocar el campo cuando desaparezca
+    this.toastService.show('Campo requerido: ' + message, 'error', 3000);
+
+    const element = document.getElementById(field) as HTMLInputElement | null;
+    if (element) {
+      // Enfocar después de que el toast se oculte para evitar cambios visuales bruscos
+      setTimeout(() => {
+        try {
+          element.focus();
+        } catch (e) {
+          /* ignore */
+        }
+      }, 3200);
+    }
   }
 
   showErrorToast(message: string): void {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error de autenticación',
-      text: message,
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 4000,
-      timerProgressBar: true,
-      customClass: {
-        popup: 'swal-error-toast',
-      },
-    });
+    // Mostrar toast de error con duración más larga
+    this.toastService.show('Error de autenticación: ' + message, 'error', 4000);
   }
 
   isFieldInvalid(field: string): boolean {

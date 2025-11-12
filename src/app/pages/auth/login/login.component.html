@@ -1,70 +1,82 @@
 <div class="fullscreen-background">
-    <div class="container">
+  <div class="container">
+    <!-- Toast modal moved to app root - use ToastService to trigger toasts -->
 
-        <!-- Formulario reactivo con Angular -->
-        <form
-            [formGroup]="loginForm"
-            (ngSubmit)="onSubmit()"
-            aria-labelledby="login-form-title"
-            autocomplete="off"
-            novalidate>
-            <div class="header-section">
-                <div class="logo-container">
-                    <img src="assets/images/logos/logo.png" alt="Pyre Logo" class="company-logo">
-                </div>
-                <p class="subtitle">Sistema de Gestión de Herramientas</p>
-            </div>
+    <!-- Formulario reactivo con Angular -->
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="onSubmit()"
+      aria-labelledby="login-form-title"
+      autocomplete="off"
+      novalidate
+    >
+      <div class="header-section">
+        <div class="logo-container">
+          <img
+            src="assets/images/logos/logo.png"
+            alt="Pyre Logo"
+            class="company-logo"
+          />
+        </div>
+        <p class="subtitle">Sistema de Gestión de Herramientas</p>
+      </div>
 
-            <div class="form-group">
-                <label for="legajo" class="field-label">Usuario</label>
-                <input
-                    type="text"
-                    formControlName="legajo"
-                    id="legajo"
-                    name="employee-id"
-                    placeholder="Ingrese su legajo"
-                    autocomplete="off"
-                    autocapitalize="none"
-                    autocorrect="off"
-                    spellcheck="false"
-                    inputmode="numeric"
-                    pattern="[0-9]*"
-                    required />
-                <i class="bx bx-id-card" aria-label="Icono de legajo"></i>
-            </div>
+      <div class="form-group">
+        <label for="legajo" class="field-label">Usuario</label>
+        <input
+          type="text"
+          formControlName="legajo"
+          id="legajo"
+          name="employee-id"
+          placeholder="Ingrese su legajo"
+          autocomplete="off"
+          autocapitalize="none"
+          autocorrect="off"
+          spellcheck="false"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          required
+        />
+        <i class="bx bx-id-card" aria-label="Icono de legajo"></i>
+      </div>
 
-            <div class="form-group">
-                <label for="password" class="field-label">Contraseña</label>
-                <input
-                    [type]="showPassword ? 'text' : 'password'"
-                    formControlName="password"
-                    id="password"
-                    name="user-password"
-                    placeholder="Ingrese su contraseña"
-                    autocomplete="new-password"
-                    autocapitalize="none"
-                    autocorrect="off"
-                    spellcheck="false"
-                    required />
-                <i
-                    class="password-toggle-icon bx {{ showPassword ? 'bx-hide' : 'bx-show' }}"
-                    [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-                    (mousedown)="onMouseDownPassword()"
-                    (mouseup)="onMouseUpPassword()"
-                    (mouseleave)="onMouseLeavePassword()"
-                    (touchstart)="onTouchStartPassword($event)"
-                    (touchend)="onTouchEndPassword($event)"
-                    [ngbTooltip]="'Mantener presionado para ver la contraseña'" container="body">
-                </i>
-            </div>
+      <div class="form-group">
+        <label for="password" class="field-label">Contraseña</label>
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          formControlName="password"
+          id="password"
+          name="user-password"
+          placeholder="Ingrese su contraseña"
+          autocomplete="new-password"
+          autocapitalize="none"
+          autocorrect="off"
+          spellcheck="false"
+          required
+        />
+        <i
+          class="password-toggle-icon bx {{
+            showPassword ? 'bx-hide' : 'bx-show'
+          }}"
+          [attr.aria-label]="
+            showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+          "
+          (mousedown)="onMouseDownPassword()"
+          (mouseup)="onMouseUpPassword()"
+          (mouseleave)="onMouseLeavePassword()"
+          (touchstart)="onTouchStartPassword($event)"
+          (touchend)="onTouchEndPassword($event)"
+          [ngbTooltip]="'Mantener presionado para ver la contraseña'"
+          container="body"
+        >
+        </i>
+      </div>
 
-            <button type="submit" class="btn">
-                Acceder al Sistema
-            </button>
+      <button type="submit" class="btn">Acceder al Sistema</button>
 
-            <div class="company-info">
-                <p>Montaje Eléctrico Profesional</p>
-            </div>
-        </form>
-    </div>
+      <div class="company-info">
+        <p>Montaje Eléctrico Profesional</p>
+      </div>
+    </form>
+  </div>
 </div>
