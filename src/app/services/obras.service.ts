@@ -9,11 +9,11 @@ export interface ObraDto {
   nombreObra: string;
   ubicacion?: string;
   fechaInicio?: string; // ISO string
-  fechaFin?: string;    // ISO string
+  fechaFin?: string; // ISO string
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ObrasService {
   private apiUrl = environment.apiUrl;
@@ -44,6 +44,8 @@ export class ObrasService {
 
   getObrasPaged(page: number = 1, pageSize: number = 10): Observable<any> {
     // El backend devuelve un objeto con 'data' que contiene 'data', 'page', 'pageSize', etc.
-    return this.http.get<any>(`${this.baseUrl}?page=${page}&pageSize=${pageSize}`);
+    return this.http.get<any>(
+      `${this.baseUrl}?page=${page}&pageSize=${pageSize}`
+    );
   }
 }
