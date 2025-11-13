@@ -78,7 +78,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
 
@@ -96,7 +96,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
 
@@ -114,7 +114,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
 
@@ -132,7 +132,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
 
@@ -150,7 +150,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
     {
@@ -166,7 +166,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
     {
@@ -182,7 +182,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
     {
@@ -198,7 +198,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
     {
@@ -214,7 +214,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
 
@@ -232,7 +232,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
     {
@@ -248,7 +248,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
     {
@@ -264,7 +264,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
     {
@@ -280,7 +280,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
     {
@@ -296,7 +296,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.SuperAdmin,
         Roles.Operario,
         Roles.Supervisor,
-        Roles.Administrativo,
+        Roles.Administrador,
       ],
     },
 
@@ -357,10 +357,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   // Mapeo de roles a IDs
   private roleMapping = {
     SuperAdmin: Roles.SuperAdmin,
-    Administrador: Roles.SuperAdmin,
+    Administrador: Roles.Administrador,
     Supervisor: Roles.Supervisor,
     Operario: Roles.Operario,
-    Administrativo: Roles.Administrativo,
   };
 
   @HostListener('window:resize')
@@ -429,8 +428,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         mappedRoleId != null
           ? mappedRoleId
           : user.id_acceso != null
-          ? Number(user.id_acceso)
-          : 0;
+            ? Number(user.id_acceso)
+            : 0;
 
       const nombre = user.nombre || '';
       const apellido = user.apellido || '';
