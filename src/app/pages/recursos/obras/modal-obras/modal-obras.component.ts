@@ -145,10 +145,9 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
   private buildForm() {
     this.form = this.fb.group({
-      NombreObra: ['', [Validators.required, Validators.maxLength(100)]],
-      Codigo: ['', [Validators.required, Validators.maxLength(20)]],
       NombreObra: ['', [Validators.required, Validators.maxLength(150)]],
-      Ubicacion: ['', [Validators.maxLength(200)]],
+      Codigo: ['', [Validators.required, Validators.maxLength(20)]],
+      Descripcion: ['', [Validators.maxLength(500)]],
       FechaInicio: [''],
       FechaFin: [''],
       Estado: ['Activo', [Validators.required]],
@@ -195,9 +194,7 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       if (payload?.errors && typeof payload.errors === 'object') {
         Object.keys(payload.errors).forEach((k: string) => {
           const val = payload.errors[k];
-          this.serverErrors[k] = Array.isArray(val)
-            ? String(val[0])
-            : String(val);
+          this.serverErrors[k] = Array.isArray(val) ? String(val[0]) : String(val);
           const control = this.form.get(k) || this.form.get(this.toFormKey(k));
           if (control) {
             control.setErrors({ server: true });
@@ -214,9 +211,10 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
           this.form.get('Codigo')?.setErrors({ server: true });
           this.form.get('Codigo')?.markAsTouched();
         } else if (/nombre/i.test(msg)) {
-          this.serverErrors['Nombre'] = msg;
-          this.form.get('Nombre')?.setErrors({ server: true });
-          this.form.get('Nombre')?.markAsTouched();
+          // mapear mensajes de "nombre" al control NombreObra
+          this.serverErrors['NombreObra'] = msg;
+          this.form.get('NombreObra')?.setErrors({ server: true });
+          this.form.get('NombreObra')?.markAsTouched();
         } else {
           this.alertService.error(msg);
         }
@@ -231,10 +229,10 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
   private toFormKey(serverKey: string): string {
     const map: any = {
-      codigo: 'Codigo',
-      nombre: 'Nombre',
-      descripcion: 'Descripcion',
-      direccion: 'Direccion',
+      'codigo': 'Codigo',
+      'nombre': 'NombreObra',
+      'descripcion': 'Descripcion',
+      'direccion': 'Direccion'
     };
     return map[serverKey] ?? serverKey;
   }

@@ -39,11 +39,6 @@
         <div class="loading-spinner"></div>
         <p>Cargando datos de la obra...</p>
       </div>
-      <!-- Indicador de loading para modo edición -->
-      <div *ngIf="mode === 'edit' && !initialData" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Cargando datos de la obra...</p>
-      </div>
 
       <form
         *ngIf="mode === 'create' || initialData"
