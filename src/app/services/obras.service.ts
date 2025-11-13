@@ -9,17 +9,17 @@ export interface ObraDto {
   nombreObra: string;
   ubicacion?: string;
   fechaInicio?: string; // ISO string
-  fechaFin?: string;    // ISO string
+  fechaFin?: string; // ISO string
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ObrasService {
   private apiUrl = environment.apiUrl;
   private baseUrl = `${this.apiUrl}/Obra`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getObras(): Observable<{ data: ObraDto[]; total: number }> {
     return this.http.get<{ data: ObraDto[]; total: number }>(`${this.baseUrl}`);
@@ -34,7 +34,24 @@ export class ObrasService {
   }
 
   updateObra(id: number, data: Partial<ObraDto>): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}`, data);
+    // Normalizar el payload antes de enviarlo
+    const normalizedData: any = {
+      Codigo: data.codigo,
+      NombreObra: data.nombreObra,
+      Ubicacion: data.ubicacion,
+      FechaInicio: data.fechaInicio,
+      FechaFin: data.fechaFin === '' ? null : data.fechaFin, // Convertir cadena vacía a null
+    };
+
+    // Eliminar propiedades no definidas (como FechaFin si es null)
+    Object.keys(normalizedData).forEach(
+      (key) => normalizedData[key] === undefined && delete normalizedData[key]
+    );
+
+    // Anidar los datos en createDto
+    const payload = { createDto: normalizedData };
+
+    return this.http.put<any>(`${this.baseUrl}/${id}`, payload);
   }
 
   deleteObra(id: number): Observable<any> {
@@ -43,6 +60,8 @@ export class ObrasService {
 
   getObrasPaged(page: number = 1, pageSize: number = 10): Observable<any> {
     // El backend devuelve un objeto con 'data' que contiene 'data', 'page', 'pageSize', etc.
-    return this.http.get<any>(`${this.baseUrl}?page=${page}&pageSize=${pageSize}`);
+    return this.http.get<any>(
+      `${this.baseUrl}?page=${page}&pageSize=${pageSize}`
+    );
   }
 }

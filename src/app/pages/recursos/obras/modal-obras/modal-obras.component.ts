@@ -1,7 +1,24 @@
-import { Component, EventEmitter, Output, OnInit, Input, OnChanges, SimpleChanges, HostListener, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output,
+  OnInit,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  HostListener,
+  ElementRef,
+  ViewChild,
+  OnDestroy,
+} from '@angular/core';
 import { Subscription, debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../../services/alerta.service';
 
@@ -10,7 +27,7 @@ import { AlertaService } from '../../../../services/alerta.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NgbTooltipModule],
   templateUrl: './modal-obras.component.html',
-  styleUrls: ['./modal-obras.component.css']
+  styleUrls: ['./modal-obras.component.css'],
 })
 export class ObraEditModalComponent implements OnInit, OnChanges {
   @Output() submit = new EventEmitter<{
@@ -42,10 +59,11 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     private fb: FormBuilder,
     private elementRef: ElementRef,
     private alertService: AlertaService
-  ) { }
+  ) {}
 
   @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey(event: KeyboardEvent) {
+  onEscapeKey(event: Event) {
+    const keyboardEvent = event as KeyboardEvent;
     this.onCancel();
   }
 
@@ -59,7 +77,9 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
     // Focus management
     setTimeout(() => {
-      const firstInput = this.elementRef.nativeElement.querySelector('input:not([style*="display:none"])');
+      const firstInput = this.elementRef.nativeElement.querySelector(
+        'input:not([style*="display:none"])'
+      );
       if (firstInput) {
         firstInput.focus();
       }
@@ -78,7 +98,7 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions.forEach((s) => s.unsubscribe());
     this.subscriptions = [];
   }
 
@@ -87,7 +107,9 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     this.editingEnabled = true;
     this.setControlsDisabled(false);
     setTimeout(() => {
-      const firstInput = this.elementRef.nativeElement.querySelector('input:not([disabled])');
+      const firstInput = this.elementRef.nativeElement.querySelector(
+        'input:not([disabled])'
+      );
       if (firstInput) firstInput.focus();
     }, 50);
   }
@@ -98,15 +120,19 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     this.setControlsDisabled(!this.editingEnabled);
     if (this.editingEnabled) {
       setTimeout(() => {
-        const firstInput = this.elementRef.nativeElement.querySelector('input:not([disabled])');
-        if (firstInput) firstInput.focus();
+        const firstInput = this.elementRef.nativeElement.querySelector(
+          'input:not([style*="display:none"])'
+        );
+        if (firstInput) {
+          firstInput.focus();
+        }
       }, 50);
     }
   }
 
   private setControlsDisabled(disabled: boolean) {
     if (!this.form) return;
-    Object.keys(this.form.controls).forEach(key => {
+    Object.keys(this.form.controls).forEach((key) => {
       const control = this.form.get(key);
       if (!control) return;
 
@@ -120,18 +146,11 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
   private buildForm() {
     this.form = this.fb.group({
-      Nombre: ['', [Validators.required, Validators.maxLength(100)]],
       Codigo: ['', [Validators.required, Validators.maxLength(20)]],
-      Descripcion: ['', [Validators.maxLength(500)]],
-      Direccion: ['', [Validators.maxLength(200)]],
-      Ciudad: ['', [Validators.maxLength(100)]],
-      Provincia: ['', [Validators.maxLength(100)]],
+      NombreObra: ['', [Validators.required, Validators.maxLength(150)]],
+      Ubicacion: ['', [Validators.maxLength(200)]],
       FechaInicio: [''],
-      FechaFinEstimada: [''],
-      Estado: ['Activo', [Validators.required]],
-      Presupuesto: ['', [Validators.min(0)]],
-      ResponsableTecnico: ['', [Validators.maxLength(100)]],
-      Observaciones: ['', [Validators.maxLength(1000)]]
+      FechaFin: [''],
     });
   }
 
@@ -141,22 +160,15 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     console.log('🔍 Patching form with data:', data);
 
     // Guardar el ID de la obra para edición
-    this.obraId = data?.id ?? data?.Id ?? data?.obra_id ?? null;
+    this.obraId = data?.idObra ?? null;
     console.log('💾 Obra ID saved:', this.obraId);
 
     const mapped = {
-      Nombre: data?.nombre ?? data?.Nombre ?? '',
-      Codigo: data?.codigo ?? data?.Codigo ?? '',
-      Descripcion: data?.descripcion ?? data?.Descripcion ?? '',
-      Direccion: data?.direccion ?? data?.Direccion ?? '',
-      Ciudad: data?.ciudad ?? data?.Ciudad ?? '',
-      Provincia: data?.provincia ?? data?.Provincia ?? '',
-      FechaInicio: data?.fechaInicio ?? data?.FechaInicio ?? '',
-      FechaFinEstimada: data?.fechaFinEstimada ?? data?.FechaFinEstimada ?? '',
-      Estado: data?.estado ?? data?.Estado ?? 'Activo',
-      Presupuesto: data?.presupuesto ?? data?.Presupuesto ?? '',
-      ResponsableTecnico: data?.responsableTecnico ?? data?.ResponsableTecnico ?? '',
-      Observaciones: data?.observaciones ?? data?.Observaciones ?? ''
+      Codigo: data?.codigo ?? '',
+      NombreObra: data?.nombreObra ?? '',
+      Ubicacion: data?.ubicacion ?? '',
+      FechaInicio: data?.fechaInicio ?? '',
+      FechaFin: data?.fechaFin ?? '',
     };
 
     console.log('✅ Mapped data for form:', mapped);
@@ -172,7 +184,9 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       if (payload?.errors && typeof payload.errors === 'object') {
         Object.keys(payload.errors).forEach((k: string) => {
           const val = payload.errors[k];
-          this.serverErrors[k] = Array.isArray(val) ? String(val[0]) : String(val);
+          this.serverErrors[k] = Array.isArray(val)
+            ? String(val[0])
+            : String(val);
           const control = this.form.get(k) || this.form.get(this.toFormKey(k));
           if (control) {
             control.setErrors({ server: true });
@@ -198,16 +212,18 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       }
     } catch (e) {
       console.warn('handleServerErrors parse failed', e, error);
-      this.alertService.error('Ocurrió un error al procesar la respuesta del servidor');
+      this.alertService.error(
+        'Ocurrió un error al procesar la respuesta del servidor'
+      );
     }
   }
 
   private toFormKey(serverKey: string): string {
     const map: any = {
-      'codigo': 'Codigo',
-      'nombre': 'Nombre',
-      'descripcion': 'Descripcion',
-      'direccion': 'Direccion'
+      codigo: 'Codigo',
+      nombre: 'Nombre',
+      descripcion: 'Descripcion',
+      direccion: 'Direccion',
     };
     return map[serverKey] ?? serverKey;
   }
@@ -233,7 +249,9 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       data: value,
       onSuccess: () => {
         this.alertService.success(
-          `La obra ha sido ${this.mode === 'create' ? 'creada' : 'actualizada'} exitosamente`,
+          `La obra ha sido ${
+            this.mode === 'create' ? 'creada' : 'actualizada'
+          } exitosamente`,
           `¡Obra ${this.mode === 'create' ? 'Creada' : 'Actualizada'}!`
         );
         this.resetModal();
@@ -241,13 +259,18 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
         this.close.emit();
       },
       onError: (error: any) => {
-        const errorMessage = error?.error?.message || error?.message || 'Ocurrió un error inesperado';
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Ocurrió un error inesperado';
         this.alertService.error(
-          `Error al ${this.mode === 'create' ? 'crear' : 'actualizar'} la obra: ${errorMessage}`,
+          `Error al ${
+            this.mode === 'create' ? 'crear' : 'actualizar'
+          } la obra: ${errorMessage}`,
           `Error al ${this.mode === 'create' ? 'Crear' : 'Actualizar'} Obra`
         );
         this.handleServerErrors(error);
-      }
+      },
     });
   }
 
