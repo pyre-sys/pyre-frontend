@@ -227,7 +227,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       grupo: 'GM06',
       principal: true,
       orden: 6,
-      estado: true,
+      estado: false,
       requiredAccess: [
         Roles.SuperAdmin,
         Roles.Operario,
@@ -309,8 +309,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
       grupo: 'GM07',
       principal: true,
       orden: 7,
-      estado: true,
-      requiredAccess: [Roles.SuperAdmin],
+      estado: false,
+      requiredAccess: [
+        Roles.SuperAdmin
+      ]
+      ,
     },
     {
       id: 71,
