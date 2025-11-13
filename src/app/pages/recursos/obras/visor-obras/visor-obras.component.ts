@@ -218,11 +218,21 @@ export class VisorObrasComponent implements OnInit {
         }
       });
     } else {
-      const id = Number(this.modalInitialData?.idObra ?? null);
+      // Intentar detectar id desde distintos campos que pueden venir (IdObra, idObra, Id)
+      const idFromData = Number(event.data?.IdObra ?? event.data?.idObra ?? event.data?.Id ?? null);
+      const idFromModal = Number(this.modalInitialData?.idObra ?? this.modalInitialData?.IdObra ?? null);
+      const id = idFromData || idFromModal;
+
       if (!id) {
         event.onError({ message: 'No se pudo identificar la obra a actualizar' });
         return;
       }
+
+      // Asegurar que el body tenga la propiedad IdObra (por si no la trae)
+      if (!event.data?.IdObra) {
+        event.data.IdObra = id;
+      }
+
       this.obrasService.updateObra(id, event.data).subscribe({
         next: () => {
           this.fetchObras();

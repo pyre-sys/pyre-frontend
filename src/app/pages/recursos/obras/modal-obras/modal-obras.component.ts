@@ -44,8 +44,8 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     private alertService: AlertaService
   ) { }
 
-  @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey(event: KeyboardEvent) {
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
     this.onCancel();
   }
 
@@ -120,14 +120,14 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
   private buildForm() {
     this.form = this.fb.group({
-      Nombre: ['', [Validators.required, Validators.maxLength(100)]],
+      NombreObra: ['', [Validators.required, Validators.maxLength(100)]],
       Codigo: ['', [Validators.required, Validators.maxLength(20)]],
       Descripcion: ['', [Validators.maxLength(500)]],
       Direccion: ['', [Validators.maxLength(200)]],
       Ciudad: ['', [Validators.maxLength(100)]],
       Provincia: ['', [Validators.maxLength(100)]],
       FechaInicio: [''],
-      FechaFinEstimada: [''],
+      FechaFin: [''],
       Estado: ['Activo', [Validators.required]],
       Presupuesto: ['', [Validators.min(0)]],
       ResponsableTecnico: ['', [Validators.maxLength(100)]],
@@ -145,14 +145,14 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     console.log('💾 Obra ID saved:', this.obraId);
 
     const mapped = {
-      Nombre: data?.nombre ?? data?.Nombre ?? '',
+      NombreObra: data?.nombreObra ?? '',
       Codigo: data?.codigo ?? data?.Codigo ?? '',
       Descripcion: data?.descripcion ?? data?.Descripcion ?? '',
       Direccion: data?.direccion ?? data?.Direccion ?? '',
       Ciudad: data?.ciudad ?? data?.Ciudad ?? '',
       Provincia: data?.provincia ?? data?.Provincia ?? '',
       FechaInicio: data?.fechaInicio ?? data?.FechaInicio ?? '',
-      FechaFinEstimada: data?.fechaFinEstimada ?? data?.FechaFinEstimada ?? '',
+      FechaFin: data?.fechaFin ?? '',
       Estado: data?.estado ?? data?.Estado ?? 'Activo',
       Presupuesto: data?.presupuesto ?? data?.Presupuesto ?? '',
       ResponsableTecnico: data?.responsableTecnico ?? data?.ResponsableTecnico ?? '',
@@ -220,10 +220,12 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
     const value = { ...this.form.value };
 
-    // En modo edición, incluir el ID de la obra
+    // En modo edición, incluir el ID de la obra como IdObra (backend espera IdObra)
     if (this.mode === 'edit' && this.obraId) {
-      value.Id = this.obraId;
-      console.log('🔄 Including obra ID in update:', this.obraId);
+      // Aseguramos el nombre de campo IdObra; mantenemos Id por compatibilidad si fuera necesario
+      (value as any).IdObra = this.obraId;
+      (value as any).Id = this.obraId;
+      console.log('🔄 Including obra ID in update (IdObra):', this.obraId);
     }
 
     console.log('📤 Final data being sent:', value);

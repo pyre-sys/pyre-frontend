@@ -33,8 +33,9 @@ export class ObrasService {
     return this.http.post<any>(`${this.baseUrl}`, data);
   }
 
+  // Cambiado: incluir el id en la URL para coincidir con [HttpPut("{id}")]
   updateObra(id: number, data: Partial<ObraDto>): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}`, data);
+    return this.http.put<any>(`${this.baseUrl}/${id}`, data);
   }
 
   deleteObra(id: number): Observable<any> {
