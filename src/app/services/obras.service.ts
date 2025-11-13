@@ -7,9 +7,10 @@ export interface ObraDto {
   idObra: number;
   codigo: string;
   nombreObra: string;
-  ubicacion?: string;
+  descripcion?: string;
   fechaInicio?: string; // ISO string
   fechaFin?: string; // ISO string
+  activa?: boolean;
 }
 
 @Injectable({

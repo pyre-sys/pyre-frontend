@@ -1,123 +1,182 @@
 <div class="container-fluid page-shell page-header-container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="page-title mb-0" style="margin-left: 3rem;">Lista de Obras</h1>
-        <a class="btn btn-primary header-action" (click)="createNewObra()" role="button">
-            <i class="bx bx-plus bx-tada me-1" aria-hidden="true"></i> Nueva Obra
-        </a>
-    </div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="page-title mb-0" style="margin-left: 3rem">Lista de Obras</h1>
+    <a
+      class="btn btn-primary header-action"
+      (click)="createNewObra()"
+      role="button"
+    >
+      <i class="bx bx-plus bx-tada me-1" aria-hidden="true"></i> Nueva Obra
+    </a>
+  </div>
 </div>
 
 <div class="obra-list-container container-fluid page-shell mt-2">
-    <div class="pyre-table-shell">
-        <!-- Filter bar -->
-        <div class="pyre-filter-bar">
-            <div class="filter-row">
-                <div class="filter-item">
-                    <input type="text" [(ngModel)]="filtroNombre" placeholder="Nombre de obra"
-                        (keyup.enter)="onSearch()" />
-                </div>
-                <div class="filter-item filter-item-with-reset">
-                    <div class="filter-input-group">
-
-                        <button *ngIf="hasActiveFilters()" type="button" class="reset-button-inline"
-                            (click)="onResetFilters()" title="Limpiar todos los filtros">
-                            <i class="pi pi-filter-slash"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="filter-actions">
-                    <button type="button" class="search-button" (click)="onSearch()" [disabled]="!hasActiveFilters()"
-                        title="Buscar">
-                        <i class="pi pi-search"></i>
-                    </button>
-                </div>
-            </div>
+  <div class="pyre-table-shell">
+    <!-- Filter bar -->
+    <div class="pyre-filter-bar">
+      <div class="filter-row">
+        <div class="filter-item">
+          <input
+            type="text"
+            [(ngModel)]="filtroNombre"
+            placeholder="Nombre de obra"
+            (keyup.enter)="onSearch()"
+          />
         </div>
-
-        <!-- Loading indicator -->
-        <div *ngIf="loading" class="text-center py-4">
-            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-            <p>Cargando obras...</p>
+        <div class="filter-item filter-item-with-reset">
+          <div class="filter-input-group">
+            <button
+              *ngIf="hasActiveFilters()"
+              type="button"
+              class="reset-button-inline"
+              (click)="onResetFilters()"
+              title="Limpiar todos los filtros"
+            >
+              <i class="pi pi-filter-slash"></i>
+            </button>
+          </div>
         </div>
-
-        <!-- Custom table -->
-        <div *ngIf="!loading" class="custom-table-container">
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Nombre</th>
-                        <th>Ubicación</th>
-                        <th>Fecha Inicio</th>
-                        <th>Fecha Fin</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let obra of getPaginatedObras(); let i = index">
-                        <td>{{ obra.codigo }}</td>
-                        <td>{{ obra.nombreObra }}</td>
-                        <td>{{ obra.ubicacion }}</td>
-                        <td>{{ obra.fechaInicio | date:'dd/MM/yyyy' }}</td>
-                        <td>{{ obra.fechaFin | date:'dd/MM/yyyy' }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button type="button" class="btn-icon btn-edit" (click)="editObra(obra)"
-                                    title="Ver / Editar">
-                                    <i class="pi pi-user-edit"></i>
-                                </button>
-                                <button type="button" class="btn-icon btn-delete" (click)="deleteObra(obra)"
-                                    title="Eliminar">
-                                    <i class="pi pi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr *ngIf="getPaginatedObras().length === 0">
-                        <td colspan="7" class="empty-message">No se encontraron obras.</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="filter-actions">
+          <button
+            type="button"
+            class="search-button"
+            (click)="onSearch()"
+            [disabled]="!hasActiveFilters()"
+            title="Buscar"
+          >
+            <i class="pi pi-search"></i>
+          </button>
         </div>
-
-        <!-- Custom pagination -->
-        <div *ngIf="!loading && totalItems > 0" class="pagination-container">
-            <div class="pagination-info">
-                <span>Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
-                    {{ Math.min(currentPage * pageSize, totalItems) }} de {{ totalItems }} registros</span>
-            </div>
-            <div class="pagination-controls">
-                <div class="page-size-selector">
-                    <label>Registros por página:</label>
-                    <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-                        <option *ngFor="let size of rowsPerPageOptions" [value]="size">{{ size }}</option>
-                    </select>
-                </div>
-                <div class="page-buttons">
-                    <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="onPageChange(1)">
-                        <i class="pi pi-angle-double-left"></i>
-                    </button>
-                    <button type="button" class="page-btn" [disabled]="currentPage === 1"
-                        (click)="onPageChange(currentPage - 1)">
-                        <i class="pi pi-angle-left"></i>
-                    </button>
-                    <button *ngFor="let page of getVisiblePages()" type="button" class="page-btn"
-                        [class.active]="page === currentPage" (click)="onPageChange(page)">
-                        {{ page }}
-                    </button>
-                    <button type="button" class="page-btn" [disabled]="currentPage === totalPages"
-                        (click)="onPageChange(currentPage + 1)">
-                        <i class="pi pi-angle-right"></i>
-                    </button>
-                    <button type="button" class="page-btn" [disabled]="currentPage === totalPages"
-                        (click)="onPageChange(totalPages)">
-                        <i class="pi pi-angle-double-right"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <app-obra-edit-modal *ngIf="showObraModal" [initialData]="modalInitialData" [mode]="modalMode"
-        (submit)="onModalSubmit($event)" (close)="closeObraModal()"></app-obra-edit-modal>
+    <!-- Loading indicator -->
+    <div *ngIf="loading" class="text-center py-4">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <p>Cargando obras...</p>
+    </div>
+
+    <!-- Custom table -->
+    <div *ngIf="!loading" class="custom-table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Descripcion</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <!-- <th>Estado</th> -->
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let obra of getPaginatedObras(); let i = index">
+            <td>{{ obra.codigo }}</td>
+            <td>{{ obra.nombreObra }}</td>
+            <td>{{ obra.descripcion }}</td>
+            <td>{{ obra.fechaInicio | date : "dd/MM/yyyy" }}</td>
+            <td>{{ obra.fechaFin | date : "dd/MM/yyyy" }}</td>
+            <!-- <td>{{ obra.activa ? "Activo" : "Inactivo" }}</td> -->
+            <td>
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="btn-icon btn-edit"
+                  (click)="editObra(obra)"
+                  title="Ver / Editar"
+                >
+                  <i class="pi pi-user-edit"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn-icon btn-delete"
+                  (click)="deleteObra(obra)"
+                  title="Eliminar"
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="getPaginatedObras().length === 0">
+            <td colspan="7" class="empty-message">No se encontraron obras.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Custom pagination -->
+    <div *ngIf="!loading && totalItems > 0" class="pagination-container">
+      <div class="pagination-info">
+        <span
+          >Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
+          {{ Math.min(currentPage * pageSize, totalItems) }} de
+          {{ totalItems }} registros</span
+        >
+      </div>
+      <div class="pagination-controls">
+        <div class="page-size-selector">
+          <label>Registros por página:</label>
+          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option *ngFor="let size of rowsPerPageOptions" [value]="size">
+              {{ size }}
+            </option>
+          </select>
+        </div>
+        <div class="page-buttons">
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage === 1"
+            (click)="onPageChange(1)"
+          >
+            <i class="pi pi-angle-double-left"></i>
+          </button>
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage === 1"
+            (click)="onPageChange(currentPage - 1)"
+          >
+            <i class="pi pi-angle-left"></i>
+          </button>
+          <button
+            *ngFor="let page of getVisiblePages()"
+            type="button"
+            class="page-btn"
+            [class.active]="page === currentPage"
+            (click)="onPageChange(page)"
+          >
+            {{ page }}
+          </button>
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage === totalPages"
+            (click)="onPageChange(currentPage + 1)"
+          >
+            <i class="pi pi-angle-right"></i>
+          </button>
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage === totalPages"
+            (click)="onPageChange(totalPages)"
+          >
+            <i class="pi pi-angle-double-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-obra-edit-modal
+    *ngIf="showObraModal"
+    [initialData]="modalInitialData"
+    [mode]="modalMode"
+    (submit)="onModalSubmit($event)"
+    (close)="closeObraModal()"
+  ></app-obra-edit-modal>
 </div>

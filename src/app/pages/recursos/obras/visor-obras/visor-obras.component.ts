@@ -21,7 +21,7 @@ import { PageTitleService } from '../../../../services/page-title.service';
 export class VisorObrasComponent implements OnInit {
   obras: ObraDto[] = [];
   filteredObras: ObraDto[] = [];
-  columns: string[] = ['codigo', 'nombreObra', 'ubicacion', 'fechaInicio', 'fechaFin'];
+  columns: string[] = ['codigo', 'nombreObra', 'descripcion', 'fechaInicio', 'fechaFin'];
   rowsPerPageOptions: number[] = [5, 10, 20, 40];
   currentPage = 1;
   pageSize = 10;
@@ -63,7 +63,7 @@ export class VisorObrasComponent implements OnInit {
           idObra: o.idObra,
           codigo: o.codigo,
           nombreObra: o.nombreObra,
-          ubicacion: o.ubicacion,
+          descripcion: o.descripcion,
           fechaInicio: o.fechaInicio,
           fechaFin: o.fechaFin,
           estado: o.estado || 'Activo' // Default state
