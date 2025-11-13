@@ -49,8 +49,8 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     private alertService: AlertaService
   ) { }
 
-  @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey(event: KeyboardEvent) {
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
     this.onCancel();
   }
 
