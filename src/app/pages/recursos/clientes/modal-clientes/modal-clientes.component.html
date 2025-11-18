@@ -1,0 +1,420 @@
+<!-- Toma la plantilla del modal de usuario; conservar bindings y estructura -->
+<div class="modal-overlay" *ngIf="visible" role="dialog" aria-modal="true">
+  <div class="modal-wrapper" [class.readonly]="!editingEnabled">
+    <div class="modal-content" [class.open]="visible">
+      <div class="modal-header">
+        <div class="header-controls">
+          <div *ngIf="mode === 'edit'" class="mode-switch-wrapper">
+            <button
+              type="button"
+              class="mode-switch"
+              (click)="toggleEditing()"
+              [attr.aria-pressed]="editingEnabled"
+              [attr.aria-label]="
+                editingEnabled ? 'Desactivar edición' : 'Activar edición'
+              "
+            >
+              <span class="switch-track" [class.on]="editingEnabled"
+                ><span class="switch-thumb" [class.on]="editingEnabled"></span
+              ></span>
+            </button>
+          </div>
+          <h3 class="modal-title">
+            {{
+              mode === "edit"
+                ? editingEnabled
+                  ? "Modo edición"
+                  : "Modo lectura"
+                : "Nuevo Usuario"
+            }}
+          </h3>
+        </div>
+
+        <button class="close-btn" (click)="onCancel()" aria-label="Cerrar">
+          <span class="pi pi-times" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <div *ngIf="mode === 'edit' && !initialData" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Cargando datos del usuario...</p>
+      </div>
+
+      <form
+        *ngIf="mode === 'create' || initialData"
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        class="modal-form"
+        autocomplete="off"
+      >
+        <input
+          type="text"
+          name="fakeusernameremembered"
+          autocomplete="username"
+          style="display: none"
+        />
+        <input
+          type="password"
+          name="fakepasswordremembered"
+          autocomplete="new-password"
+          style="display: none"
+        />
+        <div class="compact-form-grid">
+          <div
+            class="field-group"
+            [class.has-error]="
+              form.get('Nombre')?.invalid && form.get('Nombre')?.touched
+            "
+          >
+            <label class="required">Nombre</label>
+            <input
+              formControlName="Nombre"
+              placeholder="Ingresa el nombre"
+              [class.error]="
+                form.get('Nombre')?.invalid && form.get('Nombre')?.touched
+              "
+            />
+            <div
+              *ngIf="form.get('Nombre')?.invalid && form.get('Nombre')?.touched"
+              class="error-text"
+            >
+              El nombre es requerido
+            </div>
+          </div>
+
+          <div
+            class="field-group"
+            [class.has-error]="
+              form.get('Apellido')?.invalid && form.get('Apellido')?.touched
+            "
+          >
+            <label class="required">Apellido</label>
+            <input
+              formControlName="Apellido"
+              placeholder="Ingresa el apellido"
+              [class.error]="
+                form.get('Apellido')?.invalid && form.get('Apellido')?.touched
+              "
+            />
+            <div
+              *ngIf="
+                form.get('Apellido')?.invalid && form.get('Apellido')?.touched
+              "
+              class="error-text"
+            >
+              <span *ngIf="form.get('Apellido')?.errors?.['required']"
+                >El apellido es requerido</span
+              >
+              <span *ngIf="form.get('Apellido')?.errors?.['maxlength']"
+                >Máximo 100 caracteres</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="field-group"
+            [class.has-error]="
+              (form.get('Dni')?.invalid && form.get('Dni')?.touched) ||
+              serverErrors['Dni']
+            "
+          >
+            <label class="required">DNI</label>
+            <input
+              formControlName="Dni"
+              placeholder="12345678"
+              [class.error]="
+                (form.get('Dni')?.invalid && form.get('Dni')?.touched) ||
+                serverErrors['Dni']
+              "
+            />
+            <div *ngIf="serverErrors['Dni']" class="error-text">
+              {{ serverErrors["Dni"] }}
+            </div>
+            <div
+              *ngIf="
+                !serverErrors['Dni'] &&
+                form.get('Dni')?.invalid &&
+                form.get('Dni')?.touched
+              "
+              class="error-text"
+            >
+              El DNI es requerido y debe tener máximo 20 caracteres
+            </div>
+          </div>
+
+          <div
+            class="field-group full-width"
+            [class.has-error]="
+              form.get('Email')?.invalid && form.get('Email')?.touched
+            "
+          >
+            <label>Email <span class="optional-text">(opcional)</span></label>
+            <input
+              formControlName="Email"
+              type="email"
+              placeholder="usuario@empresa.com"
+              [class.error]="
+                form.get('Email')?.invalid && form.get('Email')?.touched
+              "
+            />
+            <div
+              *ngIf="form.get('Email')?.invalid && form.get('Email')?.touched"
+              class="error-text"
+            >
+              <span *ngIf="form.get('Email')?.errors?.['email']"
+                >Formato de email inválido</span
+              >
+              <span *ngIf="form.get('Email')?.errors?.['maxlength']"
+                >Máximo 150 caracteres</span
+              >
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="optional"
+              >Teléfono <span class="optional-text">(opcional)</span></label
+            >
+            <input
+              formControlName="Telefono"
+              type="tel"
+              placeholder="11 2345-6789"
+            />
+            <div
+              *ngIf="
+                form.get('Telefono')?.invalid && form.get('Telefono')?.touched
+              "
+              class="error-text"
+            >
+              Máximo 50 caracteres
+            </div>
+          </div>
+
+          <div
+            class="field-group"
+            [class.has-error]="
+              (form.get('Legajo')?.invalid && form.get('Legajo')?.touched) ||
+              serverErrors['Legajo']
+            "
+          >
+            <label class="required">Legajo</label>
+            <input
+              formControlName="Legajo"
+              placeholder="ABC001"
+              [class.error]="
+                (form.get('Legajo')?.invalid && form.get('Legajo')?.touched) ||
+                serverErrors['Legajo']
+              "
+            />
+            <div *ngIf="serverErrors['Legajo']" class="error-text">
+              {{ serverErrors["Legajo"] }}
+            </div>
+            <div
+              *ngIf="
+                !serverErrors['Legajo'] &&
+                form.get('Legajo')?.invalid &&
+                form.get('Legajo')?.touched
+              "
+              class="error-text"
+            >
+              El legajo es requerido (máx 5 caracteres)
+            </div>
+          </div>
+
+          <div
+            class="field-group"
+            [class.has-error]="
+              form.get('RolId')?.invalid && form.get('RolId')?.touched
+            "
+          >
+            <label class="required">Rol</label>
+            <select
+              formControlName="RolId"
+              [class.error]="
+                form.get('RolId')?.invalid && form.get('RolId')?.touched
+              "
+            >
+              <option value="" disabled>Selecciona un rol</option>
+              <option *ngFor="let r of rolesList" [value]="r.id">
+                {{ r.label }}
+              </option>
+            </select>
+            <div
+              *ngIf="form.get('RolId')?.invalid && form.get('RolId')?.touched"
+              class="error-text"
+            >
+              Selecciona un rol
+            </div>
+          </div>
+
+          <div
+            class="field-group"
+            [class.has-error]="
+              form.get('Password')?.invalid && form.get('Password')?.touched
+            "
+          >
+            <label>
+              Contraseña <span class="optional-text">(opcional)</span>
+            </label>
+            <div class="input-with-icon">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="Password"
+                autocomplete="new-password"
+                placeholder="Mínimo 6 caracteres"
+                [class.error]="
+                  form.get('Password')?.invalid && form.get('Password')?.touched
+                "
+              />
+              <button
+                type="button"
+                class="icon-btn"
+                (click)="showPassword = !showPassword"
+                [attr.aria-label]="
+                  showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                "
+              >
+                <span
+                  [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                ></span>
+              </button>
+            </div>
+            <div class="password-feedback">
+              <div *ngIf="passwordFeedback" class="error-text">
+                {{ passwordFeedback }}
+              </div>
+              <div
+                *ngIf="
+                  !passwordFeedback &&
+                  form.get('Password')?.invalid &&
+                  form.get('Password')?.touched
+                "
+                class="error-text"
+              >
+                <span *ngIf="form.get('Password')?.errors?.['minlength']"
+                  >La contraseña debe tener al menos 6 caracteres</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="field-group"
+            [class.has-error]="
+              form.get('PasswordConfirm')?.invalid &&
+              form.get('PasswordConfirm')?.touched
+            "
+          >
+            <label>
+              Confirmar Contraseña <span class="optional-text">(opcional)</span>
+            </label>
+            <div class="input-with-icon">
+              <input
+                [type]="showConfirm ? 'text' : 'password'"
+                formControlName="PasswordConfirm"
+                autocomplete="new-password"
+                placeholder="Repite la contraseña"
+                [class.error]="
+                  form.get('PasswordConfirm')?.invalid &&
+                  form.get('PasswordConfirm')?.touched
+                "
+              />
+              <button
+                type="button"
+                class="icon-btn"
+                (click)="showConfirm = !showConfirm"
+                [attr.aria-label]="
+                  showConfirm ? 'Ocultar confirmación' : 'Mostrar confirmación'
+                "
+              >
+                <span
+                  [class]="showConfirm ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                ></span>
+              </button>
+            </div>
+
+            <div class="status-area" aria-live="polite">
+              <span
+                *ngIf="passwordsMatch === true"
+                class="status-ok"
+                [title]="confirmFeedback || 'Las contraseñas coinciden'"
+              >
+                <i class="pi pi-check" aria-hidden="true"></i>
+                <span class="status-short">Coinciden</span>
+              </span>
+              <span
+                *ngIf="
+                  passwordsMatch === false &&
+                  confirmFeedback &&
+                  confirmFeedback.includes('no coinciden')
+                "
+                class="status-bad"
+                [title]="confirmFeedback"
+              >
+                <i class="pi pi-times" aria-hidden="true"></i>
+                <span class="status-short">No coinciden</span>
+              </span>
+            </div>
+            <div class="password-feedback">
+              <div
+                *ngIf="
+                  confirmFeedback &&
+                  confirmFeedback.includes('confirmación debe tener al menos 6')
+                "
+                class="error-text"
+              >
+                {{ confirmFeedback }}
+              </div>
+              <div
+                *ngIf="
+                  !confirmFeedback &&
+                  form.get('PasswordConfirm')?.invalid &&
+                  form.get('PasswordConfirm')?.touched
+                "
+                class="error-text"
+              >
+                <span *ngIf="form.get('PasswordConfirm')?.errors?.['minlength']"
+                  >La confirmación debe tener al menos 6 caracteres</span
+                >
+                <span *ngIf="form.get('PasswordConfirm')?.errors?.['mismatch']"
+                  >Las contraseñas no coinciden</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn-cancel" (click)="onCancel()">
+            Cancelar
+          </button>
+          <span
+            [ngbTooltip]="
+              !editingEnabled
+                ? 'Pasa a modo edición para poder actualizar'
+                : null
+            "
+            placement="top"
+            container="body"
+          >
+            <button
+              *ngIf="mode === 'edit'"
+              [disabled]="!editingEnabled || passwordsMatch === false"
+              type="submit"
+              class="btn-submit"
+            >
+              Actualizar
+            </button>
+          </span>
+          <button
+            *ngIf="mode !== 'edit'"
+            [disabled]="passwordsMatch === false"
+            type="submit"
+            class="btn-submit"
+          >
+            Crear
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
