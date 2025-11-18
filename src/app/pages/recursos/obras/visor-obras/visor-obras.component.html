@@ -1,6 +1,6 @@
 <div class="container-fluid page-shell page-header-container">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="page-title mb-0" style="margin-left: 3rem">Lista de Obras</h1>
+    <div></div>
     <a
       class="btn btn-primary header-action"
       (click)="createNewObra()"
@@ -11,42 +11,69 @@
   </div>
 </div>
 
-<div class="obra-list-container container-fluid page-shell mt-2">
+<!-- Reemplazar wrapper específico por clases compartidas -->
+<div class="user-list-container container-fluid page-shell mt-2">
   <div class="pyre-table-shell">
-    <!-- Filter bar -->
-    <div class="pyre-filter-bar">
-      <div class="filter-row">
-        <div class="filter-item">
-          <input
-            type="text"
-            [(ngModel)]="filtroNombre"
-            placeholder="Nombre de obra"
-            (keyup.enter)="onSearch()"
-          />
+    <!-- Filter bar: estructura unificada con otros visores -->
+    <div class="pyre-filter-bar container-fluid">
+      <div class="row g-3 align-items-end">
+        <!-- Nombre de la obra -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="filtroNombre"
+                placeholder="Nombre de obra"
+                (keyup.enter)="onSearch()"
+              />
+            </div>
+          </div>
         </div>
-        <div class="filter-item filter-item-with-reset">
-          <div class="filter-input-group">
+
+        <!-- Estado -->
+        <div class="col-lg-2 col-md-3 col-sm-6">
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <select class="form-control" [(ngModel)]="filtroEstado">
+                <option value="">Todos los estados</option>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Espacio flexible -->
+        <div class="col-lg-2 col-md-3 col-sm-6 d-none d-md-block"></div>
+
+        <!-- Reset + Buscar (alineados a la derecha, igual que otros visores) -->
+        <div class="col-lg-4 col-md-12 col-sm-12 d-flex justify-content-end">
+          <div class="d-flex gap-2">
             <button
-              *ngIf="hasActiveFilters()"
               type="button"
               class="reset-button-inline"
               (click)="onResetFilters()"
-              title="Limpiar todos los filtros"
+              [disabled]="!hasActiveFilters()"
+              [title]="
+                hasActiveFilters()
+                  ? 'Limpiar filtros'
+                  : 'No hay filtros activos'
+              "
             >
               <i class="pi pi-filter-slash"></i>
             </button>
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="onSearch()"
+              title="Buscar"
+            >
+              <i class="pi pi-search"></i>
+            </button>
           </div>
-        </div>
-        <div class="filter-actions">
-          <button
-            type="button"
-            class="search-button"
-            (click)="onSearch()"
-            [disabled]="!hasActiveFilters()"
-            title="Buscar"
-          >
-            <i class="pi pi-search"></i>
-          </button>
         </div>
       </div>
     </div>
@@ -85,15 +112,19 @@
                   type="button"
                   class="btn-icon btn-edit"
                   (click)="editObra(obra)"
-                  title="Ver / Editar"
+                  ngbTooltip="Ver/Editar obra"
+                  placement="top"
+                  container="body"
                 >
-                  <i class="pi pi-user-edit"></i>
+                  <i class="pi pi-eye"></i>
                 </button>
                 <button
                   type="button"
                   class="btn-icon btn-delete"
                   (click)="deleteObra(obra)"
-                  title="Eliminar"
+                  ngbTooltip="Eliminar obra"
+                  placement="top"
+                  container="body"
                 >
                   <i class="pi pi-trash"></i>
                 </button>
@@ -107,68 +138,15 @@
       </table>
     </div>
 
-    <!-- Custom pagination -->
-    <div *ngIf="!loading && totalItems > 0" class="pagination-container">
-      <div class="pagination-info">
-        <span
-          >Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
-          {{ Math.min(currentPage * pageSize, totalItems) }} de
-          {{ totalItems }} registros</span
-        >
-      </div>
-      <div class="pagination-controls">
-        <div class="page-size-selector">
-          <label>Registros por página:</label>
-          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-            <option *ngFor="let size of rowsPerPageOptions" [value]="size">
-              {{ size }}
-            </option>
-          </select>
-        </div>
-        <div class="page-buttons">
-          <button
-            type="button"
-            class="page-btn"
-            [disabled]="currentPage === 1"
-            (click)="onPageChange(1)"
-          >
-            <i class="pi pi-angle-double-left"></i>
-          </button>
-          <button
-            type="button"
-            class="page-btn"
-            [disabled]="currentPage === 1"
-            (click)="onPageChange(currentPage - 1)"
-          >
-            <i class="pi pi-angle-left"></i>
-          </button>
-          <button
-            *ngFor="let page of getVisiblePages()"
-            type="button"
-            class="page-btn"
-            [class.active]="page === currentPage"
-            (click)="onPageChange(page)"
-          >
-            {{ page }}
-          </button>
-          <button
-            type="button"
-            class="page-btn"
-            [disabled]="currentPage === totalPages"
-            (click)="onPageChange(currentPage + 1)"
-          >
-            <i class="pi pi-angle-right"></i>
-          </button>
-          <button
-            type="button"
-            class="page-btn"
-            [disabled]="currentPage === totalPages"
-            (click)="onPageChange(totalPages)"
-          >
-            <i class="pi pi-angle-double-right"></i>
-          </button>
-        </div>
-      </div>
+    <!-- Reemplazar la paginación custom por app-paginator -->
+    <div *ngIf="!loading && totalItems > 0" class="paginator-container">
+      <app-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage - 1"
+        (pageChange)="onPageEvent($event)"
+      >
+      </app-paginator>
     </div>
   </div>
 
