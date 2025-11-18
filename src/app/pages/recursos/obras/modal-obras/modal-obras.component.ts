@@ -27,7 +27,7 @@ import { AlertaService } from '../../../../services/alerta.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NgbTooltipModule],
   templateUrl: './modal-obras.component.html',
-  styleUrls: ['./modal-obras.component.css'],
+  styleUrls: ['../../../../../styles/modal-style.css'], // Corregir la ruta relativa
 })
 export class ObraEditModalComponent implements OnInit, OnChanges {
   @Output() submit = new EventEmitter<{
@@ -59,7 +59,7 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     private fb: FormBuilder,
     private elementRef: ElementRef,
     private alertService: AlertaService
-  ) { }
+  ) {}
 
   @HostListener('document:keydown.escape')
   onEscapeKey() {
@@ -153,7 +153,7 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       Estado: ['Activo', [Validators.required]],
       Presupuesto: ['', [Validators.min(0)]],
       ResponsableTecnico: ['', [Validators.maxLength(100)]],
-      Observaciones: ['', [Validators.maxLength(1000)]]
+      Observaciones: ['', [Validators.maxLength(1000)]],
     });
   }
 
@@ -177,8 +177,9 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       FechaFin: data?.fechaFin ?? '',
       Estado: data?.estado ?? data?.Estado ?? 'Activo',
       Presupuesto: data?.presupuesto ?? data?.Presupuesto ?? '',
-      ResponsableTecnico: data?.responsableTecnico ?? data?.ResponsableTecnico ?? '',
-      Observaciones: data?.observaciones ?? data?.Observaciones ?? ''
+      ResponsableTecnico:
+        data?.responsableTecnico ?? data?.ResponsableTecnico ?? '',
+      Observaciones: data?.observaciones ?? data?.Observaciones ?? '',
     };
 
     console.log('✅ Mapped data for form:', mapped);
@@ -194,7 +195,9 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       if (payload?.errors && typeof payload.errors === 'object') {
         Object.keys(payload.errors).forEach((k: string) => {
           const val = payload.errors[k];
-          this.serverErrors[k] = Array.isArray(val) ? String(val[0]) : String(val);
+          this.serverErrors[k] = Array.isArray(val)
+            ? String(val[0])
+            : String(val);
           const control = this.form.get(k) || this.form.get(this.toFormKey(k));
           if (control) {
             control.setErrors({ server: true });
@@ -229,10 +232,10 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
   private toFormKey(serverKey: string): string {
     const map: any = {
-      'codigo': 'Codigo',
-      'nombre': 'NombreObra',
-      'descripcion': 'Descripcion',
-      'direccion': 'Direccion'
+      codigo: 'Codigo',
+      nombre: 'NombreObra',
+      descripcion: 'Descripcion',
+      direccion: 'Direccion',
     };
     return map[serverKey] ?? serverKey;
   }
@@ -260,7 +263,8 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       data: value,
       onSuccess: () => {
         this.alertService.success(
-          `La obra ha sido ${this.mode === 'create' ? 'creada' : 'actualizada'
+          `La obra ha sido ${
+            this.mode === 'create' ? 'creada' : 'actualizada'
           } exitosamente`,
           `¡Obra ${this.mode === 'create' ? 'Creada' : 'Actualizada'}!`
         );
@@ -274,7 +278,8 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
           error?.message ||
           'Ocurrió un error inesperado';
         this.alertService.error(
-          `Error al ${this.mode === 'create' ? 'crear' : 'actualizar'
+          `Error al ${
+            this.mode === 'create' ? 'crear' : 'actualizar'
           } la obra: ${errorMessage}`,
           `Error al ${this.mode === 'create' ? 'Crear' : 'Actualizar'} Obra`
         );

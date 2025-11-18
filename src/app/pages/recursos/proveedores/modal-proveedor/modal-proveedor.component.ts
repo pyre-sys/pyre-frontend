@@ -1,6 +1,22 @@
-import { Component, EventEmitter, Output, Input, OnInit, OnChanges, SimpleChanges, HostListener, ElementRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  HostListener,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../../services/alerta.service';
 
@@ -21,7 +37,7 @@ export interface ProveedorDto {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NgbTooltipModule],
   templateUrl: './modal-proveedor.component.html',
-  styleUrls: ['./modal-proveedor.component.css']
+  styleUrls: ['../../../../../styles/modal-style.css'],
 })
 export class ModalProveedorComponent implements OnInit, OnChanges {
   @Output() submit = new EventEmitter<{
@@ -47,7 +63,7 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     private fb: FormBuilder,
     private elementRef: ElementRef,
     private alertService: AlertaService
-  ) { }
+  ) {}
 
   @HostListener('document:keydown.escape')
   onEscapeKey() {
@@ -63,7 +79,9 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     this.setControlsDisabled(!this.editingEnabled);
 
     setTimeout(() => {
-      const firstInput = this.elementRef.nativeElement.querySelector('input:not([style*="display:none"])');
+      const firstInput = this.elementRef.nativeElement.querySelector(
+        'input:not([style*="display:none"])'
+      );
       if (firstInput) {
         firstInput.focus();
       }
@@ -86,7 +104,9 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     this.setControlsDisabled(!this.editingEnabled);
     if (this.editingEnabled) {
       setTimeout(() => {
-        const firstInput = this.elementRef.nativeElement.querySelector('input:not([disabled])');
+        const firstInput = this.elementRef.nativeElement.querySelector(
+          'input:not([disabled])'
+        );
         if (firstInput) firstInput.focus();
       }, 50);
     }
@@ -94,7 +114,7 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
 
   private setControlsDisabled(disabled: boolean) {
     if (!this.form) return;
-    Object.keys(this.form.controls).forEach(key => {
+    Object.keys(this.form.controls).forEach((key) => {
       const control = this.form.get(key);
       if (!control) return;
       if (disabled) {
@@ -114,7 +134,7 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
       email: ['', [Validators.email, Validators.maxLength(150)]],
       direccion: ['', [Validators.maxLength(200)]],
       descripcion: ['', [Validators.maxLength(1000)]],
-      activo: [true, [Validators.required]]
+      activo: [true, [Validators.required]],
     });
   }
 
@@ -134,7 +154,7 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
       email: data?.email ?? '',
       direccion: data?.direccion ?? '',
       descripcion: data?.descripcion ?? '',
-      activo: data?.activo ?? true
+      activo: data?.activo ?? true,
     };
 
     console.log('✅ Mapped data for form:', mapped);
@@ -149,7 +169,9 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
       if (payload?.errors && typeof payload.errors === 'object') {
         Object.keys(payload.errors).forEach((k: string) => {
           const val = payload.errors[k];
-          this.serverErrors[k] = Array.isArray(val) ? String(val[0]) : String(val);
+          this.serverErrors[k] = Array.isArray(val)
+            ? String(val[0])
+            : String(val);
           const control = this.form.get(k) || this.form.get(this.toFormKey(k));
           if (control) {
             control.setErrors({ server: true });
@@ -165,16 +187,18 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
       }
     } catch (e) {
       console.warn('handleServerErrors parse failed', e, error);
-      this.alertService.error('Ocurrió un error al procesar la respuesta del servidor');
+      this.alertService.error(
+        'Ocurrió un error al procesar la respuesta del servidor'
+      );
     }
   }
 
   private toFormKey(serverKey: string): string {
     const map: any = {
-      'nombreProveedor': 'nombreProveedor',
-      'contacto': 'contacto',
-      'cuit': 'cuit',
-      'email': 'email'
+      nombreProveedor: 'nombreProveedor',
+      contacto: 'contacto',
+      cuit: 'cuit',
+      email: 'email',
     };
     return map[serverKey] ?? serverKey;
   }
@@ -199,7 +223,9 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
       data: value,
       onSuccess: () => {
         this.alertService.success(
-          `El proveedor ha sido ${this.mode === 'create' ? 'creado' : 'actualizado'} exitosamente`,
+          `El proveedor ha sido ${
+            this.mode === 'create' ? 'creado' : 'actualizado'
+          } exitosamente`,
           `¡Proveedor ${this.mode === 'create' ? 'Creado' : 'Actualizado'}!`
         );
         this.resetModal();
@@ -207,13 +233,20 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
         this.close.emit();
       },
       onError: (error: any) => {
-        const errorMessage = error?.error?.message || error?.message || 'Ocurrió un error inesperado';
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Ocurrió un error inesperado';
         this.alertService.error(
-          `Error al ${this.mode === 'create' ? 'crear' : 'actualizar'} el proveedor: ${errorMessage}`,
-          `Error al ${this.mode === 'create' ? 'Crear' : 'Actualizar'} Proveedor`
+          `Error al ${
+            this.mode === 'create' ? 'crear' : 'actualizar'
+          } el proveedor: ${errorMessage}`,
+          `Error al ${
+            this.mode === 'create' ? 'Crear' : 'Actualizar'
+          } Proveedor`
         );
         this.handleServerErrors(error);
-      }
+      },
     });
   }
 

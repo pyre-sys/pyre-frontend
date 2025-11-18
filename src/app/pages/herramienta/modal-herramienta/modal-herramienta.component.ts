@@ -32,10 +32,10 @@ import { CboEstadoFisicoHerramientaComponent } from '../../../shared/components/
     ReactiveFormsModule,
     NgbTooltipModule,
     CboFamiliaHerramientaComponent,
-    CboEstadoFisicoHerramientaComponent, // Asegurar que esté incluido
+    CboEstadoFisicoHerramientaComponent,
   ],
   templateUrl: './modal-herramienta.component.html',
-  styleUrls: ['./modal-herramienta.component.css'],
+  styleUrls: ['../../../../styles/modal-style.css'], // Apuntar a la hoja de estilos global
 })
 export class HerramientasModalComponent
   implements OnInit, OnChanges, OnDestroy
@@ -74,17 +74,30 @@ export class HerramientasModalComponent
 
   ngOnInit(): void {
     this.buildForm();
-    if (this.initialData) this.patchForm(this.initialData);
 
+    // Si hay datos iniciales, aplicarlos inmediatamente
+    if (this.initialData) {
+      this.patchForm(this.initialData);
+    } else if (this.mode === 'create') {
+      // En modo creación, establecer valores por defecto inmediatamente
+      this.form.patchValue({
+        EstadoFisico: { idEstadoFisico: 1, descripcionEstado: 'EXCELENTE' },
+        Activo: true,
+        Planta: 1,
+      });
+    }
+
+    // Establecer estado de edición inmediatamente
     this.editingEnabled = this.mode !== 'edit';
     this.setControlsDisabled(!this.editingEnabled);
 
+    // Reducir timeout para focus más rápido
     setTimeout(() => {
       const firstInput = this.elementRef.nativeElement.querySelector(
         'input:not([style*="display:none"])'
       );
       if (firstInput) firstInput.focus();
-    }, 150);
+    }, 50); // Reducido de 150ms a 50ms
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -96,9 +109,12 @@ export class HerramientasModalComponent
       this.editingEnabled = this.mode !== 'edit';
       this.setControlsDisabled(!this.editingEnabled);
     }
-    if (changes['mode'] && this.mode === 'create') {
+    // Optimizar para modo creación
+    if (changes['mode'] && this.mode === 'create' && this.form) {
       this.form.patchValue({
         EstadoFisico: { idEstadoFisico: 1, descripcionEstado: 'EXCELENTE' },
+        Activo: true,
+        Planta: 1,
       });
     }
   }
@@ -147,19 +163,18 @@ export class HerramientasModalComponent
       Tipo: ['', [Validators.maxLength(100)]],
       Ubicacion: ['', [Validators.maxLength(50)]],
       Planta: [1, [Validators.required]],
-      Familia: ['', [Validators.required]], // Added cbo-familia-herramienta
-      Serie: ['', [Validators.maxLength(100)]], // Added optional Serie field
-      Valor: [null, [Validators.min(0)]], // Cambiar validación para permitir decimales
+      Familia: ['', [Validators.required]],
+      Serie: ['', [Validators.maxLength(100)]],
+      Valor: [null, [Validators.min(0)]],
       CostoDolares: [null, [Validators.min(0)]],
       UbicacionFisica: ['', [Validators.maxLength(150)]],
       Activo: [true],
-      Codigo: ['', [Validators.maxLength(50)]], // Agregar el campo Codigo
+      Codigo: ['', [Validators.maxLength(50)]],
+      // Valor por defecto optimizado para modo creación
       EstadoFisico: [
-        this.mode === 'create'
-          ? { idEstadoFisico: 1, descripcionEstado: 'EXCELENTE' }
-          : '',
+        { idEstadoFisico: 1, descripcionEstado: 'EXCELENTE' },
         [Validators.required],
-      ], // Agregar el campo EstadoFisico
+      ],
     });
   }
 
