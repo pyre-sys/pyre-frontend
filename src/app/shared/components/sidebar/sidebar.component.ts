@@ -100,7 +100,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ],
     },
 
-    // 3. Proveedores
     {
       id: 3,
       descripcion: 'Proveedores',
@@ -118,13 +117,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ],
     },
 
-    // 4. Obras
     {
       id: 4,
-      descripcion: 'Obras',
-      icono: 'bi bi-card-list',
-      link: '/recursos/obras',
-      grupo: 'GM04',
+      descripcion: 'Clientes',
+      icono: 'bi bi-people-fill',
+      link: '/recursos/clientes',
+      grupo: 'GM03',
       principal: true,
       orden: 4,
       estado: true,
@@ -136,15 +134,32 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ],
     },
 
-    // 5. Movimientos (principal con submenús)
     {
       id: 5,
+      descripcion: 'Obras',
+      icono: 'bi bi-card-list',
+      link: '/recursos/obras',
+      grupo: 'GM04',
+      principal: true,
+      orden: 5,
+      estado: true,
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrador,
+      ],
+    },
+
+    // 6. Movimientos (principal con submenús)
+    {
+      id: 6,
       descripcion: 'Movimientos',
       icono: 'bi bi-arrow-left-right',
       link: '/movimientos',
       grupo: 'GM05',
       principal: true,
-      orden: 5,
+      orden: 6,
       estado: true,
       requiredAccess: [
         Roles.SuperAdmin,
@@ -310,10 +325,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: true,
       orden: 7,
       estado: false,
-      requiredAccess: [
-        Roles.SuperAdmin
-      ]
-      ,
+      requiredAccess: [Roles.SuperAdmin],
     },
     {
       id: 71,
@@ -431,8 +443,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         mappedRoleId != null
           ? mappedRoleId
           : user.id_acceso != null
-            ? Number(user.id_acceso)
-            : 0;
+          ? Number(user.id_acceso)
+          : 0;
 
       const nombre = user.nombre || '';
       const apellido = user.apellido || '';
