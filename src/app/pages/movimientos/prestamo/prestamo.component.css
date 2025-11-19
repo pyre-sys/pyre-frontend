@@ -466,3 +466,13 @@
   transform: scale(1.05);
   letter-spacing: 0.3px;
 }
+
+/* Estilo para el combo de obras deshabilitado */
+.form-field-wrapper.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.form-field-wrapper.disabled app-cbo-obra {
+  cursor: not-allowed;
+}
