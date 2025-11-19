@@ -62,7 +62,7 @@ export class VisorHerramientasComponent implements OnInit {
     private srvHerramienta: HerramientaService,
     private srvAlerta: AlertaService,
     private pageTitleService: PageTitleService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Listado de Herramientas');
@@ -285,8 +285,7 @@ export class VisorHerramientasComponent implements OnInit {
     this.srvAlerta
       .confirm(
         `¿Estás seguro de que deseas ${actionText} esta herramienta?`,
-        `${
-          actionText.charAt(0).toUpperCase() + actionText.slice(1)
+        `${actionText.charAt(0).toUpperCase() + actionText.slice(1)
         } Herramienta`
       )
       .then((result: any) => {
@@ -390,8 +389,8 @@ export class VisorHerramientasComponent implements OnInit {
     } else {
       const id = Number(
         this.modalInitialData?.id ??
-          this.modalInitialData?.idHerramienta ??
-          null
+        this.modalInitialData?.idHerramienta ??
+        null
       );
       if (!id) {
         const error = {
@@ -429,5 +428,39 @@ export class VisorHerramientasComponent implements OnInit {
 
   private showSnack(message: string): void {
     console.log('SNACK:', message);
+  }
+
+  // Añadir método para descargar el reporte Excel
+  downloadReporteExcel(): void {
+    this.srvHerramienta.reporteHerramientas().subscribe({
+      next: (blob: Blob) => {
+        try {
+          const url = window.URL.createObjectURL(blob);
+          const fileName = `Reporte_Herramientas_${new Date()
+            .toISOString()
+            .slice(0, 10)
+            .replace(/-/g, '')}.xlsx`;
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+          this.srvAlerta.success('Reporte descargado correctamente.', 'Descarga');
+        } catch (e) {
+          console.error('Error al procesar el archivo:', e);
+          this.srvAlerta.error('No se pudo procesar el archivo descargado.');
+        }
+      },
+      error: (err: any) => {
+        console.error('Error al descargar reporteHerramientas:', err);
+        const msg =
+          err?.error?.message ||
+          err?.message ||
+          'No se pudo descargar el reporte. Intente nuevamente.';
+        this.srvAlerta.error(msg);
+      },
+    });
   }
 }

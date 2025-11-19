@@ -11,7 +11,7 @@ export class HerramientaService {
   private baseUrl =
     (environment?.apiUrl ? environment.apiUrl : '') + '/Herramienta';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Obtiene herramientas paginadas y opcionalmente filtradas.
@@ -264,14 +264,14 @@ export class HerramientaService {
     // Añadir idDisponibilidad sólo si se proporciona algún indicio en formData
     const providedDisponibilidad =
       formData.idDisponibilidad !== undefined &&
-      formData.idDisponibilidad !== null &&
-      formData.idDisponibilidad !== ''
+        formData.idDisponibilidad !== null &&
+        formData.idDisponibilidad !== ''
         ? formData.idDisponibilidad
         : formData.IdDisponibilidad !== undefined &&
           formData.IdDisponibilidad !== null &&
           formData.IdDisponibilidad !== ''
-        ? formData.IdDisponibilidad
-        : formData.disponibilidad ||
+          ? formData.IdDisponibilidad
+          : formData.disponibilidad ||
           formData.Disponibilidad ||
           formData.estadoDisponibilidad ||
           null;
@@ -487,4 +487,22 @@ export class HerramientaService {
       `${this.baseUrl}/count-herramientas-by-disponibilidad/${disponibilidadId}`
     );
   }
+
+  /**
+   * Descarga el reporte de herramientas en formato Excel (XLSX) como Blob.
+   * Endpoint: GET /api/Herramienta/reporteHerramientas
+   */
+  reporteHerramientas(): Observable<Blob> {
+    const url = `${this.baseUrl}/reporteHerramientas`;
+    console.debug('[HerramientaService] solicitando reporteHerramientas desde', url);
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      tap(() => console.debug('[HerramientaService] reporteHerramientas: respuesta recibida')),
+      catchError((err) => {
+        console.error('[HerramientaService] reporteHerramientas error:', err);
+        throw err;
+      })
+    );
+  }
+
+
 }

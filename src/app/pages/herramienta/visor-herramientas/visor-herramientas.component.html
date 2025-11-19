@@ -2,14 +2,23 @@
 <div class="container-fluid page-shell page-header-container">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div></div>
-    <a
-      class="btn btn-primary header-action"
-      (click)="createNewTool()"
-      role="button"
-    >
-      <i class="bx bx-wrench bx-tada me-1" aria-hidden="true"></i> Nueva
-      Herramienta
-    </a>
+    <div class="d-flex gap-2">
+      <button
+        class="btn btn-outline-success"
+        (click)="downloadReporteExcel()"
+        title="Exportar Excel"
+      >
+        <i class="pi pi-file-excel"></i> Exportar Excel
+      </button>
+      <a
+        class="btn btn-primary header-action"
+        (click)="createNewTool()"
+        role="button"
+      >
+        <i class="bx bx-wrench bx-tada me-1" aria-hidden="true"></i> Nueva
+        Herramienta
+      </a>
+    </div>
   </div>
 </div>
 
