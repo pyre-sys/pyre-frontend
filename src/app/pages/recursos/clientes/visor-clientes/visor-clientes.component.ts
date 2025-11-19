@@ -2,15 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { UsuarioService } from '../../../../services/usuario.service';
-import { UsuariosModalComponent } from '../../../usuario/modal-usuario/modal-usuario.component';
+import { ClienteService } from '../../../../services/cliente.service';
+import { ModalClientesComponent } from '../modal-clientes/modal-clientes.component';
 import { Router } from '@angular/router';
 import { AlertaService } from '../../../../services/alerta.service';
 import { Roles } from '../../../../shared/enums/roles';
 import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PageTitleService } from '../../../../services/page-title.service';
-import { CboRolUsuarioComponent } from '../../../../shared/components/Cbo/cbo-rol-usuario/cbo-rol-usuario.component';
 import { CboEstadoComponent } from '../../../../shared/components/Cbo/cbo-estado/cbo-estado.component';
 
 interface UserRaw {
@@ -19,12 +18,13 @@ interface UserRaw {
 
 interface DisplayUser {
   id: number | null;
+  cuit?: string;
   legajo?: string | number;
   nombre?: string;
-  apellido?: string;
-  rol?: string;
+  telefono?: string;
   estado?: string;
   activo?: boolean;
+  _pending?: boolean; // flag local para bloquear UI mientras se hace la petición
 }
 
 // Nueva interfaz para la paginación
@@ -65,20 +65,20 @@ interface ApiResponse {
     RouterModule,
     PaginatorComponent,
     NgbTooltipModule,
-    UsuariosModalComponent,
-    CboRolUsuarioComponent,
+    ModalClientesComponent,
     CboEstadoComponent,
   ],
   templateUrl: './visor-clientes.component.html',
   styleUrls: ['./visor-clientes.component.css'],
-  providers: [UsuarioService],
+  providers: [ClienteService],
 })
 export class VisorClientesComponent implements OnInit {
   users: DisplayUser[] = [];
   filteredUsers: DisplayUser[] = [];
-  columns: string[] = ['legajo', 'nombre', 'apellido', 'rol', 'estado'];
+  // Mostrar columnas: cuit, nombre, telefono, estado, acciones
+  columns: string[] = ['cuit', 'nombre', 'telefono', 'estado'];
   currentPage = 1;
-  pageSize = 6;
+  pageSize = 10; // usar 10 por defecto para coincidir con backend
   loading = false;
   totalItems = 0;
   totalPages = 0;
@@ -86,11 +86,9 @@ export class VisorClientesComponent implements OnInit {
   // Expose Math to template
   Math = Math;
 
-  // Filtros
-  filtroLegajo: string = '';
+  // Filtros (actualizados: sólo Cuit, Nombre y Estado)
+  filtroCuit: string = '';
   filtroNombre: string = '';
-  filtroApellido: string = '';
-  filtroRol: number | null = null;
   filtroEstado: string = '';
 
   // Modal control
@@ -102,14 +100,14 @@ export class VisorClientesComponent implements OnInit {
   readonly Roles = Roles;
 
   constructor(
-    private userService: UsuarioService,
+    private clienteService: ClienteService,
     private router: Router,
     private alertService: AlertaService,
     private pageTitleService: PageTitleService
   ) {}
 
   ngOnInit(): void {
-    this.pageTitleService.setTitle('Listado de Usuarios');
+    this.pageTitleService.setTitle('Listado de Clientes');
     this.fetchUsers();
   }
 
@@ -121,32 +119,15 @@ export class VisorClientesComponent implements OnInit {
 
     // Construir objeto de filtros para enviar al servicio
     const filters: any = {};
-    if (this.filtroLegajo?.trim()) filters.legajo = this.filtroLegajo.trim();
+    if (this.filtroCuit?.trim()) filters.cuit = this.filtroCuit.trim();
     if (this.filtroNombre?.trim()) filters.nombre = this.filtroNombre.trim();
-    if (this.filtroApellido?.trim())
-      filters.apellido = this.filtroApellido.trim();
-    // Validar filtroRol: sólo incluir si está definido y es un número válido
-    if (this.filtroRol !== null && this.filtroRol !== undefined) {
-      // Permitir que filtroRol sea number o string (por seguridad). Convertir a Number y validar.
-      const rolVal = Number(this.filtroRol as any);
-      if (!Number.isNaN(rolVal)) {
-        filters.rol = rolVal;
-      } else {
-        // Evitar enviar valores inválidos como NaN
-        console.warn(
-          '[ClientList] filtroRol tiene un valor no numérico, se omitirá en la consulta:',
-          this.filtroRol
-        );
-      }
-    }
-
-    // Convertir estado de string a boolean para el backend
+    // Convertir estado de string a boolean para el backend (si aplica)
     if (this.filtroEstado) {
       filters.estado = this.filtroEstado === 'activo';
     }
 
-    this.userService
-      .getUsers(this.currentPage, this.pageSize, filters)
+    this.clienteService
+      .getClientes(this.currentPage, this.pageSize, filters)
       .subscribe({
         next: (resp: ApiResponse) => {
           console.debug('[ClientList] fetchUsers - filtros enviados:', filters);
@@ -256,14 +237,15 @@ export class VisorClientesComponent implements OnInit {
     const estado = activo ? 'Activo' : 'Inactivo';
 
     return {
-      id: u['id'] ?? u['userId'] ?? null,
+      id: u['id'] ?? u['idCliente'] ?? u['userId'] ?? null,
+      cuit: u['cuit'] ?? u['cuitNumber'] ?? '',
       legajo:
         u['legajo'] ?? u['legajo_number'] ?? u['legajoNumber'] ?? u['id'] ?? '',
-      nombre: u['nombre'] ?? u['firstName'] ?? u['name'] ?? '',
-      apellido: u['apellido'] ?? u['lastName'] ?? u['surname'] ?? '',
-      rol: u['rol'] ?? u['role'] ?? u['rolNombre'] ?? u['roleName'] ?? '',
+      nombre: u['nombre'] ?? u['name'] ?? u['razonSocial'] ?? '',
+      telefono: u['telefono'] ?? u['phone'] ?? u['telefonoContacto'] ?? '',
       estado: estado,
       activo: activo,
+      _pending: false,
     } as DisplayUser;
   }
 
@@ -274,10 +256,8 @@ export class VisorClientesComponent implements OnInit {
   }
 
   onResetFilters(): void {
-    this.filtroLegajo = '';
+    this.filtroCuit = '';
     this.filtroNombre = '';
-    this.filtroApellido = '';
-    this.filtroRol = null;
     this.filtroEstado = '';
     this.currentPage = 1;
     this.fetchUsers();
@@ -308,10 +288,8 @@ export class VisorClientesComponent implements OnInit {
 
   hasActiveFilters(): boolean {
     return !!(
-      this.filtroLegajo?.trim() ||
+      this.filtroCuit?.trim() ||
       this.filtroNombre?.trim() ||
-      this.filtroApellido?.trim() ||
-      this.filtroRol !== null ||
       this.filtroEstado
     );
   }
@@ -360,11 +338,11 @@ export class VisorClientesComponent implements OnInit {
     this.modalMode = 'edit';
     this.showUserModal = true;
 
-    this.userService.getUserById(Number(id)).subscribe({
-      next: (resp) => {
+    this.clienteService.getClienteById(Number(id)).subscribe({
+      next: (resp: any) => {
         this.modalInitialData = resp?.data ?? resp ?? null;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('[ClientList] error loading user by id', err);
         this.modalInitialData = item;
       },
@@ -377,31 +355,45 @@ export class VisorClientesComponent implements OnInit {
 
     this.alertService
       .confirm(
-        '¿Estás seguro de que deseas eliminar este usuario?',
-        'Eliminar Usuario'
+        '¿Estás seguro de que deseas eliminar este cliente?',
+        'Eliminar Cliente'
       )
       .then((result: any) => {
         if (result && result.isConfirmed) {
-          this.userService.deleteUser(Number(id)).subscribe({
-            next: () => {
-              this.alertService.success(
-                'El usuario ha sido eliminado correctamente.',
-                '¡Eliminado!'
-              );
+          // bloquear el botón y mostrar spinner en la fila
+          item._pending = true;
+          this.clienteService.deleteCliente(Number(id)).subscribe({
+            next: (resp: any) => {
+              const msg =
+                resp?.message ?? 'El cliente ha sido eliminado correctamente.';
+              this.alertService.success(msg, '¡Eliminado!');
+              item._pending = false;
               this.fetchUsers();
             },
-            error: (err) => {
+            error: (err: any) => {
+              item._pending = false;
               console.error('[ClientList] deleteUser error', err);
-              this.alertService.error(
-                'No se pudo eliminar el usuario. Intente nuevamente.'
-              );
+              // intentar mostrar message si viene en el objeto de error
+              const errMsg =
+                err?.message ??
+                err?.error?.message ??
+                'No se pudo eliminar el cliente. Intente nuevamente.';
+              this.alertService.error(errMsg);
             },
           });
         }
       });
   }
 
-  toggleUserActive(item: DisplayUser): void {
+  toggleUserActive(event: Event, item: DisplayUser): void {
+    // Evitar que el checkbox nativo cambie su estado visual antes de la confirmación
+    try {
+      event.preventDefault();
+      event.stopPropagation();
+    } catch {
+      /* safe */
+    }
+
     const id = item?.id ?? null;
     if (id == null) return;
 
@@ -411,27 +403,36 @@ export class VisorClientesComponent implements OnInit {
 
     this.alertService
       .confirm(
-        `¿Estás seguro de que deseas ${actionText} este usuario?`,
-        `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} Usuario`
+        `¿Estás seguro de que deseas ${actionText} este cliente?`,
+        `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} Cliente`
       )
       .then((result: any) => {
         if (result && result.isConfirmed) {
-          this.userService.toggleActivo(Number(id)).subscribe({
-            next: () => {
-              item.activo = targetState; // Actualizar el estado localmente
+          // marcar pending para bloquear UI y mostrar spinner
+          item._pending = true;
+
+          this.clienteService.toggleActivo(Number(id)).subscribe({
+            next: (_resp: any) => {
+              // sólo al confirm y respuesta exitosa actualizamos el estado
+              item.activo = targetState;
+              item._pending = false;
               const pastText = targetState ? 'activado' : 'desactivado';
               this.alertService.success(
-                `Usuario ${pastText} correctamente.`,
+                `Cliente ${pastText} correctamente.`,
                 '¡Hecho!'
               );
             },
-            error: (err) => {
+            error: (err: any) => {
+              item._pending = false;
               console.error('[ClientList] toggleUserActive error', err);
               this.alertService.error(
-                'No se pudo cambiar el estado del usuario. Intente nuevamente.'
+                'No se pudo cambiar el estado del cliente. Intente nuevamente.'
               );
             },
           });
+        } else {
+          // Si cancela, no hacemos nada. Como prevenimos el toggle nativo,
+          // el checkbox permanece mostrando item.activo (estado anterior).
         }
       });
   }
@@ -455,20 +456,26 @@ export class VisorClientesComponent implements OnInit {
     onError: (error: any) => void;
   }) {
     if (event.mode === 'create') {
-      this.userService.createUser(event.data).subscribe({
-        next: (resp) => {
+      this.clienteService.createCliente(event.data).subscribe({
+        next: (_resp: any) => {
           this.fetchUsers();
           event.onSuccess();
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('[ClientList] createUser error', err);
           event.onError(err);
         },
       });
     } else {
       const id = Number(
-        this.modalInitialData?.id ?? this.modalInitialData?.userId ?? null
+        this.modalInitialData?.id ??
+          this.modalInitialData?.idCliente ??
+          this.modalInitialData?.clienteId ??
+          this.modalInitialData?.userId ??
+          this.modalInitialData?.Id ??
+          null
       );
+
       if (!id) {
         console.warn('[ClientList] update requested but no id available');
         event.onError({
@@ -476,12 +483,41 @@ export class VisorClientesComponent implements OnInit {
         });
         return;
       }
-      this.userService.updateUser(id, event.data).subscribe({
-        next: (resp) => {
+
+      // Asegurar que el body tenga idCliente para que updateCliente lo valide
+      if (!event.data?.idCliente && !event.data?.Id && !event.data?.IdCliente) {
+        event.data.idCliente = id;
+      }
+
+      // Incluir siempre el campo 'activo' con el valor real actual antes de hacer PUT.
+      let actualActivo: boolean | null = null;
+      if (
+        this.modalInitialData &&
+        (this.modalInitialData.activo === true ||
+          this.modalInitialData.activo === false)
+      ) {
+        actualActivo = !!this.modalInitialData.activo;
+      } else {
+        // intentar buscar en la lista local por id
+        const local = this.users.find((u) => Number(u.id) === Number(id));
+        if (local && (local.activo === true || local.activo === false)) {
+          actualActivo = !!local.activo;
+        }
+      }
+      if (actualActivo === null) {
+        console.warn(
+          '[ClientList] No se pudo determinar el valor actual de activo, usando true como fallback para el PUT'
+        );
+        actualActivo = true;
+      }
+      event.data.activo = actualActivo;
+
+      this.clienteService.updateCliente(id, event.data).subscribe({
+        next: (_resp: any) => {
           this.fetchUsers();
           event.onSuccess();
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('[ClientList] updateUser error', err);
           event.onError(err);
         },
