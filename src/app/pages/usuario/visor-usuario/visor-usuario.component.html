@@ -156,12 +156,18 @@
                   <input
                     type="checkbox"
                     [checked]="user.activo"
-                    (change)="toggleUserActive(user)"
+                    (click)="toggleUserActive($event, user)"
+                    [disabled]="user._pending"
                   />
                   <span
                     class="toggle-slider modern"
                     [class.active]="user.activo"
                   ></span>
+                  <i
+                    *ngIf="user._pending"
+                    class="pi pi-spin pi-spinner small-spinner"
+                    style="margin-left: 6px"
+                  ></i>
                 </label>
               </div>
             </td>

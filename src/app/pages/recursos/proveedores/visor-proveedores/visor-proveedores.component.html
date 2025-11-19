@@ -114,11 +114,21 @@
                   placement="top"
                   container="body"
                 >
-                  <input type="checkbox" [checked]="proveedor.activo" />
+                  <input
+                    type="checkbox"
+                    [checked]="proveedor.activo"
+                    (click)="toggleProveedorActive($event, proveedor)"
+                    [disabled]="proveedor._pending"
+                  />
                   <span
                     class="toggle-slider modern"
                     [class.active]="proveedor.activo"
                   ></span>
+                  <i
+                    *ngIf="proveedor._pending"
+                    class="pi pi-spin pi-spinner small-spinner"
+                    style="margin-left: 6px"
+                  ></i>
                 </label>
               </div>
             </td>

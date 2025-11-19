@@ -18,6 +18,7 @@ export interface ProveedorDto {
   direccion?: string;
   descripcion?: string;
   activo: boolean;
+  _pending?: boolean;
 }
 
 @Component({
@@ -106,6 +107,7 @@ export class VisorProveedoresComponent implements OnInit {
             direccion: p.direccion ?? '',
             descripcion: p.descripcion ?? '',
             activo: p.activo ?? false,
+            _pending: false,
           }));
 
           // Extraer paginación si viene
@@ -301,12 +303,37 @@ export class VisorProveedoresComponent implements OnInit {
         });
         return;
       }
+
+      // Asegurar que el body incluya el estado actual 'activo'
+      let actualActivo: boolean | null = null;
+      if (
+        this.modalInitialData &&
+        (this.modalInitialData.activo === true ||
+          this.modalInitialData.activo === false)
+      ) {
+        actualActivo = !!this.modalInitialData.activo;
+      } else {
+        const local = this.proveedores.find(
+          (p) => Number(p.idProveedor) === Number(id)
+        );
+        if (local && (local.activo === true || local.activo === false)) {
+          actualActivo = !!local.activo;
+        }
+      }
+      if (actualActivo === null) {
+        console.warn(
+          '[ProveedorList] No se pudo determinar activo, usando true como fallback'
+        );
+        actualActivo = true;
+      }
+      event.data.activo = actualActivo;
+
       this.proveedoresService.updateProveedor(id, event.data).subscribe({
         next: () => {
           this.fetchProveedores();
           event.onSuccess();
         },
-        error: (err) => {
+        error: (err: any) => {
           event.onError(err);
         },
       });
@@ -321,6 +348,74 @@ export class VisorProveedoresComponent implements OnInit {
   closeDetailsModal(): void {
     this.showDetailsModal = false;
     this.detailsData = null;
+  }
+
+  toggleProveedorActive(event: Event, item: ProveedorDto): void {
+    try {
+      event.preventDefault();
+      event.stopPropagation();
+    } catch {
+      /* safe */
+    }
+
+    const id = item?.idProveedor ?? null;
+    if (id == null) return;
+
+    const current = item.activo;
+    const targetState = !current;
+    const actionText = targetState ? 'activar' : 'desactivar';
+
+    this.alertService
+      .confirm(
+        `¿Estás seguro de que deseas ${actionText} este proveedor?`,
+        `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} Proveedor`
+      )
+      .then((result: any) => {
+        if (result && result.isConfirmed) {
+          item._pending = true;
+
+          // Intentamos llamar al método toggleActivo; si no está disponible en runtime,
+          // la llamada lanzará y caeremos al catch para usar el fallback (updateProveedor).
+          let obs: any = null;
+          try {
+            obs = (this.proveedoresService as any).toggleActivo(id);
+          } catch (e) {
+            // Fallback: usar updateProveedor si está disponible
+            obs = (this.proveedoresService as any).updateProveedor
+              ? (this.proveedoresService as any).updateProveedor(id, {
+                  activo: targetState,
+                })
+              : null;
+          }
+
+          if (!obs) {
+            item._pending = false;
+            this.alertService.error('Operación no disponible en el servicio.');
+            return;
+          }
+
+          obs.subscribe({
+            next: () => {
+              item.activo = targetState;
+              item._pending = false;
+              const pastText = targetState ? 'activado' : 'desactivado';
+              this.alertService.success(
+                `Proveedor ${pastText} correctamente.`,
+                '¡Hecho!'
+              );
+            },
+            error: (err: any) => {
+              item._pending = false;
+              console.error('[ProveedorList] toggleProveedorActive error', err);
+              this.alertService.error(
+                'No se pudo cambiar el estado del proveedor. Intente nuevamente.'
+              );
+            },
+          });
+        } else {
+          // cancelado: no hacer nada
+        }
+      });
   }
 
   private showSnack(message: string): void {
