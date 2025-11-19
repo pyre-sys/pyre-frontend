@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -8,9 +8,12 @@ export interface ObraDto {
   codigo: string;
   nombreObra: string;
   descripcion?: string;
+  ubicacion?: string;
   fechaInicio?: string; // ISO string
   fechaFin?: string; // ISO string
   activa?: boolean;
+  idCliente?: number;
+  clienteNombre?: string;
 }
 
 @Injectable({
@@ -20,7 +23,7 @@ export class ObrasService {
   private apiUrl = environment.apiUrl;
   private baseUrl = `${this.apiUrl}/Obra`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getObras(): Observable<{ data: ObraDto[]; total: number }> {
     return this.http.get<{ data: ObraDto[]; total: number }>(`${this.baseUrl}`);
@@ -48,5 +51,30 @@ export class ObrasService {
     return this.http.get<any>(
       `${this.baseUrl}?page=${page}&pageSize=${pageSize}`
     );
+  }
+
+  /**
+   * Obtiene obras activas para combos/autocomplete con filtros opcionales.
+   * Limita a 5 resultados por defecto para eficiencia.
+   * @param idCliente - ID del cliente para filtrar (opcional).
+   * @param search - Término de búsqueda parcial sobre nombreObra o codigo (opcional).
+   * @returns Observable con BaseResponse<ObraDto[]>.
+   */
+  getObrasCombo(
+    idCliente?: number,
+    search?: string
+  ): Observable<{ success: boolean; data: ObraDto[]; message?: string }> {
+    let params = new HttpParams();
+    if (idCliente !== undefined) {
+      params = params.set('idCliente', idCliente.toString());
+    }
+    if (search && search.trim()) {
+      params = params.set('search', search.trim());
+    }
+    return this.http.get<{
+      success: boolean;
+      data: ObraDto[];
+      message?: string;
+    }>(`${this.baseUrl}/getObrasCombo`, { params });
   }
 }

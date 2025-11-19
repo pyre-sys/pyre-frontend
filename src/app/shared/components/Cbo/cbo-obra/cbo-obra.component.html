@@ -1,80 +1,94 @@
-<div class="cbo-wrapper">
-    <!-- Conditional Label -->
-    <label *ngIf="isLabel" [for]="isId" [class]="labelClass + ' form-label'">
-        {{ isLabel }}
-        <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
-    </label>
+<div class="cbo-obra-wrapper">
+  <!-- Search input container -->
+  <div
+    class="search-container"
+    [class.has-error]="hasErrors()"
+    [class.is-expanded]="isOpen"
+  >
+    <div class="search-input-group">
+      <!-- Main input -->
+      <input
+        [id]="isId"
+        [value]="isOpen ? searchControl.value || '' : placeholder"
+        [disabled]="isDisabled"
+        [readonly]="!isOpen || isDisabled"
+        [class.error]="hasErrors()"
+        class="search-input"
+        (click)="onMainInputClick()"
+        (focus)="onMainInputFocus()"
+        (blur)="onMainInputBlur()"
+        (input)="onMainInputChange($event)"
+        autocomplete="off"
+      />
 
-    <!-- Search input container -->
-    <div class="search-container" [class.has-error]="hasErrors()" [class.is-expanded]="isOpen">
-        <div class="search-input-group">
-            <!-- Main input - readonly when collapsed, editable when expanded -->
-            <input [id]="isId" [value]="isOpen ? (searchControl.value || '') : placeholder" [disabled]="isDisabled"
-                [readonly]="!isOpen" [class.error]="hasErrors()" class="search-input" (click)="onMainInputClick()"
-                (focus)="onMainInputFocus()" (blur)="onMainInputBlur()" (input)="onMainInputChange($event)"
-                autocomplete="off" />
+      <!-- Clear button -->
+      <button
+        *ngIf="selectedObra && !isDisabled && isOpen"
+        type="button"
+        class="clear-button"
+        (click)="clearSelection()"
+        title="Limpiar selección"
+      >
+        <i class="pi pi-times"></i>
+      </button>
 
-            <!-- Clear button -->
-            <button *ngIf="selectedObra && !isDisabled && isOpen" type="button" class="clear-button"
-                (click)="clearSelection()" title="Limpiar selección">
-                <i class="pi pi-times"></i>
-            </button>
+      <!-- Dropdown arrow -->
+      <div
+        *ngIf="!isLoading"
+        class="dropdown-arrow"
+        (click)="toggleDropdown($event)"
+      >
+        <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
+      </div>
+    </div>
 
-            <!-- Loading spinner -->
-            <div *ngIf="isLoading" class="loading-spinner">
-                <i class="pi pi-spinner pi-spin"></i>
-            </div>
-
-            <!-- Dropdown arrow -->
-            <div *ngIf="!isLoading" class="dropdown-arrow" (click)="toggleDropdown($event)">
-                <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
-            </div>
+    <!-- Dropdown options -->
+    <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
+      <div class="dropdown-content">
+        <!-- No results message -->
+        <div *ngIf="obras.length === 0 && !isLoading" class="no-results">
+          <i
+            class="pi pi-search"
+            style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5"
+          ></i>
+          <span *ngIf="searchControl.value && searchControl.value.length < 3">
+            Ingrese al menos 3 caracteres para buscar
+          </span>
+          <span *ngIf="searchControl.value && searchControl.value.length >= 3">
+            No se encontraron obras
+          </span>
+          <span *ngIf="!searchControl.value"> No hay obras disponibles </span>
         </div>
 
-        <!-- Dropdown options -->
-        <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
-            <div class="dropdown-content">
-                <!-- No results message -->
-                <div *ngIf="obras.length === 0 && !isLoading" class="no-results">
-                    <span *ngIf="searchControl.value && searchControl.value.length < 3">
-                        Ingrese al menos 3 caracteres para buscar
-                    </span>
-                    <span *ngIf="searchControl.value && searchControl.value.length >= 3">
-                        No se encontraron obras
-                    </span>
-                    <span *ngIf="!searchControl.value">
-                        No hay obras disponibles
-                    </span>
-                </div>
-
-                <!-- Options list -->
-                <div *ngFor="let obra of obras; trackBy: trackByObra" class="dropdown-option"
-                    [class.selected]="selectedObra?.idObra === obra.idObra" (click)="onOptionClick(obra)">
-                    <div class="option-content">
-                        <div class="option-main">
-                            <span class="option-codigo">{{ obra.codigo || 'S/C' }}</span>
-                            <span class="option-nombre">{{ obra.nombreObra }}</span>
-                        </div>
-                        <div class="option-details">
-                            <span *ngIf="obra.ubicacion" class="option-ubicacion">{{ obra.ubicacion }}</span>
-                            <span *ngIf="obra.fechaInicio" class="option-fecha">
-                                {{ obra.fechaInicio | date:'dd/MM/yyyy' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+        <!-- Options list -->
+        <div
+          *ngFor="let obra of obras; trackBy: trackByObra"
+          class="dropdown-option"
+          [class.selected]="selectedObra?.idObra === obra.idObra"
+          (click)="onOptionClick(obra)"
+        >
+          <div class="option-content">
+            <!-- Left side: codigo + nombreObra -->
+            <div class="option-main">
+              <span class="option-codigo">{{ obra.codigo || "S/C" }}</span>
+              <span class="option-nombre" [title]="obra.nombreObra">{{
+                obra.nombreObra
+              }}</span>
             </div>
+            <!-- Right side: descripcion -->
+            <div class="option-details">
+              <span class="option-descripcion" *ngIf="obra.descripcion">{{
+                obra.descripcion
+              }}</span>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Error message -->
-    <div *ngIf="hasErrors()" class="error-message">
-        {{ getErrorMessage() }}
-    </div>
-
-    <!-- Loading indicator -->
-    <div *ngIf="isLoading && !isOpen" class="loading-indicator">
-        <i class="pi pi-spinner pi-spin"></i>
-        <span>Cargando...</span>
-    </div>
+  <!-- Error message -->
+  <div *ngIf="hasErrors()" class="error-message">
+    {{ getErrorMessage() }}
+  </div>
 </div>

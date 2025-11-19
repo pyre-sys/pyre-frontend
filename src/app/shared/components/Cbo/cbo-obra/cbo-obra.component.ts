@@ -1,38 +1,59 @@
-import { Component, OnInit, Input, Output, EventEmitter, forwardRef, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  forwardRef,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, Subscription, switchMap, of, catchError } from 'rxjs';
+import {
+  ReactiveFormsModule,
+  FormControl,
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+} from '@angular/forms';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  Subscription,
+  switchMap,
+  of,
+  catchError,
+} from 'rxjs';
 import { ObrasService } from '../../../../services/obras.service';
 
 export interface ObraOption {
   idObra: number;
   codigo: string;
   nombreObra: string;
-  ubicacion: string;
-  fechaInicio: string;
-  fechaFin: string;
+  descripcion?: string; // Agregar propiedad opcional
+  ubicacion?: string; // Agregar propiedad opcional
+  fechaInicio?: string; // Agregar propiedad opcional
+  fechaFin?: string; // Agregar propiedad opcional
   displayText: string;
 }
 
 @Component({
   selector: 'app-cbo-obra',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './cbo-obra.component.html',
-  styleUrls: ['./cbo-obra.component.css'],
+  styleUrls: ['../cbo.component.css', '../cbo-movimientos.css'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CboObraComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
-export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor {
-
+export class CboObraComponent
+  implements OnInit, OnDestroy, OnChanges, ControlValueAccessor
+{
   // Internal FormControl for search
   searchControl = new FormControl('');
   selectedControl = new FormControl<ObraOption | null>(null);
@@ -41,8 +62,8 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
   private subscriptions: Subscription[] = [];
 
   // ControlValueAccessor callbacks
-  private onChange = (value: any) => { };
-  private onTouched = () => { };
+  private onChange = (value: any) => {};
+  private onTouched = () => {};
 
   // Component inputs
   @Input() isLabel: string = '';
@@ -53,6 +74,7 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
   @Input() showOnlyActive: boolean = true;
   @Input() objectErrors: any = null;
   @Input() isTouched: boolean = false;
+  @Input() idCliente?: number; // Nuevo input para filtrar por cliente
 
   // Output events
   @Output() isEmiterTouched = new EventEmitter<boolean>();
@@ -64,7 +86,7 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
   isOpen = false; // Start collapsed
   selectedObra: ObraOption | null = null;
 
-  constructor(private obrasService: ObrasService) { }
+  constructor(private obrasService: ObrasService) {}
 
   ngOnInit(): void {
     this.setupSearchSubscription();
@@ -73,8 +95,17 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
     this.updatePlaceholderText();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['idCliente']) {
+      this.loadInitialObras();
+    }
+    if (changes['isDisabled']) {
+      this.updateDisabledState();
+    }
+  }
+
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   private setupSearchSubscription(): void {
@@ -82,7 +113,7 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        switchMap(term => {
+        switchMap((term) => {
           // Only search when dropdown is open
           if (!this.isOpen) {
             return of([]);
@@ -90,7 +121,7 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
 
           const searchTerm = (term || '').toString().trim();
 
-          if (searchTerm.length >= 3) {
+          if (searchTerm.length >= 2) {
             return this.searchObras(searchTerm);
           } else if (searchTerm.length === 0) {
             return this.loadInitialData();
@@ -99,7 +130,7 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
           }
         })
       )
-      .subscribe(obras => {
+      .subscribe((obras) => {
         this.obras = obras;
       });
 
@@ -107,7 +138,7 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
   }
 
   private loadInitialObras(): void {
-    this.loadInitialData().subscribe(obras => {
+    this.loadInitialData().subscribe((obras) => {
       this.obras = obras;
     });
   }
@@ -115,79 +146,72 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
   private loadInitialData() {
     this.isLoading = true;
 
-    return this.obrasService.getObrasPaged(1, 10)
-      .pipe(
-        switchMap(response => {
-          const rawList = response.data?.data || response.data || [];
-          const obras = this.mapObrasToOptions(rawList);
+    return this.obrasService.getObrasCombo(this.idCliente).pipe(
+      switchMap((response) => {
+        if (response.success && response.data) {
+          const obras = this.mapObrasToOptions(response.data);
           this.isLoading = false;
           return of(obras);
-        }),
-        catchError(error => {
-          console.error('Error loading obras:', error);
+        } else {
           this.isLoading = false;
           return of([]);
-        })
-      );
+        }
+      }),
+      catchError((error) => {
+        console.error('Error loading obras combo:', error);
+        this.isLoading = false;
+        return of([]);
+      })
+    );
   }
 
   private searchObras(searchTerm: string) {
     this.isLoading = true;
 
-    // For obras, we'll search by name or code
-    return this.obrasService.getObrasPaged(1, 20)
-      .pipe(
-        switchMap(response => {
-          const rawList = response.data?.data || response.data || [];
-
-          // Filter client-side by search term
-          const filteredList = rawList.filter((obra: any) => {
-            const codigo = (obra.codigo || '').toLowerCase();
-            const nombre = (obra.nombreObra || '').toLowerCase();
-            const ubicacion = (obra.ubicacion || '').toLowerCase();
-            const searchLower = searchTerm.toLowerCase();
-
-            return codigo.includes(searchLower) ||
-              nombre.includes(searchLower) ||
-              ubicacion.includes(searchLower);
-          });
-
-          const obras = this.mapObrasToOptions(filteredList);
+    return this.obrasService.getObrasCombo(this.idCliente, searchTerm).pipe(
+      switchMap((response) => {
+        if (response.success && response.data) {
+          const obras = this.mapObrasToOptions(response.data);
           this.isLoading = false;
           return of(obras);
-        }),
-        catchError(error => {
-          console.error('Error searching obras:', error);
+        } else {
           this.isLoading = false;
           return of([]);
-        })
-      );
+        }
+      }),
+      catchError((error) => {
+        console.error('Error searching obras combo:', error);
+        this.isLoading = false;
+        return of([]);
+      })
+    );
   }
 
   private mapObrasToOptions(obras: any[]): ObraOption[] {
-    return obras.map(o => ({
+    return obras.map((o) => ({
       idObra: o.idObra || o.id,
       codigo: o.codigo || '',
       nombreObra: o.nombreObra || o.nombre || '',
-      ubicacion: o.ubicacion || '',
-      fechaInicio: o.fechaInicio || '',
-      fechaFin: o.fechaFin || '',
-      displayText: this.buildDisplayText(o)
+      descripcion: o.descripcion || '', // Mapear descripcion
+      ubicacion: o.ubicacion || '', // Mapear ubicacion
+      fechaInicio: o.fechaInicio || '', // Mapear fechaInicio
+      fechaFin: o.fechaFin || '', // Mapear fechaFin
+      displayText: this.buildDisplayText(o),
     }));
   }
 
   private buildDisplayText(obra: any): string {
     const codigo = obra.codigo;
     const nombre = obra.nombreObra || obra.nombre;
-    const ubicacion = obra.ubicacion;
+    const descripcion = obra.descripcion;
 
     let text = '';
     if (codigo) {
       text += `${codigo} - `;
     }
     text += nombre;
-    if (ubicacion) {
-      text += ` (${ubicacion})`;
+    if (descripcion) {
+      text += ` (${descripcion})`;
     }
     return text;
   }
@@ -245,10 +269,12 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
   private openDropdown(): void {
     this.isOpen = true;
 
-    // Load initial data when opening
-    this.loadInitialData().subscribe(obras => {
-      this.obras = obras;
-    });
+    // Load initial data only if not already loaded
+    if (this.obras.length === 0) {
+      this.loadInitialData().subscribe((obras) => {
+        this.obras = obras;
+      });
+    }
 
     // Clear search when opening if no selection
     if (!this.selectedObra) {
@@ -317,7 +343,7 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
 
   private findObraById(id: number): void {
     // First check if it's in current list
-    const found = this.obras.find(o => o.idObra === id);
+    const found = this.obras.find((o) => o.idObra === id);
     if (found) {
       this.selectObra(found);
       return;
@@ -335,7 +361,7 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
       error: () => {
         // If request fails, just set the ID
         this.onChange(id);
-      }
+      },
     });
   }
 
@@ -354,7 +380,10 @@ export class CboObraComponent implements OnInit, OnDestroy, ControlValueAccessor
 
   // Helper methods for template
   hasErrors(): boolean {
-    return !!(this.objectErrors && (this.isTouched || this.selectedControl.touched));
+    return !!(
+      this.objectErrors &&
+      (this.isTouched || this.selectedControl.touched)
+    );
   }
 
   getErrorMessage(): string {
