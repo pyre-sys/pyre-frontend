@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ObrasService, ObraDto } from '../../../../services/obras.service';
 import { AlertaService } from '../../../../services/alerta.service';
 import { ObraEditModalComponent } from '../modal-obras/modal-obras.component';
+import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PageTitleService } from '../../../../services/page-title.service';
 
 @Component({
@@ -12,16 +14,26 @@ import { PageTitleService } from '../../../../services/page-title.service';
   imports: [
     CommonModule,
     FormsModule,
-    ObraEditModalComponent
+    ObraEditModalComponent,
+    PaginatorComponent,
+    NgbTooltipModule,
   ],
   templateUrl: './visor-obras.component.html',
-  styleUrls: ['./visor-obras.component.css'],
-  providers: [ObrasService]
+  // Se elimina styleUrls para evitar error de fichero no encontrado.
+  // Los estilos globales deben cargarse desde src/styles/visor-style.css (angular.json).
+  // styleUrls: [],
+  providers: [ObrasService],
 })
 export class VisorObrasComponent implements OnInit {
   obras: ObraDto[] = [];
   filteredObras: ObraDto[] = [];
-  columns: string[] = ['codigo', 'nombreObra', 'descripcion', 'fechaInicio', 'fechaFin'];
+  columns: string[] = [
+    'codigo',
+    'nombreObra',
+    'descripcion',
+    'fechaInicio',
+    'fechaFin',
+  ];
   rowsPerPageOptions: number[] = [5, 10, 20, 40];
   currentPage = 1;
   pageSize = 10;
@@ -43,7 +55,11 @@ export class VisorObrasComponent implements OnInit {
   showDetailsModal = false;
   detailsData: any = null;
 
-  constructor(private obrasService: ObrasService, private alertService: AlertaService, private pageTitleService: PageTitleService) { }
+  constructor(
+    private obrasService: ObrasService,
+    private alertService: AlertaService,
+    private pageTitleService: PageTitleService
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Obras');
@@ -66,27 +82,33 @@ export class VisorObrasComponent implements OnInit {
           descripcion: o.descripcion,
           fechaInicio: o.fechaInicio,
           fechaFin: o.fechaFin,
-          estado: o.estado || 'Activo' // Default state
+          estado: o.estado || 'Activo', // Default state
         }));
         this.applyFilters();
         this.calculatePagination();
         this.loading = false;
       },
       error: () => {
-        this.showSnack('Error al cargar las obras. Por favor, inténtelo de nuevo.');
+        this.showSnack(
+          'Error al cargar las obras. Por favor, inténtelo de nuevo.'
+        );
         this.loading = false;
-      }
+      },
     });
   }
 
   applyFilters(): void {
-    this.filteredObras = this.obras.filter(obra => {
-      const matchesNombre = !this.filtroNombre ||
-        obra.nombreObra?.toLowerCase().includes(this.filtroNombre.toLowerCase());
+    this.filteredObras = this.obras.filter((obra) => {
+      const matchesNombre =
+        !this.filtroNombre ||
+        obra.nombreObra
+          ?.toLowerCase()
+          .includes(this.filtroNombre.toLowerCase());
 
-      const matchesEstado = !this.filtroEstado ||
-        (this.filtroEstado === 'activo') ||
-        (this.filtroEstado === 'inactivo');
+      const matchesEstado =
+        !this.filtroEstado ||
+        this.filtroEstado === 'activo' ||
+        this.filtroEstado === 'inactivo';
 
       return matchesNombre && matchesEstado;
     });
@@ -166,24 +188,33 @@ export class VisorObrasComponent implements OnInit {
       },
       error: () => {
         this.modalInitialData = item;
-      }
+      },
     });
   }
 
   deleteObra(item: ObraDto): void {
     const id = item?.idObra ?? null;
     if (id == null) return;
-    this.alertService.confirm('¿Estás seguro de que deseas eliminar esta obra?', 'Eliminar Obra')
+    this.alertService
+      .confirm(
+        '¿Estás seguro de que deseas eliminar esta obra?',
+        'Eliminar Obra'
+      )
       .then((result: any) => {
         if (result && result.isConfirmed) {
           this.obrasService.deleteObra(id).subscribe({
             next: () => {
-              this.alertService.success('La obra ha sido eliminada correctamente.', '¡Eliminado!');
+              this.alertService.success(
+                'La obra ha sido eliminada correctamente.',
+                '¡Eliminado!'
+              );
               this.fetchObras();
             },
             error: () => {
-              this.alertService.error('No se pudo eliminar la obra. Intente nuevamente.');
-            }
+              this.alertService.error(
+                'No se pudo eliminar la obra. Intente nuevamente.'
+              );
+            },
           });
         }
       });
@@ -215,16 +246,22 @@ export class VisorObrasComponent implements OnInit {
         },
         error: (err) => {
           event.onError(err);
-        }
+        },
       });
     } else {
       // Intentar detectar id desde distintos campos que pueden venir (IdObra, idObra, Id)
-      const idFromData = Number(event.data?.IdObra ?? event.data?.idObra ?? event.data?.Id ?? null);
-      const idFromModal = Number(this.modalInitialData?.idObra ?? this.modalInitialData?.IdObra ?? null);
+      const idFromData = Number(
+        event.data?.IdObra ?? event.data?.idObra ?? event.data?.Id ?? null
+      );
+      const idFromModal = Number(
+        this.modalInitialData?.idObra ?? this.modalInitialData?.IdObra ?? null
+      );
       const id = idFromData || idFromModal;
 
       if (!id) {
-        event.onError({ message: 'No se pudo identificar la obra a actualizar' });
+        event.onError({
+          message: 'No se pudo identificar la obra a actualizar',
+        });
         return;
       }
 
@@ -240,7 +277,7 @@ export class VisorObrasComponent implements OnInit {
         },
         error: (err) => {
           event.onError(err);
-        }
+        },
       });
     }
   }
@@ -253,6 +290,13 @@ export class VisorObrasComponent implements OnInit {
   closeDetailsModal(): void {
     this.showDetailsModal = false;
     this.detailsData = null;
+  }
+
+  // Manejar eventos emitidos por app-paginator (pageIndex 0-based)
+  onPageEvent(event: { pageIndex: number; pageSize: number }): void {
+    this.currentPage = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.fetchObras();
   }
 
   private showSnack(message: string): void {

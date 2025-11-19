@@ -216,172 +216,222 @@
                 *ngIf="
                   !isLoadingHerramientas && herramientasEnPrestamo.length > 0
                 "
-                class="herramientas-grid"
+                class="herramientas-section"
               >
-                <div
-                  *ngFor="
-                    let herramienta of herramientasEnPrestamo;
-                    let i = index
-                  "
-                  class="herramienta-card"
-                  [class.selected]="herramienta.selected"
-                  @fadeIn
-                >
-                  <!-- Card header with checkbox -->
-                  <div class="card-header-custom">
-                    <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        [id]="'herramienta-' + herramienta.id"
-                        [checked]="herramienta.selected"
-                        (change)="onHerramientaToggle(herramienta)"
-                      />
-                      <label
-                        class="form-check-label fw-bold"
-                        [for]="'herramienta-' + herramienta.id"
-                      >
-                        {{ herramienta.codigo }} - {{ herramienta.nombre }}
-                      </label>
+                <!-- Header con contador y seleccionar todas -->
+                <div class="herramientas-header mb-3">
+                  <div class="d-flex align-items-center">
+                    <div class="herramientas-count">
+                      <i class="bi bi-tools text-primary me-2"></i>
+                      <span class="fw-semibold">
+                        {{ herramientasEnPrestamo.length }} herramienta{{
+                          herramientasEnPrestamo.length > 1 ? "s" : ""
+                        }}
+                        {{
+                          tipoOperacion === "prestamo"
+                            ? "en préstamo"
+                            : "en reparación"
+                        }}
+                      </span>
                     </div>
-                    <div class="status-badges">
-                      <div
-                        class="overdue-badge"
-                        *ngIf="isOverdue(herramienta.fechaEstimadaDevolucion)"
-                      >
-                        <span class="badge bg-danger">
-                          {{
-                            getDaysOverdue(herramienta.fechaEstimadaDevolucion)
-                          }}
-                          días de atraso
-                        </span>
+                    <!-- Checkbox para seleccionar todas (solo si hay más de una herramienta) -->
+                    <div
+                      *ngIf="herramientasEnPrestamo.length > 1"
+                      class="select-all-control ml-auto"
+                    >
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="selectAllHerramientas"
+                          [checked]="allSelected"
+                          (change)="toggleSelectAll()"
+                        />
+                        <label
+                          class="form-check-label fw-semibold"
+                          for="selectAllHerramientas"
+                        >
+                          <i class="bi bi-check-all me-1"></i>
+                          Seleccionar todas
+                        </label>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <!-- Card body -->
-                  <div class="card-body-custom">
-                    <div class="herramienta-info mb-3">
-                      <div class="info-row">
-                        <span class="info-label">Marca:</span>
-                        <span class="info-value">{{ herramienta.marca }}</span>
-                      </div>
-                      <div class="info-row">
-                        <span class="info-label">
-                          <span *ngIf="isPrestamoOperation()"
-                            >Fecha Préstamo:</span
-                          >
-                          <span *ngIf="isReparacionOperation()"
-                            >Fecha Reparación:</span
-                          >
-                        </span>
-                        <span class="info-value">{{
-                          herramienta.fechaPrestamo
-                            | date : "dd/MM/yyyy HH:mm" : "UTC"
-                        }}</span>
-                      </div>
-                      <div class="info-row">
-                        <span class="info-label">
-                          <span *ngIf="isPrestamoOperation()"
-                            >Fecha Estimada:</span
-                          >
-                          <span *ngIf="isReparacionOperation()"
-                            >Fecha Est. Finalización:</span
-                          >
-                        </span>
-                        <span
-                          class="info-value"
-                          [class.text-danger]="
-                            isOverdue(herramienta.fechaEstimadaDevolucion)
-                          "
+                <!-- Grid de herramientas -->
+                <div class="herramientas-grid">
+                  <div
+                    *ngFor="
+                      let herramienta of herramientasEnPrestamo;
+                      let i = index
+                    "
+                    class="herramienta-card"
+                    [class.selected]="herramienta.selected"
+                    @fadeIn
+                  >
+                    <!-- Card header with checkbox -->
+                    <div class="card-header-custom">
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          [id]="'herramienta-' + herramienta.id"
+                          [checked]="herramienta.selected"
+                          (change)="onHerramientaToggle(herramienta)"
+                        />
+                        <label
+                          class="form-check-label fw-bold"
+                          [for]="'herramienta-' + herramienta.id"
                         >
-                          {{
-                            herramienta.fechaEstimadaDevolucion
-                              | date : "dd/MM/yyyy HH:mm" : "UTC"
-                          }}
-                          <small
-                            *ngIf="
-                              isOverdue(herramienta.fechaEstimadaDevolucion)
-                            "
-                            class="text-danger fw-bold ms-1"
-                          >
-                            ({{
+                          {{ herramienta.codigo }} - {{ herramienta.nombre }}
+                        </label>
+                      </div>
+                      <div class="status-badges">
+                        <div
+                          class="overdue-badge"
+                          *ngIf="isOverdue(herramienta.fechaEstimadaDevolucion)"
+                        >
+                          <span class="badge bg-danger">
+                            {{
                               getDaysOverdue(
                                 herramienta.fechaEstimadaDevolucion
                               )
                             }}
-                            días de atraso)
-                          </small>
-                        </span>
-                      </div>
-                      <div
-                        class="info-row"
-                        *ngIf="herramienta.nombreObra && isPrestamoOperation()"
-                      >
-                        <span class="info-label">Obra:</span>
-                        <span class="info-value">{{
-                          herramienta.nombreObra
-                        }}</span>
+                            días de atraso
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    <!-- Estado físico y observaciones (solo si está seleccionada) -->
-                    <div
-                      *ngIf="herramienta.selected"
-                      class="devolucion-fields"
-                      @fadeIn
-                    >
-                      <div class="row g-2">
-                        <div class="col-12">
-                          <label class="form-label small fw-bold">
-                            Estado Físico al Devolver
-                            <span class="text-danger">*</span>
-                          </label>
-                          <select
-                            class="form-select form-select-sm"
-                            [value]="herramienta.estadoFisicoId || ''"
-                            (change)="
-                              onEstadoFisicoChange(
-                                herramienta,
-                                +$any($event.target).value
-                              )
-                            "
-                            [class.is-invalid]="
-                              herramienta.selected &&
-                              !herramienta.estadoFisicoId
-                            "
-                          >
-                            <!-- <option value="">Seleccionar Estado</option> -->
-                            <option
-                              *ngFor="let estado of estadoFisicoOptions"
-                              [value]="estado.id"
-                            >
-                              {{ estado.nombre }}
-                            </option>
-                          </select>
+                    <!-- Card body -->
+                    <div class="card-body-custom">
+                      <div class="herramienta-info mb-3">
+                        <div class="info-row">
+                          <span class="info-label">Marca:</span>
+                          <span class="info-value">{{
+                            herramienta.marca
+                          }}</span>
                         </div>
-                        <div class="col-12">
-                          <label class="form-label small fw-bold"
-                            >Observaciones</label
-                          >
-                          <textarea
-                            class="form-control form-control-sm"
-                            rows="2"
-                            maxlength="200"
-                            [value]="herramienta.observaciones"
-                            (input)="
-                              onObservacionesChange(
-                                herramienta,
-                                $any($event.target).value
-                              )
+                        <div class="info-row">
+                          <span class="info-label">
+                            <span *ngIf="isPrestamoOperation()"
+                              >Fecha Préstamo:</span
+                            >
+                            <span *ngIf="isReparacionOperation()"
+                              >Fecha Reparación:</span
+                            >
+                          </span>
+                          <span class="info-value">{{
+                            herramienta.fechaPrestamo
+                              | date : "dd/MM/yyyy HH:mm" : "UTC"
+                          }}</span>
+                        </div>
+                        <div class="info-row">
+                          <span class="info-label">
+                            <span *ngIf="isPrestamoOperation()"
+                              >Fecha Estimada:</span
+                            >
+                            <span *ngIf="isReparacionOperation()"
+                              >Fecha Est. Finalización:</span
+                            >
+                          </span>
+                          <span
+                            class="info-value"
+                            [class.text-danger]="
+                              isOverdue(herramienta.fechaEstimadaDevolucion)
                             "
-                            placeholder="Observaciones sobre la devolución..."
-                          ></textarea>
-                          <small class="text-muted"
-                            >{{
-                              herramienta.observaciones.length || 0
-                            }}/200</small
                           >
+                            {{
+                              herramienta.fechaEstimadaDevolucion
+                                | date : "dd/MM/yyyy HH:mm" : "UTC"
+                            }}
+                            <small
+                              *ngIf="
+                                isOverdue(herramienta.fechaEstimadaDevolucion)
+                              "
+                              class="text-danger fw-bold ms-1"
+                            >
+                              ({{
+                                getDaysOverdue(
+                                  herramienta.fechaEstimadaDevolucion
+                                )
+                              }}
+                              días de atraso)
+                            </small>
+                          </span>
+                        </div>
+                        <div
+                          class="info-row"
+                          *ngIf="
+                            herramienta.nombreObra && isPrestamoOperation()
+                          "
+                        >
+                          <span class="info-label">Obra:</span>
+                          <span class="info-value">{{
+                            herramienta.nombreObra
+                          }}</span>
+                        </div>
+                      </div>
+
+                      <!-- Estado físico y observaciones (solo si está seleccionada) -->
+                      <div
+                        *ngIf="herramienta.selected"
+                        class="devolucion-fields"
+                        @fadeIn
+                      >
+                        <div class="row g-2">
+                          <div class="col-12">
+                            <label class="form-label small fw-bold">
+                              Estado Físico al Devolver
+                              <span class="text-danger">*</span>
+                            </label>
+                            <select
+                              class="form-select form-select-sm"
+                              [value]="herramienta.estadoFisicoId || ''"
+                              (change)="
+                                onEstadoFisicoChange(
+                                  herramienta,
+                                  +$any($event.target).value
+                                )
+                              "
+                              [class.is-invalid]="
+                                herramienta.selected &&
+                                !herramienta.estadoFisicoId
+                              "
+                            >
+                              <!-- <option value="">Seleccionar Estado</option> -->
+                              <option
+                                *ngFor="let estado of estadoFisicoOptions"
+                                [value]="estado.id"
+                              >
+                                {{ estado.nombre }}
+                              </option>
+                            </select>
+                          </div>
+                          <div class="col-12">
+                            <label class="form-label small fw-bold"
+                              >Observaciones</label
+                            >
+                            <textarea
+                              class="form-control form-control-sm"
+                              rows="2"
+                              maxlength="200"
+                              [value]="herramienta.observaciones"
+                              (input)="
+                                onObservacionesChange(
+                                  herramienta,
+                                  $any($event.target).value
+                                )
+                              "
+                              placeholder="Observaciones sobre la devolución..."
+                            ></textarea>
+                            <small class="text-muted"
+                              >{{
+                                herramienta.observaciones.length || 0
+                              }}/200</small
+                            >
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -633,143 +683,4 @@
       </div>
     </div>
   </div>
-
-  <style>
-    .operation-type-selector {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1rem;
-    }
-
-    .operation-card {
-      border: 2px solid #e9ecef;
-      border-radius: 0.5rem;
-      padding: 1.5rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      background: white;
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .operation-card:hover {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border-color: #007bff;
-    }
-
-    .operation-card.selected {
-      border-color: #28a745;
-      background-color: #f8fff9;
-      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-    }
-
-    .operation-icon {
-      font-size: 2rem;
-      color: #6c757d;
-      min-width: 3rem;
-      text-align: center;
-    }
-
-    .operation-card.selected .operation-icon {
-      color: #28a745;
-    }
-
-    .operation-content {
-      flex-grow: 1;
-    }
-
-    .operation-title {
-      margin: 0 0 0.5rem 0;
-      font-weight: 600;
-      color: #495057;
-    }
-
-    .operation-description {
-      margin: 0;
-      font-size: 0.875rem;
-      color: #6c757d;
-    }
-
-    .operation-check {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      font-size: 1.25rem;
-    }
-
-    .herramientas-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 1rem;
-    }
-
-    .herramienta-card {
-      border: 2px solid #e9ecef;
-      border-radius: 0.5rem;
-      transition: all 0.2s ease;
-      background: white;
-    }
-
-    .herramienta-card:hover {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .herramienta-card.selected {
-      border-color: #28a745;
-      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-    }
-
-    .card-header-custom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem;
-      background: #f8f9fa;
-      border-bottom: 1px solid #dee2e6;
-      border-radius: 0.5rem 0.5rem 0 0;
-    }
-
-    .card-body-custom {
-      padding: 0.75rem;
-    }
-
-    .herramienta-info .info-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.25rem;
-    }
-
-    .info-label {
-      font-weight: 500;
-      color: #6c757d;
-      font-size: 0.875rem;
-    }
-
-    .info-value {
-      font-size: 0.875rem;
-      color: #495057;
-    }
-
-    .devolucion-fields {
-      border-top: 1px solid #dee2e6;
-      padding-top: 0.75rem;
-      margin-top: 0.75rem;
-    }
-
-    .overdue-badge .badge {
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .status-badges {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      align-items: flex-end;
-    }
-
-    /* ...existing styles... */
-  </style>
 </div>

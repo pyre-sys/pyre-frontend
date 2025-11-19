@@ -1,15 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { CboUsuarioComponent, UsuarioOption } from "../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component";
-import { CboHerramientasComponent, HerramientaOption } from '../../../shared/components/Cbo/cbo-herramientas/cbo-herramientas.component';
-import { CboObraComponent, ObraOption } from '../../../shared/components/Cbo/cbo-obra/cbo-obra.component';
-import { MovimientoService, CreateMovimientoDto } from '../../../services/movimiento.service';
+import {
+  CboUsuarioComponent,
+  UsuarioOption,
+} from '../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component';
+import {
+  CboHerramientasComponent,
+  HerramientaOption,
+} from '../../../shared/components/Cbo/cbo-herramientas/cbo-herramientas.component';
+import {
+  CboObraComponent,
+  ObraOption,
+} from '../../../shared/components/Cbo/cbo-obra/cbo-obra.component';
+import {
+  MovimientoService,
+  CreateMovimientoDto,
+} from '../../../services/movimiento.service';
 import { AuthService } from '../../../services/auth.service';
 import { PageTitleService } from '../../../services/page-title.service';
 import { AlertaService } from '../../../services/alerta.service';
+import { CboClienteComponent } from '../../../shared/components/Cbo/cbo-cliente/cbo-cliente.component';
 
 @Component({
   selector: 'app-prestamo',
@@ -21,17 +39,25 @@ import { AlertaService } from '../../../services/alerta.service';
     CboHerramientasComponent,
     CboUsuarioComponent,
     CboObraComponent,
+    CboClienteComponent,
   ],
   templateUrl: './prestamo.component.html',
-  styleUrls: ['../../../../styles/visor-style.css', '../../../../styles/movimientos-style.css', './prestamo.component.css'],
+  styleUrls: [
+    '../../../../styles/visor-style.css',
+    '../../../../styles/movimientos-style.css',
+    './prestamo.component.css',
+  ],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(-10px)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
-    ])
-  ]
+        animate(
+          '300ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' })
+        ),
+      ]),
+    ]),
+  ],
 })
 export class PrestamoComponent implements OnInit {
   prestamoForm!: FormGroup;
@@ -44,17 +70,22 @@ export class PrestamoComponent implements OnInit {
   isLoadingMovimiento = false;
 
   // Campos requeridos para calcular el progreso
-  private requiredFields = ['responsableId', 'fechaEstimadaDevolucion', 'obraId'];
+  private requiredFields = [
+    'responsableId',
+    'fechaEstimadaDevolucion',
+    'obraId',
+  ];
 
   // Placeholder original para observaciones
-  private originalPlaceholder: string = 'Agregue cualquier detalle adicional sobre el préstamo... (Opcional)';
+  private originalPlaceholder: string =
+    'Agregue cualquier detalle adicional sobre el préstamo... (Opcional)';
 
   // Opciones para estado físico (ejemplo; no usado en préstamo pero para consistencia)
   estadoFisicoOptions = [
     { id: 1, nombre: 'Excelente' },
     { id: 2, nombre: 'Bueno' },
     { id: 3, nombre: 'Regular' },
-    { id: 4, nombre: 'Malo' }
+    { id: 4, nombre: 'Malo' },
   ];
 
   constructor(
@@ -63,7 +94,7 @@ export class PrestamoComponent implements OnInit {
     private authService: AuthService,
     private pageTitleService: PageTitleService,
     private alertService: AlertaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Registrar Préstamo');
@@ -78,7 +109,8 @@ export class PrestamoComponent implements OnInit {
       responsableId: ['', Validators.required],
       fechaEstimadaDevolucion: ['', Validators.required],
       obraId: ['', Validators.required],
-      observaciones: ['', Validators.maxLength(500)]
+      clienteId: [null], // nuevo control para el combo cliente
+      observaciones: ['', Validators.maxLength(500)],
     });
   }
 
@@ -91,7 +123,9 @@ export class PrestamoComponent implements OnInit {
 
   private setInitialPlaceholder(): void {
     setTimeout(() => {
-      const textarea = document.querySelector('textarea[formControlName="observaciones"]') as HTMLTextAreaElement;
+      const textarea = document.querySelector(
+        'textarea[formControlName="observaciones"]'
+      ) as HTMLTextAreaElement;
       if (textarea) {
         textarea.placeholder = this.originalPlaceholder;
       }
@@ -114,7 +148,7 @@ export class PrestamoComponent implements OnInit {
       filledFields++;
     }
 
-    this.requiredFields.forEach(field => {
+    this.requiredFields.forEach((field) => {
       const control = this.prestamoForm.get(field);
       if (control && control.value && control.valid) {
         filledFields++;
@@ -130,14 +164,22 @@ export class PrestamoComponent implements OnInit {
 
   addHerramienta(): void {
     if (!this.currentHerramientaSelection) {
-      this.alertService.error('Debe seleccionar una herramienta primero', 'Selección requerida');
+      this.alertService.error(
+        'Debe seleccionar una herramienta primero',
+        'Selección requerida'
+      );
       return;
     }
 
     // Verificar si la herramienta ya está en la lista
-    const exists = this.selectedHerramientas.some(h => h.id === this.currentHerramientaSelection!.id);
+    const exists = this.selectedHerramientas.some(
+      (h) => h.id === this.currentHerramientaSelection!.id
+    );
     if (exists) {
-      this.alertService.error('Esta herramienta ya está en la lista', 'Herramienta duplicada');
+      this.alertService.error(
+        'Esta herramienta ya está en la lista',
+        'Herramienta duplicada'
+      );
       return;
     }
 
@@ -160,7 +202,10 @@ export class PrestamoComponent implements OnInit {
   onSubmit(): void {
     // Validar herramientas seleccionadas
     if (this.selectedHerramientas.length === 0) {
-      this.alertService.error('Debe seleccionar al menos una herramienta', 'Herramientas requeridas');
+      this.alertService.error(
+        'Debe seleccionar al menos una herramienta',
+        'Herramientas requeridas'
+      );
       return;
     }
 
@@ -172,14 +217,18 @@ export class PrestamoComponent implements OnInit {
     }
 
     // Crear mensaje de confirmación con los datos esenciales del préstamo
-    const herramientasText = this.selectedHerramientas.map(h => h.nombre).join(', ');
+    const herramientasText = this.selectedHerramientas
+      .map((h) => h.nombre)
+      .join(', ');
     const confirmMessage = `¿Confirmar registro de préstamo?<br><br>Herramientas (${this.selectedHerramientas.length}): ${herramientasText}<br>Responsable: ${this.selectedUsuarioInfo?.nombre} ${this.selectedUsuarioInfo?.apellido}`;
 
-    this.alertService.confirm(confirmMessage, 'Confirmar Préstamo').then((result) => {
-      if (result.isConfirmed) {
-        this.registrarPrestamo();
-      }
-    });
+    this.alertService
+      .confirm(confirmMessage, 'Confirmar Préstamo')
+      .then((result) => {
+        if (result.isConfirmed) {
+          this.registrarPrestamo();
+        }
+      });
   }
 
   private registrarPrestamo(): void {
@@ -190,12 +239,15 @@ export class PrestamoComponent implements OnInit {
 
     if (!currentUserId) {
       this.isLoading = false;
-      this.alertService.error('No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.', 'Error de Autenticación');
+      this.alertService.error(
+        'No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.',
+        'Error de Autenticación'
+      );
       return;
     }
 
     // Crear un préstamo por cada herramienta seleccionada
-    const prestamos = this.selectedHerramientas.map(herramienta => ({
+    const prestamos = this.selectedHerramientas.map((herramienta) => ({
       idHerramienta: herramienta.id,
       idUsuarioResponsable: formData.responsableId,
       idUsuarioGenera: currentUserId,
@@ -209,7 +261,7 @@ export class PrestamoComponent implements OnInit {
     }));
 
     // Registrar todos los préstamos
-    const prestamoRequests = prestamos.map(prestamo =>
+    const prestamoRequests = prestamos.map((prestamo) =>
       this.movimientoService.registrarPrestamo(prestamo)
     );
 
@@ -217,22 +269,35 @@ export class PrestamoComponent implements OnInit {
     this.movimientoService.registrarMultiplesPrestamos(prestamos).subscribe({
       next: (responses: any[]) => {
         this.isLoading = false;
-        const herramientasText = this.selectedHerramientas.map(h => h.codigo).join(', ');
-        this.alertService.success(`Los préstamos de las herramientas ${herramientasText} han sido registrados exitosamente.`, '✓ Préstamos Registrados');
+        const herramientasText = this.selectedHerramientas
+          .map((h) => h.codigo)
+          .join(', ');
+        this.alertService.success(
+          `Los préstamos de las herramientas ${herramientasText} han sido registrados exitosamente.`,
+          '✓ Préstamos Registrados'
+        );
         this.resetForm();
       },
       error: (error) => {
         this.isLoading = false;
-        this.alertService.error(error.error?.message || 'Ha ocurrido un error inesperado. Por favor, intente nuevamente.', '✗ Error al Registrar');
+        this.alertService.error(
+          error.error?.message ||
+            'Ha ocurrido un error inesperado. Por favor, intente nuevamente.',
+          '✗ Error al Registrar'
+        );
         console.error('Error al crear préstamos:', error);
-      }
+      },
     });
   }
 
   private formatDate(dateString: string): string {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
   }
 
   /**
@@ -255,7 +320,9 @@ export class PrestamoComponent implements OnInit {
 
   // Métodos para manejar el placeholder del textarea
   onTextareaFocus(): void {
-    const textarea = document.querySelector('textarea[formControlName="observaciones"]') as HTMLTextAreaElement;
+    const textarea = document.querySelector(
+      'textarea[formControlName="observaciones"]'
+    ) as HTMLTextAreaElement;
     if (textarea) {
       textarea.placeholder = '';
     }
@@ -264,7 +331,9 @@ export class PrestamoComponent implements OnInit {
   onTextareaBlur(): void {
     const control = this.prestamoForm.get('observaciones');
     if (!control?.value) {
-      const textarea = document.querySelector('textarea[formControlName="observaciones"]') as HTMLTextAreaElement;
+      const textarea = document.querySelector(
+        'textarea[formControlName="observaciones"]'
+      ) as HTMLTextAreaElement;
       if (textarea) {
         textarea.placeholder = this.originalPlaceholder;
       }
@@ -295,5 +364,26 @@ export class PrestamoComponent implements OnInit {
     if (obra) {
       console.log('Obra seleccionada:', obra);
     }
+  }
+
+  // Handler llamado desde <app-cbo-cliente (clienteSelected)="onClienteSelected($event)">
+  onClienteSelected(event: any): void {
+    // event = ClienteOption | null
+    // Resetear obra seleccionado al cambiar cliente
+    try {
+      // si el form existe, setear clienteId (ControlValueAccessor ya lo hará, pero aseguramos coherencia)
+      if (this.prestamoForm) {
+        const id = event?.idCliente ?? null;
+        this.prestamoForm.patchValue(
+          { clienteId: id, obraId: null },
+          { emitEvent: false }
+        );
+      }
+    } catch (e) {
+      console.warn('[Prestamo] onClienteSelected error', e);
+    }
+
+    // TODO: aquí puedes llamar a un servicio para recargar obras filtradas por cliente
+    // p.ej. this.obrasService.getObrasPorCliente(id).subscribe(...)
   }
 }

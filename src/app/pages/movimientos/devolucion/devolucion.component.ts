@@ -1,12 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { CboUsuarioComponent, UsuarioOption } from "../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component";
-import { CboProveedorComponent, ProveedorOption } from "../../../shared/components/Cbo/cbo-proveedor/cbo-proveedor.component";
+import {
+  CboUsuarioComponent,
+  UsuarioOption,
+} from '../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component';
+import {
+  CboProveedorComponent,
+  ProveedorOption,
+} from '../../../shared/components/Cbo/cbo-proveedor/cbo-proveedor.component';
 import { HerramientaService } from '../../../services/herramienta.service';
-import { MovimientoService, CreateMovimientoDto } from '../../../services/movimiento.service';
+import {
+  MovimientoService,
+  CreateMovimientoDto,
+} from '../../../services/movimiento.service';
 import { AuthService } from '../../../services/auth.service';
 import { PageTitleService } from '../../../services/page-title.service';
 import { AlertaService } from '../../../services/alerta.service';
@@ -39,18 +53,24 @@ type TipoOperacion = 'prestamo' | 'reparacion';
     CboProveedorComponent,
   ],
   templateUrl: './devolucion.component.html',
-  styleUrls: ['../../../../styles/visor-style.css', '../../../../styles/movimientos-style.css', './devolucion.component.css'],
+  styleUrls: [
+    '../../../../styles/visor-style.css',
+    '../../../../styles/movimientos-style.css',
+    './devolucion.component.css',
+  ],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(-10px)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
-    ])
-  ]
+        animate(
+          '300ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' })
+        ),
+      ]),
+    ]),
+  ],
 })
 export class DevolucionComponent implements OnInit {
-
   devolucionForm!: FormGroup;
   selectedUsuarioInfo: UsuarioOption | null = null;
   selectedProveedorInfo: ProveedorOption | null = null;
@@ -60,6 +80,9 @@ export class DevolucionComponent implements OnInit {
   isLoading = false;
   isLoadingHerramientas = false;
 
+  // Nueva propiedad para el checkbox de seleccionar todas
+  allSelected: boolean = false;
+
   // Campos requeridos para calcular el progreso
   private requiredFields = ['responsableId'];
 
@@ -68,13 +91,23 @@ export class DevolucionComponent implements OnInit {
     { id: 1, nombre: 'Excelente' },
     { id: 2, nombre: 'Bueno' },
     { id: 3, nombre: 'Regular' },
-    { id: 4, nombre: 'Malo' }
+    { id: 4, nombre: 'Malo' },
   ];
 
   // Opciones para tipo de operación
   tipoOperacionOptions = [
-    { value: 'prestamo', label: 'Devolución de Préstamo', icon: 'bi-person-check', description: 'Devolver herramientas prestadas a usuarios' },
-    { value: 'reparacion', label: 'Devolución de Reparación', icon: 'bi-tools', description: 'Recibir herramientas de reparación de proveedores' }
+    {
+      value: 'prestamo',
+      label: 'Devolución de Préstamo',
+      icon: 'bi-person-check',
+      description: 'Devolver herramientas prestadas a usuarios',
+    },
+    {
+      value: 'reparacion',
+      label: 'Devolución de Reparación',
+      icon: 'bi-tools',
+      description: 'Recibir herramientas de reparación de proveedores',
+    },
   ];
 
   constructor(
@@ -84,7 +117,7 @@ export class DevolucionComponent implements OnInit {
     private authService: AuthService,
     private pageTitleService: PageTitleService,
     private alertService: AlertaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Registrar Devolución');
@@ -93,7 +126,7 @@ export class DevolucionComponent implements OnInit {
 
   private buildForm(): void {
     this.devolucionForm = this.fb.group({
-      responsableId: ['', Validators.required]
+      responsableId: ['', Validators.required],
     });
   }
 
@@ -116,8 +149,8 @@ export class DevolucionComponent implements OnInit {
     }
 
     // Check if at least one tool is selected and properly filled
-    const hasValidSelection = this.herramientasEnPrestamo.some(h =>
-      h.selected && h.estadoFisicoId !== null
+    const hasValidSelection = this.herramientasEnPrestamo.some(
+      (h) => h.selected && h.estadoFisicoId !== null
     );
 
     if (hasValidSelection) {
@@ -173,126 +206,155 @@ export class DevolucionComponent implements OnInit {
   private loadHerramientasEnPrestamo(usuarioId: number): void {
     this.isLoadingHerramientas = true;
 
-    this.herramientaService.getHerramientasEnPrestamoByUsuario(usuarioId).subscribe({
-      next: (response) => {
-        this.isLoadingHerramientas = false;
-        if (response.success && response.data) {
-          // Para cada herramienta, obtener el último movimiento para tener datos completos
-          const herramientaPromises = response.data.map((item: any) =>
-            this.movimientoService.getUltimoMovimientoByHerramienta(item.idHerramienta).toPromise()
-              .then((movResp: any) => {
-                const movimiento = movResp?.data || {};
-                return {
-                  id: item.idHerramienta,
-                  codigo: item.codigoHerramienta,
-                  nombre: item.nombreHerramienta,
-                  marca: item.marca || 'N/A',
-                  fechaPrestamo: movimiento.fecha || item.fechaPrestamo,
-                  fechaEstimadaDevolucion: movimiento.fechaEstimadaDevolucion || item.fechaEstimadaDevolucion,
-                  nombreObra: movimiento.nombreObra || item.nombreObra,
-                  observacionesPrestamo: movimiento.observaciones || item.observaciones,
-                  selected: false,
-                  estadoFisicoId: item.estadoFisicoId || 1,
-                  observaciones: '',
-                  idObra: movimiento.idObra || item.idObra || null // Capturar idObra del último movimiento
-                };
-              })
-              .catch(() => {
-                // En caso de error, usar datos básicos
-                return {
-                  id: item.idHerramienta,
-                  codigo: item.codigoHerramienta,
-                  nombre: item.nombreHerramienta,
-                  marca: item.marca || 'N/A',
-                  fechaPrestamo: item.fechaPrestamo,
-                  fechaEstimadaDevolucion: item.fechaEstimadaDevolucion,
-                  nombreObra: item.nombreObra,
-                  observacionesPrestamo: item.observaciones,
-                  selected: false,
-                  estadoFisicoId: item.estadoFisicoId || 1,
-                  observaciones: '',
-                  idObra: item.idObra || null
-                };
-              })
-          );
+    this.herramientaService
+      .getHerramientasEnPrestamoByUsuario(usuarioId)
+      .subscribe({
+        next: (response) => {
+          this.isLoadingHerramientas = false;
+          if (response.success && response.data) {
+            // Para cada herramienta, obtener el último movimiento para tener datos completos
+            const herramientaPromises = response.data.map((item: any) =>
+              this.movimientoService
+                .getUltimoMovimientoByHerramienta(item.idHerramienta)
+                .toPromise()
+                .then((movResp: any) => {
+                  const movimiento = movResp?.data || {};
+                  return {
+                    id: item.idHerramienta,
+                    codigo: item.codigoHerramienta,
+                    nombre: item.nombreHerramienta,
+                    marca: item.marca || 'N/A',
+                    fechaPrestamo: movimiento.fecha || item.fechaPrestamo,
+                    fechaEstimadaDevolucion:
+                      movimiento.fechaEstimadaDevolucion ||
+                      item.fechaEstimadaDevolucion,
+                    nombreObra: movimiento.nombreObra || item.nombreObra,
+                    observacionesPrestamo:
+                      movimiento.observaciones || item.observaciones,
+                    selected: false,
+                    estadoFisicoId: item.estadoFisicoId || 1,
+                    observaciones: '',
+                    idObra: movimiento.idObra || item.idObra || null, // Capturar idObra del último movimiento
+                  };
+                })
+                .catch(() => {
+                  // En caso de error, usar datos básicos
+                  return {
+                    id: item.idHerramienta,
+                    codigo: item.codigoHerramienta,
+                    nombre: item.nombreHerramienta,
+                    marca: item.marca || 'N/A',
+                    fechaPrestamo: item.fechaPrestamo,
+                    fechaEstimadaDevolucion: item.fechaEstimadaDevolucion,
+                    nombreObra: item.nombreObra,
+                    observacionesPrestamo: item.observaciones,
+                    selected: false,
+                    estadoFisicoId: item.estadoFisicoId || 1,
+                    observaciones: '',
+                    idObra: item.idObra || null,
+                  };
+                })
+            );
 
-          Promise.all(herramientaPromises).then(herramientasCompletas => {
-            this.herramientasEnPrestamo = herramientasCompletas;
-          });
-        } else {
+            Promise.all(herramientaPromises).then((herramientasCompletas) => {
+              this.herramientasEnPrestamo = herramientasCompletas;
+            });
+          } else {
+            this.herramientasEnPrestamo = [];
+            this.alertService.error(
+              'Este usuario no tiene herramientas en préstamo actualmente.',
+              'Sin Herramientas'
+            );
+          }
+        },
+        error: (error) => {
+          this.isLoadingHerramientas = false;
           this.herramientasEnPrestamo = [];
-          this.alertService.error('Este usuario no tiene herramientas en préstamo actualmente.', 'Sin Herramientas');
-        }
-      },
-      error: (error) => {
-        this.isLoadingHerramientas = false;
-        this.herramientasEnPrestamo = [];
-        console.error('Error al cargar herramientas en préstamo:', error);
-        this.alertService.error('No se pudieron cargar las herramientas en préstamo.', 'Error al Cargar');
-      }
-    });
+          console.error('Error al cargar herramientas en préstamo:', error);
+          this.alertService.error(
+            'No se pudieron cargar las herramientas en préstamo.',
+            'Error al Cargar'
+          );
+        },
+      });
   }
 
   private loadHerramientasEnReparacion(proveedorId: number): void {
     this.isLoadingHerramientas = true;
 
-    this.herramientaService.getHerramientasEnReparacionByProveedor(proveedorId).subscribe({
-      next: (response) => {
-        this.isLoadingHerramientas = false;
-        if (response.success && response.data) {
-          // Para cada herramienta, obtener el último movimiento para tener datos completos
-          const herramientaPromises = response.data.map((item: any) =>
-            this.movimientoService.getUltimoMovimientoByHerramienta(item.idHerramienta).toPromise()
-              .then((movResp: any) => {
-                const movimiento = movResp?.data || {};
-                return {
-                  id: item.idHerramienta,
-                  codigo: item.codigoHerramienta,
-                  nombre: item.nombreHerramienta,
-                  marca: item.marca || 'N/A',
-                  fechaPrestamo: movimiento.fecha || item.fechaReparacion || item.fechaIngreso,
-                  fechaEstimadaDevolucion: movimiento.fechaEstimadaDevolucion || item.fechaEstimadaFinalizacion,
-                  nombreObra: null, // No aplica para reparaciones
-                  observacionesPrestamo: movimiento.observaciones || item.observaciones,
-                  selected: false,
-                  estadoFisicoId: item.estadoFisicoId || 1,
-                  observaciones: '',
-                  idObra: null // Para reparaciones no se usa idObra
-                };
-              })
-              .catch(() => {
-                return {
-                  id: item.idHerramienta,
-                  codigo: item.codigoHerramienta,
-                  nombre: item.nombreHerramienta,
-                  marca: item.marca || 'N/A',
-                  fechaPrestamo: item.fechaReparacion || item.fechaIngreso,
-                  fechaEstimadaDevolucion: item.fechaEstimadaFinalizacion,
-                  nombreObra: null,
-                  observacionesPrestamo: item.observaciones,
-                  selected: false,
-                  estadoFisicoId: item.estadoFisicoId || 1,
-                  observaciones: '',
-                  idObra: null
-                };
-              })
-          );
+    this.herramientaService
+      .getHerramientasEnReparacionByProveedor(proveedorId)
+      .subscribe({
+        next: (response) => {
+          this.isLoadingHerramientas = false;
+          if (response.success && response.data) {
+            // Para cada herramienta, obtener el último movimiento para tener datos completos
+            const herramientaPromises = response.data.map((item: any) =>
+              this.movimientoService
+                .getUltimoMovimientoByHerramienta(item.idHerramienta)
+                .toPromise()
+                .then((movResp: any) => {
+                  const movimiento = movResp?.data || {};
+                  return {
+                    id: item.idHerramienta,
+                    codigo: item.codigoHerramienta,
+                    nombre: item.nombreHerramienta,
+                    marca: item.marca || 'N/A',
+                    fechaPrestamo:
+                      movimiento.fecha ||
+                      item.fechaReparacion ||
+                      item.fechaIngreso,
+                    fechaEstimadaDevolucion:
+                      movimiento.fechaEstimadaDevolucion ||
+                      item.fechaEstimadaFinalizacion,
+                    nombreObra: null, // No aplica para reparaciones
+                    observacionesPrestamo:
+                      movimiento.observaciones || item.observaciones,
+                    selected: false,
+                    estadoFisicoId: item.estadoFisicoId || 1,
+                    observaciones: '',
+                    idObra: null, // Para reparaciones no se usa idObra
+                  };
+                })
+                .catch(() => {
+                  return {
+                    id: item.idHerramienta,
+                    codigo: item.codigoHerramienta,
+                    nombre: item.nombreHerramienta,
+                    marca: item.marca || 'N/A',
+                    fechaPrestamo: item.fechaReparacion || item.fechaIngreso,
+                    fechaEstimadaDevolucion: item.fechaEstimadaFinalizacion,
+                    nombreObra: null,
+                    observacionesPrestamo: item.observaciones,
+                    selected: false,
+                    estadoFisicoId: item.estadoFisicoId || 1,
+                    observaciones: '',
+                    idObra: null,
+                  };
+                })
+            );
 
-          Promise.all(herramientaPromises).then(herramientasCompletas => {
-            this.herramientasEnPrestamo = herramientasCompletas;
-          });
-        } else {
+            Promise.all(herramientaPromises).then((herramientasCompletas) => {
+              this.herramientasEnPrestamo = herramientasCompletas;
+            });
+          } else {
+            this.herramientasEnPrestamo = [];
+            this.alertService.error(
+              'Este proveedor no tiene herramientas en reparación actualmente.',
+              'Sin Herramientas'
+            );
+          }
+        },
+        error: (error) => {
+          this.isLoadingHerramientas = false;
           this.herramientasEnPrestamo = [];
-          this.alertService.error('Este proveedor no tiene herramientas en reparación actualmente.', 'Sin Herramientas');
-        }
-      },
-      error: (error) => {
-        this.isLoadingHerramientas = false;
-        this.herramientasEnPrestamo = [];
-        console.error('Error al cargar herramientas en reparación:', error);
-        this.alertService.error('No se pudieron cargar las herramientas en reparación.', 'Error al Cargar');
-      }
-    });
+          console.error('Error al cargar herramientas en reparación:', error);
+          this.alertService.error(
+            'No se pudieron cargar las herramientas en reparación.',
+            'Error al Cargar'
+          );
+        },
+      });
   }
 
   onHerramientaToggle(herramienta: HerramientaDevolucion): void {
@@ -307,36 +369,73 @@ export class DevolucionComponent implements OnInit {
       herramienta.estadoFisicoId = null;
       herramienta.observaciones = '';
     }
+
+    // Actualizar el estado del checkbox "Seleccionar todas"
+    this.updateAllSelected();
   }
 
-  onEstadoFisicoChange(herramienta: HerramientaDevolucion, estadoId: number): void {
+  // Nuevo método para alternar selección de todas las herramientas
+  toggleSelectAll(): void {
+    this.allSelected = !this.allSelected;
+    this.herramientasEnPrestamo.forEach((herramienta) => {
+      herramienta.selected = this.allSelected;
+      if (herramienta.selected) {
+        herramienta.estadoFisicoId = 1; // Default to "Excelente"
+        herramienta.observaciones = '';
+      } else {
+        herramienta.estadoFisicoId = null;
+        herramienta.observaciones = '';
+      }
+    });
+  }
+
+  // Nuevo método para actualizar el estado del checkbox "Seleccionar todas"
+  private updateAllSelected(): void {
+    this.allSelected =
+      this.herramientasEnPrestamo.length > 0 &&
+      this.herramientasEnPrestamo.every((h) => h.selected);
+  }
+
+  onEstadoFisicoChange(
+    herramienta: HerramientaDevolucion,
+    estadoId: number
+  ): void {
     herramienta.estadoFisicoId = estadoId;
   }
 
-  onObservacionesChange(herramienta: HerramientaDevolucion, observaciones: string): void {
+  onObservacionesChange(
+    herramienta: HerramientaDevolucion,
+    observaciones: string
+  ): void {
     herramienta.observaciones = observaciones;
   }
 
   getSelectedHerramientas(): HerramientaDevolucion[] {
-    return this.herramientasEnPrestamo.filter(h => h.selected);
+    return this.herramientasEnPrestamo.filter((h) => h.selected);
   }
 
   isFormValid(): boolean {
     const selectedHerramientas = this.getSelectedHerramientas();
 
-    if (!this.tipoOperacion || !this.devolucionForm.valid || selectedHerramientas.length === 0) {
+    if (
+      !this.tipoOperacion ||
+      !this.devolucionForm.valid ||
+      selectedHerramientas.length === 0
+    ) {
       return false;
     }
 
     // Check if all selected tools have required fields filled
-    return selectedHerramientas.every(h => h.estadoFisicoId !== null);
+    return selectedHerramientas.every((h) => h.estadoFisicoId !== null);
   }
 
   getDaysOverdue(fechaEstimada: string): number {
     if (!fechaEstimada) return 0;
 
     const today = new Date();
-    const estimatedDate = new Date(fechaEstimada + (fechaEstimada.includes('Z') ? '' : 'Z'));
+    const estimatedDate = new Date(
+      fechaEstimada + (fechaEstimada.includes('Z') ? '' : 'Z')
+    );
     const diffTime = today.getTime() - estimatedDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -352,12 +451,18 @@ export class DevolucionComponent implements OnInit {
 
     // Validations
     if (!this.tipoOperacion) {
-      this.alertService.error('Debe seleccionar el tipo de operación', 'Tipo de operación requerido');
+      this.alertService.error(
+        'Debe seleccionar el tipo de operación',
+        'Tipo de operación requerido'
+      );
       return;
     }
 
     if (selectedHerramientas.length === 0) {
-      this.alertService.error('Debe seleccionar al menos una herramienta para devolver', 'Herramientas requeridas');
+      this.alertService.error(
+        'Debe seleccionar al menos una herramienta para devolver',
+        'Herramientas requeridas'
+      );
       return;
     }
 
@@ -367,27 +472,42 @@ export class DevolucionComponent implements OnInit {
     }
 
     // Check if all selected tools have required fields
-    const invalidTools = selectedHerramientas.filter(h => h.estadoFisicoId === null);
+    const invalidTools = selectedHerramientas.filter(
+      (h) => h.estadoFisicoId === null
+    );
     if (invalidTools.length > 0) {
-      this.alertService.error('Debe especificar el estado físico para todas las herramientas seleccionadas', 'Campos requeridos');
+      this.alertService.error(
+        'Debe especificar el estado físico para todas las herramientas seleccionadas',
+        'Campos requeridos'
+      );
       return;
     }
 
     // Create confirmation message
-    const herramientasText = selectedHerramientas.map(h => h.codigo).join(', ');
-    const responsableName = this.tipoOperacion === 'prestamo'
-      ? `${this.selectedUsuarioInfo?.nombre} ${this.selectedUsuarioInfo?.apellido}`
-      : this.selectedProveedorInfo?.nombreProveedor;
+    const herramientasText = selectedHerramientas
+      .map((h) => h.codigo)
+      .join(', ');
+    const responsableName =
+      this.tipoOperacion === 'prestamo'
+        ? `${this.selectedUsuarioInfo?.nombre} ${this.selectedUsuarioInfo?.apellido}`
+        : this.selectedProveedorInfo?.nombreProveedor;
 
-    const operacionText = this.tipoOperacion === 'prestamo' ? 'préstamo' : 'reparación';
+    const operacionText =
+      this.tipoOperacion === 'prestamo' ? 'préstamo' : 'reparación';
 
-    const confirmMessage = `¿Confirmar registro de devolución de ${operacionText}?<br><br>Herramientas (${selectedHerramientas.length}): ${herramientasText}<br>${this.tipoOperacion === 'prestamo' ? 'Usuario' : 'Proveedor'}: ${responsableName}`;
+    const confirmMessage = `¿Confirmar registro de devolución de ${operacionText}?<br><br>Herramientas (${
+      selectedHerramientas.length
+    }): ${herramientasText}<br>${
+      this.tipoOperacion === 'prestamo' ? 'Usuario' : 'Proveedor'
+    }: ${responsableName}`;
 
-    this.alertService.confirm(confirmMessage, 'Confirmar Devolución').then((result) => {
-      if (result.isConfirmed) {
-        this.registrarDevoluciones();
-      }
-    });
+    this.alertService
+      .confirm(confirmMessage, 'Confirmar Devolución')
+      .then((result) => {
+        if (result.isConfirmed) {
+          this.registrarDevoluciones();
+        }
+      });
   }
 
   private registrarDevoluciones(): void {
@@ -398,19 +518,22 @@ export class DevolucionComponent implements OnInit {
 
     if (!currentUserId) {
       this.isLoading = false;
-      this.alertService.error('No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.', 'Error de Autenticación');
+      this.alertService.error(
+        'No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.',
+        'Error de Autenticación'
+      );
       return;
     }
 
     // Create devoluciones array based on operation type
-    const devoluciones = selectedHerramientas.map(herramienta => {
+    const devoluciones = selectedHerramientas.map((herramienta) => {
       const baseMovimiento: any = {
         idHerramienta: herramienta.id,
         idUsuarioGenera: currentUserId,
         fechaMovimiento: new Date().toISOString(),
         estadoHerramientaAlDevolver: herramienta.estadoFisicoId,
         observaciones: herramienta.observaciones || undefined,
-        fechaEstimadaDevolucion: null
+        fechaEstimadaDevolucion: null,
       };
 
       if (this.tipoOperacion === 'prestamo') {
@@ -419,7 +542,7 @@ export class DevolucionComponent implements OnInit {
           idUsuarioResponsable: this.selectedUsuarioInfo!.id,
           idTipoMovimiento: 2, // Devolución de préstamo
           idProveedor: null,
-          idObra: herramienta.idObra || null // Incluir idObra del último movimiento de préstamo
+          idObra: herramienta.idObra || null, // Incluir idObra del último movimiento de préstamo
         };
       } else {
         return {
@@ -427,7 +550,7 @@ export class DevolucionComponent implements OnInit {
           idUsuarioResponsable: null,
           idTipoMovimiento: 2, // Devolución de reparación
           idProveedor: this.selectedProveedorInfo!.idProveedor,
-          idObra: null // Para reparaciones no se incluye idObra
+          idObra: null, // Para reparaciones no se incluye idObra
         };
       }
     });
@@ -436,16 +559,26 @@ export class DevolucionComponent implements OnInit {
     this.movimientoService.registrarMultiplesPrestamos(devoluciones).subscribe({
       next: (responses: any[]) => {
         this.isLoading = false;
-        const herramientasText = selectedHerramientas.map(h => h.codigo).join(', ');
-        const operacionText = this.tipoOperacion === 'prestamo' ? 'préstamos' : 'reparaciones';
-        this.alertService.success(`Las devoluciones de ${operacionText} de las herramientas ${herramientasText} han sido registradas exitosamente.`, '✓ Devoluciones Registradas');
+        const herramientasText = selectedHerramientas
+          .map((h) => h.codigo)
+          .join(', ');
+        const operacionText =
+          this.tipoOperacion === 'prestamo' ? 'préstamos' : 'reparaciones';
+        this.alertService.success(
+          `Las devoluciones de ${operacionText} de las herramientas ${herramientasText} han sido registradas exitosamente.`,
+          '✓ Devoluciones Registradas'
+        );
         this.resetForm();
       },
       error: (error) => {
         this.isLoading = false;
-        this.alertService.error(error.error?.message || 'Ha ocurrido un error inesperado. Por favor, intente nuevamente.', '✗ Error al Registrar');
+        this.alertService.error(
+          error.error?.message ||
+            'Ha ocurrido un error inesperado. Por favor, intente nuevamente.',
+          '✗ Error al Registrar'
+        );
         console.error('Error al crear devoluciones:', error);
-      }
+      },
     });
   }
 
@@ -455,6 +588,7 @@ export class DevolucionComponent implements OnInit {
     this.selectedUsuarioInfo = null;
     this.selectedProveedorInfo = null;
     this.herramientasEnPrestamo = [];
+    this.allSelected = false; // Resetear el checkbox
   }
 
   // Helper methods for template

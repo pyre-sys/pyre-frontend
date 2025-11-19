@@ -199,19 +199,24 @@ export class VisorHerramientasComponent implements OnInit {
   }
 
   createNewTool(): void {
+    // Configuración instantánea sin demoras
     this.modalInitialData = null;
     this.modalMode = 'create';
     this.showToolModal = true;
+
+    // Sin setTimeout ni operaciones asíncronas - el modal debe aparecer inmediatamente
   }
 
   editTool(item: DisplayHerramienta): void {
     const id = item?.id ?? item?.idHerramienta ?? null;
     if (id == null) return;
 
+    // Mostrar el modal inmediatamente sin esperar la carga de datos
     this.modalInitialData = null;
     this.modalMode = 'edit';
     this.showToolModal = true;
 
+    // Cargar datos en segundo plano - el modal se mostrará con loading
     this.srvHerramienta.getToolById(Number(id)).subscribe({
       next: (resp: any) => {
         const toolData = resp?.data ?? resp ?? null;

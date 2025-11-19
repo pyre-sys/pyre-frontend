@@ -2,9 +2,13 @@
 <div class="container-fluid page-shell page-header-container">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div></div>
-    <a class="btn header-action" (click)="createNewUser()" role="button">
+    <a
+      class="btn btn-primary header-action"
+      (click)="createNewUser()"
+      role="button"
+    >
       <i class="bx bx-user-plus bx-tada me-1" aria-hidden="true"></i> Nuevo
-      Usuario
+      Cliente
     </a>
   </div>
 </div>
@@ -14,15 +18,15 @@
     <!-- Filter bar -->
     <div class="pyre-filter-bar container-fluid">
       <div class="row g-3 align-items-end">
-        <!-- Legajo -->
-        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
+        <!-- CUIT -->
+        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
           <div class="filter-item">
             <div class="filter-input-group">
               <input
                 type="text"
                 class="form-control"
-                [(ngModel)]="filtroLegajo"
-                placeholder="Legajo"
+                [(ngModel)]="filtroCuit"
+                placeholder="CUIT"
                 (keyup.enter)="onSearch()"
               />
             </div>
@@ -30,7 +34,7 @@
         </div>
 
         <!-- Nombre -->
-        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6">
           <div class="filter-item">
             <div class="filter-input-group">
               <input
@@ -44,38 +48,8 @@
           </div>
         </div>
 
-        <!-- Apellido -->
-        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
-          <div class="filter-item">
-            <div class="filter-input-group">
-              <input
-                type="text"
-                class="form-control"
-                [(ngModel)]="filtroApellido"
-                placeholder="Apellido"
-                (keyup.enter)="onSearch()"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Rol -->
-        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
-          <div class="filter-item">
-            <div class="filter-input-group">
-              <app-cbo-rol-usuario
-                class="w-100"
-                [(ngModel)]="filtroRol"
-                [showOnlyActive]="true"
-                [isId]="'filtroRolSelect'"
-              >
-              </app-cbo-rol-usuario>
-            </div>
-          </div>
-        </div>
-
         <!-- Estado -->
-        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
+        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
           <div class="filter-item">
             <div class="filter-input-group">
               <app-cbo-estado
@@ -123,7 +97,7 @@
     <!-- Loading indicator -->
     <div *ngIf="loading" class="text-center py-4">
       <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-      <p>Cargando usuarios...</p>
+      <p>Cargando clientes...</p>
     </div>
 
     <!-- Custom table -->
@@ -131,20 +105,18 @@
       <table class="custom-table">
         <thead>
           <tr>
-            <th>Legajo</th>
+            <th>CUIT</th>
             <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Rol</th>
+            <th>Teléfono</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let user of getPaginatedUsers(); let i = index">
-            <td>{{ user.legajo }}</td>
+            <td>{{ user.cuit }}</td>
             <td>{{ user.nombre }}</td>
-            <td>{{ user.apellido }}</td>
-            <td>{{ user.rol }}</td>
+            <td>{{ user.telefono }}</td>
             <td>
               <div class="estado-toggle">
                 <label
@@ -163,6 +135,7 @@
                     class="toggle-slider modern"
                     [class.active]="user.activo"
                   ></span>
+                  <!-- pequeño indicador mientras se ejecuta la petición -->
                   <i
                     *ngIf="user._pending"
                     class="pi pi-spin pi-spinner small-spinner"
@@ -177,28 +150,39 @@
                   type="button"
                   class="btn-icon btn-edit"
                   (click)="editUser(user)"
-                  ngbTooltip="Ver/Editar usuario"
+                  ngbTooltip="Ver/Editar cliente"
                   placement="top"
                   container="body"
                 >
                   <i class="pi pi-eye"></i>
                 </button>
+
                 <button
                   type="button"
                   class="btn-icon btn-delete"
                   (click)="deleteUser(user)"
-                  ngbTooltip="Eliminar usuario"
+                  [disabled]="user._pending"
+                  ngbTooltip="Eliminar cliente"
                   placement="top"
                   container="body"
                 >
-                  <i class="pi pi-trash"></i>
+                  <i
+                    *ngIf="!user._pending"
+                    class="pi pi-trash"
+                    aria-hidden="true"
+                  ></i>
+                  <i
+                    *ngIf="user._pending"
+                    class="pi pi-spin pi-spinner small-spinner"
+                    aria-hidden="true"
+                  ></i>
                 </button>
               </div>
             </td>
           </tr>
           <tr *ngIf="getPaginatedUsers().length === 0">
-            <td colspan="6" class="empty-message">
-              No se encontraron usuarios.
+            <td colspan="5" class="empty-message">
+              No se encontraron clientes.
             </td>
           </tr>
         </tbody>
@@ -217,12 +201,12 @@
     </div>
   </div>
 
-  <!-- Instancia del modal de usuario -->
-  <app-usuarios-modal
+  <!-- Instancia del modal de clientes -->
+  <app-modal-clientes
     *ngIf="showUserModal"
     [initialData]="modalInitialData"
     [mode]="modalMode"
     (submit)="onModalSubmit($event)"
     (close)="closeUserModal()"
-  ></app-usuarios-modal>
+  ></app-modal-clientes>
 </div>

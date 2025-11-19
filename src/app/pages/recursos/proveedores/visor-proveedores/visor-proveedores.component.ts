@@ -5,6 +5,8 @@ import { ProveedoresService } from '../../../../services/proveedores.service';
 import { AlertaService } from '../../../../services/alerta.service';
 import { ModalProveedorComponent } from '../modal-proveedor/modal-proveedor.component';
 import { PageTitleService } from '../../../../services/page-title.service';
+import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 export interface ProveedorDto {
   idProveedor: number;
@@ -16,6 +18,7 @@ export interface ProveedorDto {
   direccion?: string;
   descripcion?: string;
   activo: boolean;
+  _pending?: boolean;
 }
 
 @Component({
@@ -25,15 +28,24 @@ export interface ProveedorDto {
     CommonModule,
     FormsModule,
     ModalProveedorComponent,
+    PaginatorComponent,
+    NgbTooltipModule,
   ],
   templateUrl: './visor-proveedores.component.html',
   styleUrls: ['./visor-proveedores.component.css'],
-  providers: [ProveedoresService]
+  providers: [ProveedoresService],
 })
 export class VisorProveedoresComponent implements OnInit {
   proveedores: ProveedorDto[] = [];
   filteredProveedores: ProveedorDto[] = [];
-  columns: string[] = ['nombreProveedor', 'contacto', 'cuit', 'telefono', 'email', 'direccion'];
+  columns: string[] = [
+    'nombreProveedor',
+    'contacto',
+    'cuit',
+    'telefono',
+    'email',
+    'direccion',
+  ];
   rowsPerPageOptions: number[] = [5, 10, 20, 40];
   currentPage = 1;
   pageSize = 10;
@@ -55,7 +67,11 @@ export class VisorProveedoresComponent implements OnInit {
   showDetailsModal = false;
   detailsData: any = null;
 
-  constructor(private proveedoresService: ProveedoresService, private alertService: AlertaService, private pageTitleService: PageTitleService) { }
+  constructor(
+    private proveedoresService: ProveedoresService,
+    private alertService: AlertaService,
+    private pageTitleService: PageTitleService
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Proveedores');
@@ -64,41 +80,80 @@ export class VisorProveedoresComponent implements OnInit {
 
   fetchProveedores(): void {
     this.loading = true;
-    this.proveedoresService.getProveedores(this.currentPage, this.pageSize).subscribe({
-      next: (resp) => {
-        const pagedData = resp?.data ?? {};
-        const rawList = Array.isArray(pagedData.data) ? pagedData.data : [];
-        this.totalItems = pagedData.totalRecords ?? rawList.length ?? 0;
-        this.currentPage = pagedData.page ?? 1;
-        this.pageSize = pagedData.pageSize ?? this.pageSize;
-        this.proveedores = rawList.map((p: any) => ({
-          idProveedor: p.idProveedor,
-          nombreProveedor: p.nombreProveedor,
-          contacto: p.contacto,
-          cuit: p.cuit,
-          telefono: p.telefono,
-          email: p.email,
-          direccion: p.direccion,
-          descripcion: p.descripcion,
-          activo: p.activo
-        }));
-        this.applyFilters();
-        this.calculatePagination();
-        this.loading = false;
-      },
-      error: () => {
-        this.showSnack('Error al cargar los proveedores. Por favor, inténtelo de nuevo.');
-        this.loading = false;
-      }
-    });
+    // El servicio espera 0-2 argumentos; no pasar el objeto de filtros aquí si no lo soporta.
+    this.proveedoresService
+      .getProveedores(this.currentPage, this.pageSize)
+      .subscribe({
+        next: (resp: any) => {
+          // Manejo flexible similar a visor-usuario
+          let rawList: any[] = [];
+          if (Array.isArray(resp.data)) {
+            rawList = resp.data;
+          } else if (
+            resp.data &&
+            typeof resp.data === 'object' &&
+            Array.isArray(resp.data.data)
+          ) {
+            rawList = resp.data.data;
+          }
+
+          this.proveedores = rawList.map((p: any) => ({
+            idProveedor: p.idProveedor ?? p.id ?? null,
+            nombreProveedor: p.nombreProveedor ?? p.nombre ?? '',
+            contacto: p.contacto ?? '',
+            cuit: p.cuit ?? '',
+            telefono: p.telefono ?? '',
+            email: p.email ?? '',
+            direccion: p.direccion ?? '',
+            descripcion: p.descripcion ?? '',
+            activo: p.activo ?? false,
+            _pending: false,
+          }));
+
+          // Extraer paginación si viene
+          const pagination =
+            resp.pagination ?? (resp.data && resp.data.pagination) ?? null;
+          if (pagination) {
+            this.totalItems =
+              pagination.totalRecords ?? resp.total ?? this.proveedores.length;
+            this.totalPages =
+              pagination.totalPages ??
+              Math.ceil(this.totalItems / this.pageSize);
+            if (pagination.page) this.currentPage = pagination.page;
+          } else {
+            this.totalItems = resp.total ?? this.proveedores.length;
+            this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+          }
+
+          this.filteredProveedores = this.proveedores;
+          this.loading = false;
+        },
+        error: () => {
+          this.showSnack(
+            'Error al cargar los proveedores. Por favor, inténtelo de nuevo.'
+          );
+          this.loading = false;
+        },
+      });
+  }
+
+  // Maneja eventos emitidos por app-paginator (pageIndex 0-based)
+  onPageEvent(event: { pageIndex: number; pageSize: number }): void {
+    this.currentPage = event.pageIndex + 1; // backend 1-based
+    this.pageSize = event.pageSize;
+    this.fetchProveedores();
   }
 
   applyFilters(): void {
-    this.filteredProveedores = this.proveedores.filter(proveedor => {
-      const matchesNombre = !this.filtroNombre ||
-        proveedor.nombreProveedor?.toLowerCase().includes(this.filtroNombre.toLowerCase());
+    this.filteredProveedores = this.proveedores.filter((proveedor) => {
+      const matchesNombre =
+        !this.filtroNombre ||
+        proveedor.nombreProveedor
+          ?.toLowerCase()
+          .includes(this.filtroNombre.toLowerCase());
 
-      const matchesEstado = !this.filtroEstado ||
+      const matchesEstado =
+        !this.filtroEstado ||
         (this.filtroEstado === 'activo' && proveedor.activo) ||
         (this.filtroEstado === 'inactivo' && !proveedor.activo);
 
@@ -180,24 +235,33 @@ export class VisorProveedoresComponent implements OnInit {
       },
       error: () => {
         this.modalInitialData = item;
-      }
+      },
     });
   }
 
   deleteProveedor(item: ProveedorDto): void {
     const id = item?.idProveedor ?? null;
     if (id == null) return;
-    this.alertService.confirm('¿Estás seguro de que deseas eliminar este proveedor?', 'Eliminar Proveedor')
+    this.alertService
+      .confirm(
+        '¿Estás seguro de que deseas eliminar este proveedor?',
+        'Eliminar Proveedor'
+      )
       .then((result: any) => {
         if (result && result.isConfirmed) {
           this.proveedoresService.deleteProveedor(id).subscribe({
             next: () => {
-              this.alertService.success('El proveedor ha sido eliminado correctamente.', '¡Eliminado!');
+              this.alertService.success(
+                'El proveedor ha sido eliminado correctamente.',
+                '¡Eliminado!'
+              );
               this.fetchProveedores();
             },
             error: () => {
-              this.alertService.error('No se pudo eliminar el proveedor. Intente nuevamente.');
-            }
+              this.alertService.error(
+                'No se pudo eliminar el proveedor. Intente nuevamente.'
+              );
+            },
           });
         }
       });
@@ -229,22 +293,49 @@ export class VisorProveedoresComponent implements OnInit {
         },
         error: (err) => {
           event.onError(err);
-        }
+        },
       });
     } else {
       const id = Number(this.modalInitialData?.idProveedor ?? null);
       if (!id) {
-        event.onError({ message: 'No se pudo identificar el proveedor a actualizar' });
+        event.onError({
+          message: 'No se pudo identificar el proveedor a actualizar',
+        });
         return;
       }
+
+      // Asegurar que el body incluya el estado actual 'activo'
+      let actualActivo: boolean | null = null;
+      if (
+        this.modalInitialData &&
+        (this.modalInitialData.activo === true ||
+          this.modalInitialData.activo === false)
+      ) {
+        actualActivo = !!this.modalInitialData.activo;
+      } else {
+        const local = this.proveedores.find(
+          (p) => Number(p.idProveedor) === Number(id)
+        );
+        if (local && (local.activo === true || local.activo === false)) {
+          actualActivo = !!local.activo;
+        }
+      }
+      if (actualActivo === null) {
+        console.warn(
+          '[ProveedorList] No se pudo determinar activo, usando true como fallback'
+        );
+        actualActivo = true;
+      }
+      event.data.activo = actualActivo;
+
       this.proveedoresService.updateProveedor(id, event.data).subscribe({
         next: () => {
           this.fetchProveedores();
           event.onSuccess();
         },
-        error: (err) => {
+        error: (err: any) => {
           event.onError(err);
-        }
+        },
       });
     }
   }
@@ -257,6 +348,74 @@ export class VisorProveedoresComponent implements OnInit {
   closeDetailsModal(): void {
     this.showDetailsModal = false;
     this.detailsData = null;
+  }
+
+  toggleProveedorActive(event: Event, item: ProveedorDto): void {
+    try {
+      event.preventDefault();
+      event.stopPropagation();
+    } catch {
+      /* safe */
+    }
+
+    const id = item?.idProveedor ?? null;
+    if (id == null) return;
+
+    const current = item.activo;
+    const targetState = !current;
+    const actionText = targetState ? 'activar' : 'desactivar';
+
+    this.alertService
+      .confirm(
+        `¿Estás seguro de que deseas ${actionText} este proveedor?`,
+        `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} Proveedor`
+      )
+      .then((result: any) => {
+        if (result && result.isConfirmed) {
+          item._pending = true;
+
+          // Intentamos llamar al método toggleActivo; si no está disponible en runtime,
+          // la llamada lanzará y caeremos al catch para usar el fallback (updateProveedor).
+          let obs: any = null;
+          try {
+            obs = (this.proveedoresService as any).toggleActivo(id);
+          } catch (e) {
+            // Fallback: usar updateProveedor si está disponible
+            obs = (this.proveedoresService as any).updateProveedor
+              ? (this.proveedoresService as any).updateProveedor(id, {
+                  activo: targetState,
+                })
+              : null;
+          }
+
+          if (!obs) {
+            item._pending = false;
+            this.alertService.error('Operación no disponible en el servicio.');
+            return;
+          }
+
+          obs.subscribe({
+            next: () => {
+              item.activo = targetState;
+              item._pending = false;
+              const pastText = targetState ? 'activado' : 'desactivado';
+              this.alertService.success(
+                `Proveedor ${pastText} correctamente.`,
+                '¡Hecho!'
+              );
+            },
+            error: (err: any) => {
+              item._pending = false;
+              console.error('[ProveedorList] toggleProveedorActive error', err);
+              this.alertService.error(
+                'No se pudo cambiar el estado del proveedor. Intente nuevamente.'
+              );
+            },
+          });
+        } else {
+          // cancelado: no hacer nada
+        }
+      });
   }
 
   private showSnack(message: string): void {

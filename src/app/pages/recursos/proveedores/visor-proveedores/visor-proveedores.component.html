@@ -1,136 +1,189 @@
 <div class="container-fluid page-shell page-header-container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="page-title mb-0" style="margin-left: 3rem;">Lista de Proveedores</h1>
-        <a class="btn btn-primary header-action" (click)="createNewProveedor()" role="button">
-            <i class="bx bx-plus bx-tada me-1" aria-hidden="true"></i> Nuevo Proveedor
-        </a>
-    </div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div></div>
+    <a
+      class="btn btn-primary header-action"
+      (click)="createNewProveedor()"
+      role="button"
+    >
+      <i class="bx bx-plus bx-tada me-1" aria-hidden="true"></i> Nuevo Proveedor
+    </a>
+  </div>
 </div>
 
-<div class="proveedor-list-container container-fluid page-shell mt-2">
-    <div class="pyre-table-shell">
-        <!-- Filter bar -->
-        <div class="pyre-filter-bar">
-            <div class="filter-row">
-                <div class="filter-item">
-                    <input type="text" [(ngModel)]="filtroNombre" placeholder="Nombre del proveedor"
-                        (keyup.enter)="onSearch()" />
-                </div>
-                <div class="filter-item filter-item-with-reset">
-                    <div class="filter-input-group">
-                        <select [(ngModel)]="filtroEstado">
-                            <option value="">Todos los estados</option>
-                            <option value="activo">Activo</option>
-                            <option value="inactivo">Inactivo</option>
-                        </select>
-                        <button *ngIf="hasActiveFilters()" type="button" class="reset-button-inline"
-                            (click)="onResetFilters()" title="Limpiar todos los filtros">
-                            <i class="pi pi-filter-slash"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="filter-actions">
-                    <button type="button" class="search-button" (click)="onSearch()" [disabled]="!hasActiveFilters()"
-                        title="Buscar">
-                        <i class="pi pi-search"></i>
-                    </button>
-                </div>
+<!-- Reemplazado: usar las mismas clases estructurales que en visor-usuario -->
+<div class="user-list-container container-fluid page-shell mt-2">
+  <div class="pyre-table-shell">
+    <!-- Filter bar: misma estructura de grid que visor-usuario -->
+    <div class="pyre-filter-bar container-fluid">
+      <div class="row g-3 align-items-end">
+        <!-- Nombre del proveedor -->
+        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="filtroNombre"
+                placeholder="Nombre del proveedor"
+                (keyup.enter)="onSearch()"
+              />
             </div>
+          </div>
         </div>
 
-        <!-- Loading indicator -->
-        <div *ngIf="loading" class="text-center py-4">
-            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-            <p>Cargando proveedores...</p>
+        <!-- Estado -->
+        <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6">
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <select class="form-control" [(ngModel)]="filtroEstado">
+                <option value="">Todos los estados</option>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <!-- Custom table -->
-        <div *ngIf="!loading" class="custom-table-container">
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Contacto</th>
-                        <th>Descripción</th>
-                        <th>Teléfono</th>
-                        <th>Email</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let proveedor of getPaginatedProveedores(); let i = index">
-                        <td>{{ proveedor.nombreProveedor }}</td>
-                        <td>{{ proveedor.contacto }}</td>
-                        <td>{{ proveedor.descripcion }}</td>
-                        <td>{{ proveedor.telefono }}</td>
-                        <td>{{ proveedor.email }}</td>
-                        <td>
-                            <span class="status-badge" [class.status-activo]="proveedor.activo"
-                                [class.status-inactivo]="!proveedor.activo">
-                                {{ proveedor.activo ? 'Activo' : 'Inactivo' }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button type="button" class="btn-icon btn-edit" (click)="editProveedor(proveedor)"
-                                    title="Ver / Editar">
-                                    <i class="pi pi-user-edit"></i>
-                                </button>
-                                <button type="button" class="btn-icon btn-delete" (click)="deleteProveedor(proveedor)"
-                                    title="Eliminar">
-                                    <i class="pi pi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr *ngIf="getPaginatedProveedores().length === 0">
-                        <td colspan="7" class="empty-message">No se encontraron proveedores.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Reset + Buscar -->
+        <div
+          class="col-xl-7 col-lg-7 col-md-5 col-sm-12 d-flex justify-content-end"
+        >
+          <div class="d-flex gap-2">
+            <button
+              type="button"
+              class="reset-button-inline"
+              (click)="onResetFilters()"
+              [disabled]="!hasActiveFilters()"
+              [title]="
+                hasActiveFilters()
+                  ? 'Limpiar filtros'
+                  : 'No hay filtros activos'
+              "
+            >
+              <i class="pi pi-filter-slash"></i>
+            </button>
 
-        <!-- Custom pagination -->
-        <div *ngIf="!loading && totalItems > 0" class="pagination-container">
-            <div class="pagination-info">
-                <span>Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
-                    {{ Math.min(currentPage * pageSize, totalItems) }} de {{ totalItems }} registros</span>
-            </div>
-            <div class="pagination-controls">
-                <div class="page-size-selector">
-                    <label>Registros por página:</label>
-                    <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-                        <option *ngFor="let size of rowsPerPageOptions" [value]="size">{{ size }}</option>
-                    </select>
-                </div>
-                <div class="page-buttons">
-                    <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="onPageChange(1)">
-                        <i class="pi pi-angle-double-left"></i>
-                    </button>
-                    <button type="button" class="page-btn" [disabled]="currentPage === 1"
-                        (click)="onPageChange(currentPage - 1)">
-                        <i class="pi pi-angle-left"></i>
-                    </button>
-                    <button *ngFor="let page of getVisiblePages()" type="button" class="page-btn"
-                        [class.active]="page === currentPage" (click)="onPageChange(page)">
-                        {{ page }}
-                    </button>
-                    <button type="button" class="page-btn" [disabled]="currentPage === totalPages"
-                        (click)="onPageChange(currentPage + 1)">
-                        <i class="pi pi-angle-right"></i>
-                    </button>
-                    <button type="button" class="page-btn" [disabled]="currentPage === totalPages"
-                        (click)="onPageChange(totalPages)">
-                        <i class="pi pi-angle-double-right"></i>
-                    </button>
-                </div>
-            </div>
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="onSearch()"
+              title="Buscar"
+            >
+              <i class="pi pi-search"></i>
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- Instancia del modal de proveedor -->
-    <app-modal-proveedor *ngIf="showProveedorModal" [initialData]="modalInitialData" [mode]="modalMode"
-        (submit)="onModalSubmit($event)" (close)="closeProveedorModal()"></app-modal-proveedor>
+    <!-- Loading indicator -->
+    <div *ngIf="loading" class="text-center py-4">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <p>Cargando proveedores...</p>
+    </div>
 
+    <!-- Custom table -->
+    <div *ngIf="!loading" class="custom-table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Contacto</th>
+            <th>Descripción</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let proveedor of getPaginatedProveedores(); let i = index"
+          >
+            <td>{{ proveedor.nombreProveedor }}</td>
+            <td>{{ proveedor.contacto }}</td>
+            <td>{{ proveedor.descripcion }}</td>
+            <td>{{ proveedor.telefono }}</td>
+            <td>{{ proveedor.email }}</td>
+            <td>
+              <div class="estado-toggle">
+                <label
+                  class="toggle-switch"
+                  [ngbTooltip]="proveedor.activo ? 'Activo' : 'Inactivo'"
+                  placement="top"
+                  container="body"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="proveedor.activo"
+                    (click)="toggleProveedorActive($event, proveedor)"
+                    [disabled]="proveedor._pending"
+                  />
+                  <span
+                    class="toggle-slider modern"
+                    [class.active]="proveedor.activo"
+                  ></span>
+                  <i
+                    *ngIf="proveedor._pending"
+                    class="pi pi-spin pi-spinner small-spinner"
+                    style="margin-left: 6px"
+                  ></i>
+                </label>
+              </div>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="btn-icon btn-edit"
+                  (click)="editProveedor(proveedor)"
+                  ngbTooltip="Ver/Editar proveedor"
+                  placement="top"
+                  container="body"
+                >
+                  <i class="pi pi-eye"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn-icon btn-delete"
+                  (click)="deleteProveedor(proveedor)"
+                  ngbTooltip="Eliminar proveedor"
+                  placement="top"
+                  container="body"
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="getPaginatedProveedores().length === 0">
+            <td colspan="7" class="empty-message">
+              No se encontraron proveedores.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Custom pagination -->
+    <div *ngIf="!loading && totalItems > 0" class="paginator-container">
+      <app-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage - 1"
+        (pageChange)="onPageEvent($event)"
+      >
+      </app-paginator>
+    </div>
+  </div>
+
+  <!-- Instancia del modal de proveedor -->
+  <app-modal-proveedor
+    *ngIf="showProveedorModal"
+    [initialData]="modalInitialData"
+    [mode]="modalMode"
+    (submit)="onModalSubmit($event)"
+    (close)="closeProveedorModal()"
+  ></app-modal-proveedor>
 </div>

@@ -2,14 +2,16 @@ import {
   Component,
   EventEmitter,
   Output,
-  Input,
   OnInit,
+  Input,
   OnChanges,
   SimpleChanges,
   HostListener,
   ElementRef,
   ViewChild,
+  OnDestroy,
 } from '@angular/core';
+import { Subscription, debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -20,26 +22,14 @@ import {
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../../services/alerta.service';
 
-export interface ProveedorDto {
-  idProveedor: number;
-  nombreProveedor: string;
-  contacto: string;
-  cuit?: string;
-  telefono?: string;
-  email?: string;
-  direccion?: string;
-  descripcion?: string;
-  activo: boolean;
-}
-
 @Component({
-  selector: 'app-modal-proveedor',
+  selector: 'app-modal-clientes',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NgbTooltipModule],
-  templateUrl: './modal-proveedor.component.html',
+  templateUrl: './modal-clientes.component.html',
   styleUrls: ['../../../../../styles/modal-style.css'],
 })
-export class ModalProveedorComponent implements OnInit, OnChanges {
+export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
   @Output() submit = new EventEmitter<{
     mode: 'create' | 'edit';
     data: any;
@@ -48,14 +38,16 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
   }>();
   @Output() close = new EventEmitter<void>();
 
-  @Input() initialData: ProveedorDto | null = null;
+  @Input() initialData: any | null = null;
   @Input() mode: 'create' | 'edit' = 'create';
 
   visible = true;
   form!: FormGroup;
-  editingEnabled: boolean = true;
   serverErrors: { [key: string]: string } = {};
-  private proveedorId: number | null = null;
+  private subscriptions: Subscription[] = [];
+
+  // Nueva flag para controlar si los inputs están en modo edición o solo lectura
+  editingEnabled: boolean = true;
 
   @ViewChild('firstInput') firstInput!: ElementRef;
 
@@ -73,8 +65,7 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.buildForm();
     if (this.initialData) this.patchForm(this.initialData);
-
-    // Inicializar estado de edición: en modo 'edit' comienza deshabilitado, en 'create' habilitado
+    // inicializar estado de edición según el modo: en 'edit' empezar en modo lectura
     this.editingEnabled = this.mode !== 'edit';
     this.setControlsDisabled(!this.editingEnabled);
 
@@ -94,70 +85,38 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     }
     if (changes['mode'] && !changes['mode'].firstChange) {
       this.mode = changes['mode'].currentValue || 'create';
+      // sincronizar estado de edición cuando cambie el modo
       this.editingEnabled = this.mode !== 'edit';
       this.setControlsDisabled(!this.editingEnabled);
     }
   }
 
-  toggleEditing(): void {
-    this.editingEnabled = !this.editingEnabled;
-    this.setControlsDisabled(!this.editingEnabled);
-    if (this.editingEnabled) {
-      setTimeout(() => {
-        const firstInput = this.elementRef.nativeElement.querySelector(
-          'input:not([disabled])'
-        );
-        if (firstInput) firstInput.focus();
-      }, 50);
-    }
-  }
-
-  private setControlsDisabled(disabled: boolean) {
-    if (!this.form) return;
-    Object.keys(this.form.controls).forEach((key) => {
-      const control = this.form.get(key);
-      if (!control) return;
-      if (disabled) {
-        control.disable({ emitEvent: false });
-      } else {
-        control.enable({ emitEvent: false });
-      }
-    });
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((s) => s.unsubscribe());
+    this.subscriptions = [];
   }
 
   private buildForm() {
     this.form = this.fb.group({
-      nombreProveedor: ['', [Validators.required, Validators.maxLength(100)]],
-      contacto: ['', [Validators.required, Validators.maxLength(100)]],
-      cuit: ['', [Validators.maxLength(20)]],
+      cuit: ['', [Validators.maxLength(11)]],
+      nombre: ['', [Validators.required, Validators.maxLength(200)]],
       telefono: ['', [Validators.maxLength(50)]],
       email: ['', [Validators.email, Validators.maxLength(150)]],
-      direccion: ['', [Validators.maxLength(200)]],
-      descripcion: ['', [Validators.maxLength(1000)]],
-      activo: [true, [Validators.required]],
+      direccion: ['', [Validators.maxLength(255)]],
+      // NOTA: eliminamos el control 'activo' — todos los clientes se crean activos por defecto en backend.
     });
   }
 
   private patchForm(data: any) {
     if (!this.form) this.buildForm();
-
-    console.log('🔍 Patching form with proveedor data:', data);
-
-    this.proveedorId = data?.idProveedor ?? null;
-    console.log('💾 Proveedor ID saved:', this.proveedorId);
-
     const mapped = {
-      nombreProveedor: data?.nombreProveedor ?? '',
-      contacto: data?.contacto ?? '',
-      cuit: data?.cuit ?? '',
-      telefono: data?.telefono ?? '',
-      email: data?.email ?? '',
-      direccion: data?.direccion ?? '',
-      descripcion: data?.descripcion ?? '',
-      activo: data?.activo ?? true,
+      cuit: data?.cuit ?? data?.Cuit ?? '',
+      nombre: data?.nombre ?? data?.Nombre ?? '',
+      telefono: data?.telefono ?? data?.Telefono ?? '',
+      email: data?.email ?? data?.Email ?? '',
+      direccion: data?.direccion ?? data?.Direccion ?? '',
+      // No mapear 'activo' aquí: lo maneja el backend
     };
-
-    console.log('✅ Mapped data for form:', mapped);
     this.form.patchValue(mapped);
   }
 
@@ -165,7 +124,6 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     try {
       this.serverErrors = {};
       const payload = error?.error ?? error;
-
       if (payload?.errors && typeof payload.errors === 'object') {
         Object.keys(payload.errors).forEach((k: string) => {
           const val = payload.errors[k];
@@ -183,7 +141,18 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
 
       const msg = payload?.message || payload?.detail || payload?.error;
       if (msg && typeof msg === 'string') {
-        this.alertService.error(msg);
+        // intentar mapear mensajes comunes a campos
+        if (/cuit/i.test(msg)) {
+          this.serverErrors['cuit'] = msg;
+          this.form.get('cuit')?.setErrors({ server: true });
+          this.form.get('cuit')?.markAsTouched();
+        } else if (/nombre/i.test(msg)) {
+          this.serverErrors['nombre'] = msg;
+          this.form.get('nombre')?.setErrors({ server: true });
+          this.form.get('nombre')?.markAsTouched();
+        } else {
+          this.alertService.error(msg);
+        }
       }
     } catch (e) {
       console.warn('handleServerErrors parse failed', e, error);
@@ -195,10 +164,11 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
 
   private toFormKey(serverKey: string): string {
     const map: any = {
-      nombreProveedor: 'nombreProveedor',
-      contacto: 'contacto',
-      cuit: 'cuit',
-      email: 'email',
+      Cuit: 'cuit',
+      Nombre: 'nombre',
+      Telefono: 'telefono',
+      Email: 'email',
+      Direccion: 'direccion',
     };
     return map[serverKey] ?? serverKey;
   }
@@ -211,28 +181,47 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
 
     const value = { ...this.form.value };
 
-    if (this.mode === 'edit' && this.proveedorId) {
-      value.idProveedor = this.proveedorId;
-      console.log('🔄 Including proveedor ID in update:', this.proveedorId);
-    }
+    // Normalizar: eliminar keys vacías opcionales para no enviar datos extra
+    if (!value.cuit) delete value.cuit;
+    if (!value.telefono) delete value.telefono;
+    if (!value.email) delete value.email;
+    if (!value.direccion) delete value.direccion;
 
-    console.log('📤 Final data being sent:', value);
+    // No enviar 'activo': el servidor asignará el valor por defecto (activo = true)
+    if ('activo' in value) delete value.activo;
+
+    // Si estamos en modo edición, asegurarnos de incluir el Id en el payload
+    if (this.mode === 'edit') {
+      // Buscar id en initialData por distintas claves posibles
+      const existingId =
+        this.initialData?.id ??
+        this.initialData?.idCliente ??
+        this.initialData?.clienteId ??
+        this.initialData?.Id ??
+        this.initialData?.IdCliente ??
+        null;
+      if (existingId != null) {
+        // Normalizar a la clave esperada por el backend
+        value.idCliente = Number(existingId);
+      }
+    }
 
     this.submit.emit({
       mode: this.mode,
       data: value,
       onSuccess: () => {
         this.alertService.success(
-          `El proveedor ha sido ${
+          `El cliente ha sido ${
             this.mode === 'create' ? 'creado' : 'actualizado'
           } exitosamente`,
-          `¡Proveedor ${this.mode === 'create' ? 'Creado' : 'Actualizado'}!`
+          `¡Cliente ${this.mode === 'create' ? 'Creado' : 'Actualizado'}!`
         );
         this.resetModal();
         this.visible = false;
         this.close.emit();
       },
       onError: (error: any) => {
+        this.handleServerErrors(error);
         const errorMessage =
           error?.error?.message ||
           error?.message ||
@@ -240,12 +229,9 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
         this.alertService.error(
           `Error al ${
             this.mode === 'create' ? 'crear' : 'actualizar'
-          } el proveedor: ${errorMessage}`,
-          `Error al ${
-            this.mode === 'create' ? 'Crear' : 'Actualizar'
-          } Proveedor`
+          } el cliente: ${errorMessage}`,
+          `Error al ${this.mode === 'create' ? 'Crear' : 'Actualizar'} Cliente`
         );
-        this.handleServerErrors(error);
       },
     });
   }
@@ -256,9 +242,39 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     this.visible = false;
   }
 
+  // Habilita/deshabilita todos los controles del formulario (excluye none)
+  private setControlsDisabled(disabled: boolean) {
+    if (!this.form) return;
+    Object.keys(this.form.controls).forEach((key) => {
+      const control = this.form.get(key);
+      if (!control) return;
+      if (disabled) {
+        control.disable({ emitEvent: false });
+      } else {
+        control.enable({ emitEvent: false });
+      }
+    });
+  }
+
+  // Toggle desde el header para pasar entre lectura/edición
+  toggleEditing(): void {
+    this.editingEnabled = !this.editingEnabled;
+    this.setControlsDisabled(!this.editingEnabled);
+    if (this.editingEnabled) {
+      setTimeout(() => {
+        const firstInput = this.elementRef.nativeElement.querySelector(
+          'input:not([disabled])'
+        );
+        if (firstInput) (firstInput as HTMLElement).focus();
+      }, 50);
+    }
+  }
+
   private resetModal(): void {
-    this.proveedorId = null;
     this.form?.reset();
     this.serverErrors = {};
+    // revertir modo edición al cerrar: por defecto create = editable, edit = lectura
+    this.editingEnabled = this.mode !== 'edit';
+    this.setControlsDisabled(!this.editingEnabled);
   }
 }

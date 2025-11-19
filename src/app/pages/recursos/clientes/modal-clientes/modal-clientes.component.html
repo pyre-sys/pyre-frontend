@@ -1,0 +1,170 @@
+<!-- Toma la plantilla del modal de usuario; conservar bindings y estructura -->
+<div class="modal-overlay" *ngIf="visible" role="dialog" aria-modal="true">
+  <div class="modal-wrapper" [class.readonly]="!editingEnabled">
+    <div class="modal-content" [class.open]="visible">
+      <div class="modal-header">
+        <div class="header-controls">
+          <div *ngIf="mode === 'edit'" class="mode-switch-wrapper">
+            <button
+              type="button"
+              class="mode-switch"
+              (click)="toggleEditing()"
+              [attr.aria-pressed]="editingEnabled"
+              [attr.aria-label]="
+                editingEnabled ? 'Desactivar edición' : 'Activar edición'
+              "
+            >
+              <span class="switch-track" [class.on]="editingEnabled">
+                <span class="switch-thumb" [class.on]="editingEnabled"></span>
+              </span>
+            </button>
+          </div>
+          <h3 class="modal-title">
+            {{
+              mode === "edit"
+                ? editingEnabled
+                  ? "Modo edición"
+                  : "Modo lectura"
+                : "Nuevo Cliente"
+            }}
+          </h3>
+        </div>
+        <button class="close-btn" (click)="onCancel()" aria-label="Cerrar">
+          <span class="pi pi-times" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        class="modal-form"
+        autocomplete="off"
+      >
+        <div class="compact-form-grid">
+          <div
+            class="field-group"
+            [class.has-error]="
+              form.get('cuit')?.invalid && form.get('cuit')?.touched
+            "
+          >
+            <label>CUIT <span class="optional-text">(opcional)</span></label>
+            <input formControlName="cuit" placeholder="20301234567" />
+            <div *ngIf="serverErrors['cuit']" class="error-text">
+              {{ serverErrors["cuit"] }}
+            </div>
+            <div
+              *ngIf="form.get('cuit')?.errors?.['maxlength']"
+              class="error-text"
+            >
+              Máximo 11 caracteres
+            </div>
+          </div>
+
+          <div
+            class="field-group"
+            [class.has-error]="
+              form.get('nombre')?.invalid && form.get('nombre')?.touched
+            "
+          >
+            <label class="required">Nombre</label>
+            <input formControlName="nombre" placeholder="Razón social" />
+            <div *ngIf="serverErrors['nombre']" class="error-text">
+              {{ serverErrors["nombre"] }}
+            </div>
+            <div
+              *ngIf="form.get('nombre')?.invalid && form.get('nombre')?.touched"
+              class="error-text"
+            >
+              <span *ngIf="form.get('nombre')?.errors?.['required']"
+                >El nombre es requerido</span
+              >
+              <span *ngIf="form.get('nombre')?.errors?.['maxlength']"
+                >Máximo 200 caracteres</span
+              >
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label
+              >Teléfono <span class="optional-text">(opcional)</span></label
+            >
+            <input formControlName="telefono" placeholder="011-1234-5678" />
+            <div
+              *ngIf="form.get('telefono')?.errors?.['maxlength']"
+              class="error-text"
+            >
+              Máximo 50 caracteres
+            </div>
+          </div>
+
+          <div
+            class="field-group full-width"
+            [class.has-error]="
+              form.get('email')?.invalid && form.get('email')?.touched
+            "
+          >
+            <label>Email <span class="optional-text">(opcional)</span></label>
+            <input
+              formControlName="email"
+              type="email"
+              placeholder="contacto@empresa.com"
+            />
+            <div
+              *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
+              class="error-text"
+            >
+              <span *ngIf="form.get('email')?.errors?.['email']"
+                >Formato de email inválido</span
+              >
+              <span *ngIf="form.get('email')?.errors?.['maxlength']"
+                >Máximo 150 caracteres</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="field-group full-width"
+            [class.has-error]="
+              form.get('direccion')?.invalid && form.get('direccion')?.touched
+            "
+          >
+            <label
+              >Dirección <span class="optional-text">(opcional)</span></label
+            >
+            <input formControlName="direccion" placeholder="Av. Ejemplo 123" />
+            <div
+              *ngIf="form.get('direccion')?.errors?.['maxlength']"
+              class="error-text"
+            >
+              Máximo 255 caracteres
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn-cancel" (click)="onCancel()">
+            Cancelar
+          </button>
+          <!-- En modo 'edit' el botón Actualizar permanece deshabilitado hasta activar edición -->
+          <span
+            [ngbTooltip]="
+              mode === 'edit' && !editingEnabled
+                ? 'Pasa a modo edición para poder actualizar'
+                : null
+            "
+            placement="top"
+            container="body"
+          >
+            <button
+              [disabled]="(!editingEnabled && mode === 'edit') || form.invalid"
+              type="submit"
+              class="btn-submit"
+            >
+              {{ mode === "create" ? "Crear" : "Actualizar" }}
+            </button>
+          </span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

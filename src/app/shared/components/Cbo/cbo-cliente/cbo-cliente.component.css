@@ -1,0 +1,7 @@
+@import "../cbo-movimientos.css";
+
+/* Usar exclusivamente estilos compartidos desde cbo-movimientos.css.
+   Mantener wrapper mínimo para posicionamiento si fuera necesario. */
+.cbo-cliente-wrapper {
+  position: relative;
+}
