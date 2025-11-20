@@ -1,12 +1,7 @@
 <div class="container-fluid page-shell page-header-container">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div></div>
-    <a
-      class="btn btn-primary header-action"
-      (click)="createNewProveedor()"
-      role="button"
-    >
-      <i class="bx bx-plus bx-tada me-1" aria-hidden="true"></i> Nuevo Proveedor
+  <div class="d-flex justify-content-end align-items-center mb-3">
+    <a class="header-action" (click)="createNewProveedor()" role="button">
+      <i class="bx bx-plus bx-tada" aria-hidden="true"></i> Agregar
     </a>
   </div>
 </div>
@@ -55,11 +50,13 @@
               class="reset-button-inline"
               (click)="onResetFilters()"
               [disabled]="!hasActiveFilters()"
-              [title]="
+              [ngbTooltip]="
                 hasActiveFilters()
                   ? 'Limpiar filtros'
                   : 'No hay filtros activos'
               "
+              placement="top"
+              container="body"
             >
               <i class="pi pi-filter-slash"></i>
             </button>
@@ -68,7 +65,9 @@
               type="button"
               class="btn btn-primary"
               (click)="onSearch()"
-              title="Buscar"
+              ngbTooltip="Buscar"
+              placement="top"
+              container="body"
             >
               <i class="pi pi-search"></i>
             </button>
