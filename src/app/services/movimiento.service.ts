@@ -3,9 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export interface MovimientoDto {
-
-}
+export interface MovimientoDto {}
 
 export interface CreateMovimientoDto {
   idHerramienta: number;
@@ -20,18 +18,16 @@ export interface CreateMovimientoDto {
   observaciones?: string | null;
 }
 
-export interface UpdateMovimientoDto {
-
-}
+export interface UpdateMovimientoDto {}
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MovimientoService {
   private apiUrl = environment.apiUrl;
   private baseUrl = `${this.apiUrl}/MovimientoHerramienta`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   // Registrar préstamo de herramienta --->OK
   registrarPrestamo(data: CreateMovimientoDto): Observable<any> {
@@ -39,8 +35,12 @@ export class MovimientoService {
   }
 
   // Registrar múltiples préstamos de herramientas
-  registrarMultiplesPrestamos(prestamos: CreateMovimientoDto[]): Observable<any[]> {
-    const requests = prestamos.map(prestamo => this.registrarPrestamo(prestamo));
+  registrarMultiplesPrestamos(
+    prestamos: CreateMovimientoDto[]
+  ): Observable<any[]> {
+    const requests = prestamos.map((prestamo) =>
+      this.registrarPrestamo(prestamo)
+    );
     return forkJoin(requests);
   }
 
@@ -55,7 +55,9 @@ export class MovimientoService {
   }
   // Obtener ultimo movimiento por herramienta ID
   getUltimoMovimientoByHerramienta(herramientaId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/herramienta/${herramientaId}/ultimo`);
+    return this.http.get<any>(
+      `${this.baseUrl}/herramienta/${herramientaId}/ultimo`
+    );
   }
 
   // Obtener movimientos paginados con filtros
@@ -78,5 +80,14 @@ export class MovimientoService {
   ): Observable<any> {
     const params = { page, pageSize, ...filters };
     return this.http.get<any>(`${this.baseUrl}`, { params });
+  }
+  // Obtener las últimas herramientas prestadas
+  getUltimasPrestadas(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/ultimas-prestadas`);
+  }
+
+  // Obtener ranking de herramientas más prestadas
+  getRankingMasPrestadas(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/ranking-mas-prestadas`);
   }
 }
