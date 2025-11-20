@@ -21,7 +21,8 @@ export interface CreateMovimientoDto {
 }
 
 export interface UpdateMovimientoDto {
-
+  IdMovimiento?: number;
+  FechaEstimadaDevolucion?: string;
 }
 
 @Injectable({
@@ -47,6 +48,17 @@ export class MovimientoService {
   // Registrar devolucion de herramienta
   registrarDevolucion(data: CreateMovimientoDto): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}`, data);
+  }
+
+  // Nuevo: actualizar movimiento (PUT /MovimientoHerramienta/{id})
+  updateMovimiento(id: number, data: UpdateMovimientoDto): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${id}`, data);
+  }
+
+  //  [HttpPut("UpdateVencimiento/{id}")]
+  // Nuevo: actualizar movimiento (PUT /MovimientoHerramienta/{id})
+  updateVencimiento(id: number, data: UpdateMovimientoDto): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/UpdateVencimiento/${id}`, data);
   }
 
   // Obtener movimientos por herramienta ID

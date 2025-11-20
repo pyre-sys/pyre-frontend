@@ -490,7 +490,57 @@
     color: #495057;
 }
 
-/* Responsive Design */
+/* Icon Circle Styling */
+.icon-circle {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-circle i {
+    font-size: 1.25rem;
+}
+
+/* Text Utilities */
+.text-xs {
+    font-size: 0.75rem;
+}
+
+/* Card Hover Effects */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Modal Processing State */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Alert Cards Responsive */
+@media (max-width: 768px) {
+    .icon-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .icon-circle i {
+        font-size: 1rem;
+    }
+
+    .h5 {
+        font-size: 1.1rem;
+    }
+}
+
 @media (max-width: 768px) {
     .alertas-container {
         padding: 1rem;
@@ -551,4 +601,24 @@
     .stat-number {
         font-size: 1.5rem;
     }
+}
+
+/* Ensure modal sits above backdrop */
+.modal-backdrop {
+  z-index: 1040 !important;
+  background-color: rgba(0, 0, 0, 0.5); /* Ensure proper backdrop visibility */
+}
+
+.modal {
+  z-index: 1055 !important;
+}
+
+/* Allow pointer events in modal content */
+.modal .modal-content {
+  pointer-events: auto;
+}
+
+/* Fix for potential overflow issues */
+body.modal-open {
+  overflow: hidden;
 }

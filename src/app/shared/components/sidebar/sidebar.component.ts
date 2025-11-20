@@ -242,7 +242,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       grupo: 'GM06',
       principal: true,
       orden: 6,
-      estado: false,
+      estado: true,
       requiredAccess: [
         Roles.SuperAdmin,
         Roles.Operario,
@@ -443,8 +443,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         mappedRoleId != null
           ? mappedRoleId
           : user.id_acceso != null
-          ? Number(user.id_acceso)
-          : 0;
+            ? Number(user.id_acceso)
+            : 0;
 
       const nombre = user.nombre || '';
       const apellido = user.apellido || '';

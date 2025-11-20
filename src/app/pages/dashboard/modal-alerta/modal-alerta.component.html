@@ -1,0 +1,165 @@
+<div
+  class="modal-overlay"
+  *ngIf="visible && alerta"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="modal-wrapper">
+    <div class="modal-content" [class.open]="visible">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="bi bi-pencil-square me-2"></i>
+          Editar Alerta
+        </h3>
+        <button class="close-btn" (click)="onCancel()" aria-label="Cerrar">
+          <span class="pi pi-times" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <form (ngSubmit)="onSaveEdit()" class="modal-form" autocomplete="off">
+        <div class="compact-form-grid">
+          <!-- Alert Type -->
+          <div class="field-group">
+            <label>
+              <i class="bi bi-tag me-1"></i>
+              Tipo de Alerta
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="alerta.nombreTipoAlerta"
+              readonly
+            />
+            <div class="form-text">
+              El tipo de alerta no puede ser modificado
+            </div>
+          </div>
+
+          <!-- Tool Name -->
+          <div class="field-group">
+            <label>
+              <i class="bi bi-tools me-1"></i>
+              Nombre de Herramienta
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="alerta.nombreHerramienta"
+              readonly
+            />
+            <div class="form-text">
+              El nombre de la herramienta no puede ser modificado
+            </div>
+          </div>
+
+          <!-- Generation Date -->
+          <div class="field-group">
+            <label>
+              <i class="bi bi-calendar3 me-1"></i>
+              Fecha de Generación
+            </label>
+            <input
+              type="datetime-local"
+              class="form-control"
+              [value]="formattedFechaGeneracion"
+              readonly
+            />
+            <div class="form-text">
+              La fecha de generación no puede ser modificada
+            </div>
+          </div>
+
+          <!-- New Estimated Return Date (only for loan alerts) -->
+          <div class="field-group" *ngIf="alerta.idTipoAlerta === 2">
+            <label class="required">
+              <i class="bi bi-calendar-check me-1"></i>
+              Nueva Fecha Estimada de Devolución
+            </label>
+            <input
+              type="datetime-local"
+              class="form-control"
+              [(ngModel)]="nuevaFechaEstimada"
+              name="nuevaFechaEstimada"
+              required
+            />
+            <div class="form-text">
+              Actualizar la fecha estimada de devolución del préstamo
+            </div>
+          </div>
+
+          <!-- Responsible Person -->
+          <div class="field-group">
+            <label>
+              <i class="bi bi-person me-1"></i>
+              Responsable
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="alerta.responsableNombre || 'No asignado'"
+              readonly
+            />
+            <div class="form-text">El responsable no puede ser modificado</div>
+          </div>
+
+          <!-- Comentario -->
+          <div class="field-group">
+            <label>
+              <i class="bi bi-chat-text me-1"></i>
+              Comentario
+            </label>
+            <textarea
+              class="form-control"
+              rows="3"
+              [(ngModel)]="nuevaComentario"
+              name="nuevaComentario"
+              placeholder="Agrega un comentario sobre la resolución de la alerta (opcional)"
+            ></textarea>
+            <div class="form-text">
+              Este comentario se guardará en la alerta
+            </div>
+          </div>
+
+          <!-- Alert Status Preview -->
+          <div class="field-group">
+            <label>
+              <i class="bi bi-info-circle me-1"></i>
+              Acción a Realizar
+            </label>
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Al guardar los cambios, esta alerta se marcará como
+              <strong>inactiva</strong>
+              <span *ngIf="alerta.idTipoAlerta === 2">
+                y se actualizará la fecha estimada de devolución del préstamo.
+              </span>
+              <span *ngIf="alerta.idTipoAlerta === 1">
+                y se resolverá la alerta de mantenimiento.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn-cancel" (click)="onCancel()">
+            <i class="bi bi-x-circle me-1"></i>
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn-submit"
+            [disabled]="!isFormValid || isProcessing"
+          >
+            <span
+              *ngIf="isProcessing"
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+            ></span>
+            <i class="bi bi-check-circle me-1" *ngIf="!isProcessing"></i>
+            {{ isProcessing ? "Guardando..." : "Guardar Cambios" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

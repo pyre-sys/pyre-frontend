@@ -1,20 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AlertaService } from '../../../services/alerta.service';
 import { PageTitleService } from '../../../services/page-title.service';
+import { ModalAlertaComponent } from '../modal-alerta/modal-alerta.component';
 
 interface Alerta {
   idAlerta: number;
-  idHerramienta: number;
+  idMovimiento: number;
   nombreHerramienta: string;
   idTipoAlerta: number;
   nombreTipoAlerta: string;
   fechaGeneracion: string;
-  leida: boolean;
+  comentario: string;
+  activo: boolean;
   diasVencido?: number;
-  codigoHerramienta?: string;
+  responsableNombre?: string;
+  tipoMovimiento?: string;
 }
 
 type TipoFiltro = 'todas' | 'pendientes' | 'vencidas' | 'noLeidas';
@@ -22,7 +26,7 @@ type TipoFiltro = 'todas' | 'pendientes' | 'vencidas' | 'noLeidas';
 @Component({
   selector: 'app-alertas',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, ModalAlertaComponent],
   templateUrl: './alertas.component.html',
   styleUrls: ['./alertas.component.css', '../../../../styles/visor-style.css'],
   animations: [
@@ -47,6 +51,10 @@ export class AlertasComponent implements OnInit {
   tipoFiltroActual: TipoFiltro = 'todas';
   searchTerm = '';
 
+  // Modal properties
+  selectedAlerta: Alerta | null = null;
+  showEditModal = false;
+
   // Estadísticas
   stats = {
     total: 0,
@@ -54,14 +62,6 @@ export class AlertasComponent implements OnInit {
     vencidas: 0,
     noLeidas: 0
   };
-
-  // Opciones de filtro
-  filtroOptions = [
-    { value: 'todas', label: 'Todas las Alertas', icon: 'bi-list-ul', color: 'primary' },
-    { value: 'pendientes', label: 'Próximas a Vencer', icon: 'bi-exclamation-triangle', color: 'warning' },
-    { value: 'vencidas', label: 'Vencidas', icon: 'bi-exclamation-octagon', color: 'danger' },
-    { value: 'noLeidas', label: 'No Leídas', icon: 'bi-envelope', color: 'info' }
-  ];
 
   Math = Math; // Expose Math as a public property
 
@@ -94,7 +94,6 @@ export class AlertasComponent implements OnInit {
         if (response.success && response.data) {
           this.alertas = this.processAlertas(response.data);
           this.calculateStats();
-          this.applyFilters();
         } else {
           this.alertas = [];
           this.alertasFiltradas = [];
@@ -112,8 +111,7 @@ export class AlertasComponent implements OnInit {
   private processAlertas(alertas: any[]): Alerta[] {
     return alertas.map(alerta => ({
       ...alerta,
-      diasVencido: this.calculateDaysOverdue(alerta.fechaGeneracion, alerta.idTipoAlerta),
-      codigoHerramienta: this.extractCodigoFromName(alerta.nombreHerramienta)
+      diasVencido: this.calculateDaysOverdue(alerta.fechaGeneracion, alerta.idTipoAlerta)
     }));
   }
 
@@ -137,16 +135,85 @@ export class AlertasComponent implements OnInit {
     return match ? match[0] : '';
   }
 
+  // Get alert count by type name
+  getAlertCountByType(tipoNombre: string): number {
+    return this.alertas.filter(alerta => {
+      if (tipoNombre === "Prestamo Vencido") {
+        return alerta.nombreTipoAlerta === "Prestamo Vencido";
+      }
+      return alerta.nombreTipoAlerta === tipoNombre;
+    }).length;
+  }
+
+  // Open edit modal
+  openEditModal(alerta: Alerta): void {
+    this.selectedAlerta = { ...alerta };
+    this.showEditModal = true;
+  }
+
+  // Close edit modal
+  onCloseEditModal(): void {
+    this.selectedAlerta = null;
+    this.showEditModal = false;
+  }
+
+  // Handle alert updated
+  onAlertaUpdated(): void {
+    this.loadAlertas(); // Reload alerts after update
+    this.onCloseEditModal();
+  }
+
+  // Get alert type name by ID
+  getAlertTypeName(idTipoAlerta: number): string {
+    switch (idTipoAlerta) {
+      case 1:
+        return 'Mantenimiento';
+      case 2:
+        return 'Préstamo Vencido';
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  // Apply current filters
+  private applyFilters(): void {
+    let filtered = [...this.alertas];
+
+    // Apply search filter
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(alerta =>
+        alerta.nombreHerramienta.toLowerCase().includes(term) ||
+        alerta.nombreTipoAlerta.toLowerCase().includes(term) ||
+        (alerta.responsableNombre && alerta.responsableNombre.toLowerCase().includes(term))
+      );
+    }
+
+    // Apply type filter
+    switch (this.tipoFiltroActual) {
+      case 'pendientes':
+        filtered = filtered.filter(a => a.idTipoAlerta === 1);
+        break;
+      case 'vencidas':
+        filtered = filtered.filter(a => a.idTipoAlerta === 2);
+        break;
+      // 'todas' shows all alerts
+    }
+
+    this.alertasFiltradas = filtered;
+  }
+
   private calculateStats(): void {
     this.stats.total = this.alertas.length;
     this.stats.pendientes = this.alertas.filter(a => a.idTipoAlerta === 1).length;
     this.stats.vencidas = this.alertas.filter(a => a.idTipoAlerta === 2).length;
-    this.stats.noLeidas = this.alertas.filter(a => !a.leida).length;
+
+    // Apply filters after calculating stats
+    this.applyFilters();
   }
 
   onFilterChange(filtro: any): void {
     this.tipoFiltroActual = filtro;
-    this.applyFilters();
 
     // Update URL without navigation
     const queryParams = filtro !== 'todas' ? { tipo: filtro } : {};
@@ -157,96 +224,7 @@ export class AlertasComponent implements OnInit {
     });
   }
 
-  onSearchChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.searchTerm = target.value.toLowerCase();
-    this.applyFilters();
-  }
 
-  private applyFilters(): void {
-    let filtered = [...this.alertas];
-
-    // Apply type filter
-    switch (this.tipoFiltroActual) {
-      case 'pendientes':
-        filtered = filtered.filter(a => a.idTipoAlerta === 1);
-        break;
-      case 'vencidas':
-        filtered = filtered.filter(a => a.idTipoAlerta === 2);
-        break;
-      case 'noLeidas':
-        filtered = filtered.filter(a => !a.leida);
-        break;
-    }
-
-    // Apply search filter
-    if (this.searchTerm) {
-      filtered = filtered.filter(a =>
-        a.nombreHerramienta.toLowerCase().includes(this.searchTerm) ||
-        a.nombreTipoAlerta.toLowerCase().includes(this.searchTerm)
-      );
-    }
-
-    // Sort by priority and date
-    filtered.sort((a, b) => {
-      // First by read status (unread first)
-      if (a.leida !== b.leida) {
-        return a.leida ? 1 : -1;
-      }
-      // Then by alert type (vencidas first)
-      if (a.idTipoAlerta !== b.idTipoAlerta) {
-        return b.idTipoAlerta - a.idTipoAlerta;
-      }
-      // Finally by generation date (newest first)
-      return new Date(b.fechaGeneracion).getTime() - new Date(a.fechaGeneracion).getTime();
-    });
-
-    this.alertasFiltradas = filtered;
-  }
-
-  toggleAlertaLeida(alerta: Alerta): void {
-    const newStatus = !alerta.leida;
-
-    this.alertaService.marcarAlertaLeida(alerta.idAlerta, newStatus).subscribe({
-      next: (response) => {
-        if (response.success) {
-          alerta.leida = newStatus;
-          this.calculateStats();
-
-          // Show success message
-          const action = newStatus ? 'marcada como leída' : 'marcada como no leída';
-          this.showSuccessToast(`Alerta ${action} correctamente`);
-        }
-      },
-      error: (error) => {
-        console.error('Error al actualizar alerta:', error);
-        this.showErrorToast('Error al actualizar el estado de la alerta');
-      }
-    });
-  }
-
-  marcarTodasLeidas(): void {
-    const alertasNoLeidas = this.alertasFiltradas.filter(a => !a.leida);
-
-    if (alertasNoLeidas.length === 0) {
-      this.showInfoToast('No hay alertas sin leer en la vista actual');
-      return;
-    }
-
-    this.alertaService.marcarMultiplesAlertasLeidas(alertasNoLeidas.map(a => a.idAlerta)).subscribe({
-      next: (response) => {
-        if (response.success) {
-          alertasNoLeidas.forEach(alerta => alerta.leida = true);
-          this.calculateStats();
-          this.showSuccessToast(`${alertasNoLeidas.length} alertas marcadas como leídas`);
-        }
-      },
-      error: (error) => {
-        console.error('Error al marcar alertas como leídas:', error);
-        this.showErrorToast('Error al marcar las alertas como leídas');
-      }
-    });
-  }
 
   getAlertIcon(tipoAlerta: number): string {
     return tipoAlerta === 1 ? 'bi-exclamation-triangle' : 'bi-exclamation-octagon';

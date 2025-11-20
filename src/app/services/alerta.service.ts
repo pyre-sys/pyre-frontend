@@ -4,6 +4,30 @@ import { environment } from '../../environments/environment';
 
 declare const Swal: any;
 
+export interface UpdateAlertaDto {
+  IdAlerta: number;
+  idMovimiento?: number;
+  nombreHerramienta?: string;
+  idTipoAlerta?: number;
+  nombreTipoAlerta?: string;
+  fechaGeneracion?: string;
+  comentario?: string | null;
+  activo?: boolean;
+  diasVencido?: number;
+  responsableNombre?: string | null;
+  tipoMovimiento?: string | null;
+  idModifica?: number | null;
+}
+
+export interface UpdateAlertaMovimientoDto {
+  IdAlerta: number;
+  IdMovimiento?: number;
+  FechaEstimadaDevolucion?: string;
+  Comentario?: string | null;
+  Activo?: boolean;
+  IdModifica?: number | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -99,13 +123,13 @@ export class AlertaService {
     return this.http.get<any>(`${this.apiUrl}/Alerta`);
   }
 
-  // PUT /api/Alerta/{id}/marcar-leida - Mark alert as read/unread
-  marcarAlertaLeida(idAlerta: number, leida: boolean) {
-    return this.http.put<any>(`${this.apiUrl}/Alerta/${idAlerta}/marcar-leida`, { leida });
+  // PUT /api/Alerta/{id} -> actualizar alerta (requiere rol SuperAdmin en el backend)
+  updateAlerta(id: number, updateDto: UpdateAlertaDto) {
+    return this.http.put<any>(`${this.apiUrl}/Alerta/${id}`, updateDto);
   }
 
-  // PUT /api/Alerta/marcar-multiples-leidas - Mark multiple alerts as read
-  marcarMultiplesAlertasLeidas(idsAlertas: number[]) {
-    return this.http.put<any>(`${this.apiUrl}/Alerta/marcar-multiples-leidas`, { idsAlertas });
+  // PATCH /api/Alerta/{id}/update-with-movement -> actualizar alerta con movimiento
+  updateAlertaAndMovimiento(id: number, updateDto: UpdateAlertaMovimientoDto) {
+    return this.http.patch<any>(`${this.apiUrl}/Alerta/${id}/update-with-movement`, updateDto);
   }
 }
