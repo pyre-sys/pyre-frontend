@@ -23,7 +23,7 @@ export interface UpdateAlertaMovimientoDto {
   IdAlerta: number;
   IdMovimiento?: number;
   FechaEstimadaDevolucion?: string;
-  Comentario?: string | null;
+  Comentario?: string;
   Activo?: boolean;
   IdModifica?: number | null;
 }

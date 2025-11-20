@@ -30,9 +30,6 @@
               [value]="alerta.nombreTipoAlerta"
               readonly
             />
-            <div class="form-text">
-              El tipo de alerta no puede ser modificado
-            </div>
           </div>
 
           <!-- Tool Name -->
@@ -47,9 +44,6 @@
               [value]="alerta.nombreHerramienta"
               readonly
             />
-            <div class="form-text">
-              El nombre de la herramienta no puede ser modificado
-            </div>
           </div>
 
           <!-- Generation Date -->
@@ -64,9 +58,6 @@
               [value]="formattedFechaGeneracion"
               readonly
             />
-            <div class="form-text">
-              La fecha de generación no puede ser modificada
-            </div>
           </div>
 
           <!-- New Estimated Return Date (only for loan alerts) -->
@@ -76,7 +67,7 @@
               Nueva Fecha Estimada de Devolución
             </label>
             <input
-              type="datetime-local"
+              type="date"
               class="form-control"
               [(ngModel)]="nuevaFechaEstimada"
               name="nuevaFechaEstimada"
@@ -99,7 +90,6 @@
               [value]="alerta.responsableNombre || 'No asignado'"
               readonly
             />
-            <div class="form-text">El responsable no puede ser modificado</div>
           </div>
 
           <!-- Comentario -->
@@ -113,7 +103,8 @@
               rows="3"
               [(ngModel)]="nuevaComentario"
               name="nuevaComentario"
-              placeholder="Agrega un comentario sobre la resolución de la alerta (opcional)"
+              placeholder="Agrega un comentario sobre la resolución de la alerta (obligatorio)"
+              required
             ></textarea>
             <div class="form-text">
               Este comentario se guardará en la alerta
@@ -148,7 +139,7 @@
           <button
             type="submit"
             class="btn-submit"
-            [disabled]="!isFormValid || isProcessing"
+            [disabled]="!isFormValid || !nuevaComentario.trim() || isProcessing"
           >
             <span
               *ngIf="isProcessing"

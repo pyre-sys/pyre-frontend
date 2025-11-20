@@ -76,7 +76,7 @@ export class ModalAlertaComponent implements OnInit, OnChanges {
     const updateDto: UpdateAlertaMovimientoDto = {
       IdAlerta: alertId,
       Activo: false,
-      Comentario: this.nuevaComentario || null,
+      Comentario: this.nuevaComentario,
       IdModifica: currentUser?.id || null
     };
 
@@ -127,11 +127,11 @@ export class ModalAlertaComponent implements OnInit, OnChanges {
   }
 
   get isFormValid(): boolean {
-    // For loan alerts, require new estimated date
+    // For loan alerts, require new estimated date and a non-empty comment
     if (this.alerta?.idTipoAlerta === 2) {
-      return !!this.nuevaFechaEstimada;
+      return !!this.nuevaFechaEstimada && !!this.nuevaComentario.trim();
     }
-    // For maintenance alerts, no additional validation needed
-    return true;
+    // For maintenance alerts, require a non-empty comment
+    return !!this.nuevaComentario.trim();
   }
 }

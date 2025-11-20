@@ -62,10 +62,10 @@
               </div>
               <div class="flex-grow-1 ms-3">
                 <div class="text-xs fw-bold text-danger text-uppercase mb-1">
-                  Préstamos Vencidos
+                  Préstamos
                 </div>
                 <div class="h5 mb-0 fw-bold">
-                  {{ getAlertCountByType("Prestamo Vencido") }}
+                  {{ getAlertCountByType("Préstamo") }}
                 </div>
               </div>
             </div>
@@ -93,14 +93,6 @@
       <i class="bi bi-bell-slash"></i>
     </div>
     <h3>No se encontraron alertas</h3>
-    <p>No hay alertas que coincidan con los filtros seleccionados.</p>
-    <button
-      type="button"
-      class="btn btn-primary"
-      (click)="onFilterChange('todas')"
-    >
-      Ver todas las alertas
-    </button>
   </div>
 
   <!-- Alerts Grid -->
@@ -146,7 +138,7 @@
       <!-- Card Body -->
       <div class="card-body">
         <div class="alert-details">
-          <div class="detail-row">
+          <!-- <div class="detail-row">
             <span class="detail-label">
               <i class="bi bi-tools"></i>
               Herramienta:
@@ -157,7 +149,7 @@
               >
               {{ alerta.nombreHerramienta }}
             </span>
-          </div>
+          </div> -->
 
           <div class="detail-row">
             <span class="detail-label">
@@ -202,7 +194,7 @@
         </div>
 
         <!-- Priority Indicator for Overdue -->
-        <div *ngIf="alerta.idTipoAlerta === 2" class="priority-indicator">
+        <!-- <div *ngIf="alerta.idTipoAlerta === 2" class="priority-indicator">
           <div
             class="priority-bar"
             [style.width.%]="Math.min(100, (alerta.diasVencido || 0) * 10)"
@@ -211,7 +203,7 @@
             <i class="bi bi-exclamation-triangle-fill"></i>
             Requiere atención inmediata
           </span>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>

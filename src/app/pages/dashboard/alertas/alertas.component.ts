@@ -135,13 +135,28 @@ export class AlertasComponent implements OnInit {
     return match ? match[0] : '';
   }
 
-  // Get alert count by type name
-  getAlertCountByType(tipoNombre: string): number {
-    return this.alertas.filter(alerta => {
-      if (tipoNombre === "Prestamo Vencido") {
-        return alerta.nombreTipoAlerta === "Prestamo Vencido";
+  // Get alert count by type name (use tipoMovimiento primero, fallback to nombreTipoAlerta)
+  getAlertCountByType(tipoMovimiento: string): number {
+    const normalize = (s: string) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const target = normalize(tipoMovimiento);
+
+    return this.alertas.filter(a => {
+      const tipoMov = normalize(a.tipoMovimiento || '');
+      const nombreTipo = normalize(a.nombreTipoAlerta || '');
+
+      // Prefer matching tipoMovimiento
+      if (tipoMov) {
+        if (tipoMov === target) return true;
+        if (tipoMov.includes(target)) return true;
       }
-      return alerta.nombreTipoAlerta === tipoNombre;
+
+      // Fallback to nombreTipoAlerta
+      if (nombreTipo) {
+        if (nombreTipo === target) return true;
+        if (nombreTipo.includes(target)) return true;
+      }
+
+      return false;
     }).length;
   }
 
