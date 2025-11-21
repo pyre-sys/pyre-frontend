@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { Subject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 declare const Swal: any;
 
@@ -29,13 +31,25 @@ export interface UpdateAlertaMovimientoDto {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AlertaService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  // Subject para notificar cambios en las alertas
+  private alertasActualizadas = new Subject<void>();
 
+  constructor(private http: HttpClient) {}
+
+  // Método para obtener el observable de cambios
+  getAlertasActualizadas$() {
+    return this.alertasActualizadas.asObservable();
+  }
+
+  // Método para notificar que las alertas han cambiado
+  notificarCambioEnAlertas() {
+    this.alertasActualizadas.next();
+  }
 
   // Modal de confirmación
   confirm(message: string, title: string = '¿Estás seguro?'): Promise<any> {
@@ -81,7 +95,12 @@ export class AlertaService {
       confirmButtonText: 'Aceptar',
       focusConfirm: false,
       didOpen: () => {
-        try { setTimeout(() => { const active = document.activeElement as HTMLElement | null; if (active && typeof active.blur === 'function') active.blur(); }, 0); } catch (e) { }
+        try {
+          setTimeout(() => {
+            const active = document.activeElement as HTMLElement | null;
+            if (active && typeof active.blur === 'function') active.blur();
+          }, 0);
+        } catch (e) {}
       },
       customClass: {
         popup: 'swal2-popup swal2-themed',
@@ -99,7 +118,14 @@ export class AlertaService {
       icon: 'error',
       confirmButtonText: 'Aceptar',
       focusConfirm: false,
-      didOpen: () => { try { setTimeout(() => { const active = document.activeElement as HTMLElement | null; if (active && typeof active.blur === 'function') active.blur(); }, 0); } catch (e) { } },
+      didOpen: () => {
+        try {
+          setTimeout(() => {
+            const active = document.activeElement as HTMLElement | null;
+            if (active && typeof active.blur === 'function') active.blur();
+          }, 0);
+        } catch (e) {}
+      },
       customClass: {
         popup: 'swal2-popup swal2-themed',
         title: 'swal2-title',
@@ -125,11 +151,17 @@ export class AlertaService {
 
   // PUT /api/Alerta/{id} -> actualizar alerta (requiere rol SuperAdmin en el backend)
   updateAlerta(id: number, updateDto: UpdateAlertaDto) {
-    return this.http.put<any>(`${this.apiUrl}/Alerta/${id}`, updateDto);
+    return this.http.put<any>(`${this.apiUrl}/Alerta/${id}`, updateDto).pipe(
+      tap(() => this.notificarCambioEnAlertas()) // Notificar cambios después de actualizar
+    );
   }
 
   // PATCH /api/Alerta/{id}/update-with-movement -> actualizar alerta con movimiento
   updateAlertaAndMovimiento(id: number, updateDto: UpdateAlertaMovimientoDto) {
-    return this.http.patch<any>(`${this.apiUrl}/Alerta/${id}/update-with-movement`, updateDto);
+    return this.http
+      .patch<any>(`${this.apiUrl}/Alerta/${id}/update-with-movement`, updateDto)
+      .pipe(
+        tap(() => this.notificarCambioEnAlertas()) // Notificar cambios después de actualizar
+      );
   }
 }

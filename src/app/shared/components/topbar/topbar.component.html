@@ -137,11 +137,10 @@
         <div
           class="notifications-btn"
           [class.empty]="getTotalNotifications() === 0"
-          [class.has-normal]="hasNormalAlerts()"
-          [class.has-warning]="hasWarningAlerts()"
           [class.has-critical]="hasCriticalAlerts()"
           (click)="navigateToAlertas()"
-          [title]="getNotificationsTooltip()"
+          [ngbTooltip]="getTooltipMessage()"
+          container="body"
         >
           <!-- Icono principal -->
           <div class="notifications-icon">
@@ -156,16 +155,14 @@
                 getTotalNotifications() === 0
                   ? "Sin alertas"
                   : getTotalNotifications() +
-                    " alerta" +
-                    (getTotalNotifications() > 1 ? "s" : "")
+                    " préstamo" +
+                    (getTotalNotifications() > 1 ? "s vencidos" : " vencido")
               }}
             </div>
             <div class="notifications-subtitle">
               {{ getNotificationsSubtitle() }}
             </div>
           </div>
-
-          <!-- REMOVIDO: Badge contador redundante -->
         </div>
       </div>
     </div>

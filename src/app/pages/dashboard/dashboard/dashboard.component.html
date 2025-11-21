@@ -1,32 +1,61 @@
 <div class="pyre-table-shell">
   <div class="dashboard-header">
     <p class="dashboard-title">Panel de gestión de herramientas</p>
-  </div>
 
-  <!-- Fila de alertas principales -->
-  <div class="stats-row stats-row-alertas">
-    <div class="stat-card stat-card-alerta" (click)="navigateAlerta()">
-      <div class="stat-icon alert big">
-        <i class="bi bi-exclamation-triangle"></i>
-      </div>
-      <div class="stat-info">
-        <h3>
-          {{ alertasPendientes }}
-          <span class="badge badge-warning">Pendientes</span>
-        </h3>
-        <p>Alertas próximas a vencer</p>
-      </div>
-    </div>
-    <div class="stat-card stat-card-alerta" (click)="navigateAlerta()">
-      <div class="stat-icon danger big">
-        <i class="bi bi-exclamation-octagon"></i>
-      </div>
-      <div class="stat-info">
-        <h3>
+    <!-- Indicador de préstamos vencidos (esquina superior izquierda) -->
+    <div
+      class="overdue-loans-indicator"
+      (click)="navigateAlerta()"
+      [ngbTooltip]="
+        isLoadingAlertas
+          ? 'Cargando...'
+          : alertasVencidas > 0
+          ? 'Herramientas prestadas sin devolver'
+          : 'No hay préstamos vencidos'
+      "
+      container="body"
+      [class.no-alerts]="!isLoadingAlertas && alertasVencidas === 0"
+    >
+      <div
+        class="indicator-badge"
+        [class.no-alerts]="!isLoadingAlertas && alertasVencidas === 0"
+      >
+        <i
+          class="bi"
+          [ngClass]="
+            isLoadingAlertas
+              ? 'bi-hourglass-split'
+              : alertasVencidas > 0
+              ? 'bi-exclamation-circle-fill'
+              : 'bi-check-circle-fill'
+          "
+        ></i>
+        <span
+          *ngIf="!isLoadingAlertas && alertasVencidas > 0"
+          class="indicator-count"
+        >
           {{ alertasVencidas }}
-          <span class="badge badge-danger">Vencidas</span>
-        </h3>
-        <p>Alertas vencidas sin resolver</p>
+        </span>
+      </div>
+      <div class="indicator-text">
+        <div class="indicator-label">
+          {{
+            isLoadingAlertas
+              ? "Cargando..."
+              : alertasVencidas > 0
+              ? "Préstamos vencidos"
+              : "Sin préstamos vencidos"
+          }}
+        </div>
+        <div class="indicator-description">
+          {{
+            isLoadingAlertas
+              ? "Por favor espera"
+              : alertasVencidas > 0
+              ? "Click para resolver"
+              : "Todo está en orden"
+          }}
+        </div>
       </div>
     </div>
   </div>

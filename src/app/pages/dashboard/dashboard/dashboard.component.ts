@@ -5,6 +5,7 @@ import { AlertaService } from '../../../services/alerta.service';
 import { MovimientoService } from '../../../services/movimiento.service';
 import { PageTitleService } from '../../../services/page-title.service';
 import { Router, RouterModule } from '@angular/router';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 export interface ActividadReciente {
   tipoMovimiento: string;
@@ -24,7 +25,7 @@ export interface RankingHerramienta {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NgbTooltipModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
@@ -33,8 +34,8 @@ export class DashboardComponent implements OnInit {
   herramientasDisponibles = 0;
   herramientasEnPrestamo = 0;
   herramientasEnReparacion = 0;
-  alertasPendientes = 0;
   alertasVencidas = 0;
+  isLoadingAlertas = true; // Nuevo indicador de carga
   actividadReciente: ActividadReciente[] = [];
   rankingHerramientas: RankingHerramienta[] = [];
 
@@ -74,12 +75,16 @@ export class DashboardComponent implements OnInit {
       .subscribe((resp: any) => {
         this.herramientasEnReparacion = resp?.data ?? 0;
       });
-    this.alertaService.getCountAlertasPendientes().subscribe((resp: any) => {
-      this.alertasPendientes = resp?.data ?? 0;
-    });
-    this.alertaService.getCountAlertasVencidas().subscribe((resp: any) => {
-      this.alertasVencidas = resp?.data ?? 0;
-    });
+    this.alertaService.getCountAlertasVencidas().subscribe(
+      (resp: any) => {
+        this.alertasVencidas = resp?.data ?? 0;
+        this.isLoadingAlertas = false; // Finalizar la carga de alertas
+      },
+      (error) => {
+        console.error('Error al cargar alertas vencidas:', error);
+        this.isLoadingAlertas = false; // Finalizar la carga incluso en caso de error
+      }
+    );
   }
 
   private cargarActividadReciente(): void {

@@ -90,13 +90,11 @@ export class TopbarComponent implements OnInit, OnDestroy {
   };
 
   // Propiedades de alertas
-  alertasPendientes = 0;
   alertasVencidas = 0;
   isLoadingAlertas = false;
 
   // Datos de notificaciones (ejemplo - reemplazar con tu servicio real)
   private notifications = {
-    pending: 3, // Herramientas próximas a vencer
     overdue: 2, // Herramientas vencidas
     maintenance: 1, // Herramientas que necesitan mantenimiento
     low_stock: 0, // Stock bajo (si aplicara)
@@ -140,6 +138,13 @@ export class TopbarComponent implements OnInit, OnDestroy {
         this.isSidebarVisible = visible;
       }
     );
+
+    // Suscribirse a los cambios en las alertas
+    this.alertsSubscription = this.alertaService
+      .getAlertasActualizadas$()
+      .subscribe(() => {
+        this.loadAlertas(); // Recargar alertas automáticamente
+      });
   }
 
   ngOnDestroy() {
@@ -186,51 +191,24 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   // Getters para alertas
   get totalAlertas(): number {
-    return this.alertasPendientes + this.alertasVencidas;
+    return this.alertasVencidas;
   }
 
   get alertsTooltip(): string {
     if (this.totalAlertas === 0) {
-      return 'No hay alertas pendientes';
+      return 'No hay alertas';
     }
 
-    const parts: string[] = [];
-
-    if (this.alertasVencidas > 0) {
-      parts.push(
-        `${this.alertasVencidas} vencida${this.alertasVencidas > 1 ? 's' : ''}`
-      );
-    }
-
-    if (this.alertasPendientes > 0) {
-      parts.push(
-        `${this.alertasPendientes} pendiente${
-          this.alertasPendientes > 1 ? 's' : ''
-        }`
-      );
-    }
-
-    return `${this.totalAlertas} alerta${
-      this.totalAlertas > 1 ? 's' : ''
-    }: ${parts.join(', ')}`;
+    return `${this.totalAlertas} alerta${this.totalAlertas > 1 ? 's' : ''}`;
   }
 
   // Métodos para manejo de notificaciones
   getTotalNotifications(): number {
-    return (
-      this.notifications.pending +
-      this.notifications.overdue +
-      this.notifications.maintenance +
-      this.notifications.low_stock
-    );
+    return this.notifications.overdue;
   }
 
   hasNormalAlerts(): boolean {
-    return (
-      this.notifications.pending > 0 &&
-      !this.hasWarningAlerts() &&
-      !this.hasCriticalAlerts()
-    );
+    return false; // No hay normales, solo vencidas
   }
 
   hasWarningAlerts(): boolean {
@@ -248,27 +226,12 @@ export class TopbarComponent implements OnInit, OnDestroy {
       return 'Todo en orden';
     }
 
-    if (this.hasCriticalAlerts()) {
-      return `${this.notifications.overdue} vencida${
-        this.notifications.overdue > 1 ? 's' : ''
-      }`;
-    }
-
-    if (this.hasWarningAlerts()) {
-      const maintenance = this.notifications.maintenance;
-      const lowStock = this.notifications.low_stock;
-      if (maintenance > 0) return `${maintenance} mantenimiento`;
-      if (lowStock > 0) return `Stock bajo`;
-    }
-
-    return `${this.notifications.pending} pendiente${
-      this.notifications.pending > 1 ? 's' : ''
-    }`;
+    return ''; // Sin subtítulo cuando hay alertas
   }
 
   getNotificationsTooltip(): string {
     if (this.getTotalNotifications() === 0) {
-      return 'No hay alertas pendientes';
+      return 'No hay alertas';
     }
 
     let tooltip = 'Alertas: ';
@@ -276,16 +239,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     if (this.notifications.overdue > 0) {
       parts.push(
-        `${this.notifications.overdue} vencida${
+        `${this.notifications.overdue} alerta${
           this.notifications.overdue > 1 ? 's' : ''
         }`
-      );
-    }
-    if (this.notifications.pending > 0) {
-      parts.push(
-        `${this.notifications.pending} próxima${
-          this.notifications.pending > 1 ? 's' : ''
-        } a vencer`
       );
     }
     if (this.notifications.maintenance > 0) {
@@ -296,6 +252,13 @@ export class TopbarComponent implements OnInit, OnDestroy {
     }
 
     return tooltip + parts.join(', ');
+  }
+
+  getTooltipMessage(): string {
+    if (this.getTotalNotifications() === 0) {
+      return 'No hay préstamos vencidos. Todo está en orden.';
+    }
+    return 'Haz clic para ver los préstamos vencidos que requieren atención.';
   }
 
   togglePerfilModal(): void {
@@ -330,28 +293,17 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
     this.isLoadingAlertas = true;
 
-    // Cargar alertas pendientes
-    this.alertaService.getCountAlertasPendientes().subscribe({
-      next: (resp) => {
-        this.alertasPendientes = resp?.data ?? 0;
-        this.checkLoadingComplete();
-      },
-      error: (error) => {
-        console.error('Error loading pending alerts:', error);
-        this.alertasPendientes = 0;
-        this.checkLoadingComplete();
-      },
-    });
-
     // Cargar alertas vencidas
     this.alertaService.getCountAlertasVencidas().subscribe({
       next: (resp) => {
         this.alertasVencidas = resp?.data ?? 0;
+        this.notifications.overdue = this.alertasVencidas; // Sincronizar con notifications
         this.checkLoadingComplete();
       },
       error: (error) => {
         console.error('Error loading overdue alerts:', error);
         this.alertasVencidas = 0;
+        this.notifications.overdue = 0; // Sincronizar en error
         this.checkLoadingComplete();
       },
     });
