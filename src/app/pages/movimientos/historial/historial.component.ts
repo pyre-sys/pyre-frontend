@@ -7,11 +7,10 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
 import { DatePipe } from '@angular/common';
 import { MovimientoService } from '../../../services/movimiento.service';
 import { AlertaService } from '../../../services/alerta.service';
-import { CboObraComponent } from '../../../shared/components/Cbo/cbo-obra/cbo-obra.component';
 import { CboTipoMovimientoHerramientaComponent } from '../../../shared/components/Cbo/cbo-tipo-movimiento-herramienta/cbo-tipo-movimiento-herramienta.component';
 import { CboProveedorComponent } from '../../../shared/components/Cbo/cbo-proveedor/cbo-proveedor.component';
-import { CboFamiliaHerramientaComponent } from "../../../shared/components/Cbo/cbo-familia-herramienta/cbo-familia-herramienta.component";
-import { CboUsuarioComponent } from "../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component";
+import { CboFamiliaHerramientaComponent } from '../../../shared/components/Cbo/cbo-familia-herramienta/cbo-familia-herramienta.component';
+import { CboUsuarioComponent } from '../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component';
 import { ModalHistorialComponent } from '../modal-historial/modal-historial.component';
 import { PageTitleService } from '../../../services/page-title.service';
 
@@ -24,17 +23,18 @@ import { PageTitleService } from '../../../services/page-title.service';
     NgbTooltipModule,
     PaginatorComponent,
     DatePipe,
-    CboObraComponent,
     CboTipoMovimientoHerramientaComponent,
     CboProveedorComponent,
     CboFamiliaHerramientaComponent,
-    CboUsuarioComponent
-    ,
-    ModalHistorialComponent
+    CboUsuarioComponent,
+    ModalHistorialComponent,
   ],
   templateUrl: './historial.component.html',
-  styleUrls: ['../../../../styles/visor-style.css', './historial.component.css'],
-  providers: [{ provide: LOCALE_ID, useValue: 'es-ES' }]
+  styleUrls: [
+    '../../../../styles/visor-style.css',
+    './historial.component.css',
+  ],
+  providers: [{ provide: LOCALE_ID, useValue: 'es-ES' }],
 })
 export class HistorialComponent implements OnInit {
   movimientos: any[] = [];
@@ -49,7 +49,6 @@ export class HistorialComponent implements OnInit {
   filtroIdUsuarioGenera: number | null = null;
   filtroIdUsuarioResponsable: number | null = null;
   filtroIdTipoMovimiento: number | null = null;
-  filtroObra: number | null = null;
   filtroProveedor: number | null = null;
   filtroFechaDesde = '';
   filtroFechaHasta = '';
@@ -75,74 +74,88 @@ export class HistorialComponent implements OnInit {
       idUsuarioGenera: this.filtroIdUsuarioGenera ?? undefined,
       idUsuarioResponsable: this.filtroIdUsuarioResponsable ?? undefined,
       idTipoMovimiento: this.filtroIdTipoMovimiento ?? undefined,
-      idObra: this.filtroObra ?? undefined,
       idProveedor: this.filtroProveedor ?? undefined,
       fechaDesde: this.filtroFechaDesde,
-      fechaHasta: this.filtroFechaHasta
+      fechaHasta: this.filtroFechaHasta,
     };
 
     // Remove undefined values from filters
-    filters = Object.fromEntries(Object.entries(filters).filter(([_, value]) => value !== undefined));
+    filters = Object.fromEntries(
+      Object.entries(filters).filter(([_, value]) => value !== undefined)
+    );
 
-    this.movimientoService.getMovimientos(this.currentPage, this.pageSize, filters).subscribe({
-      next: (resp) => {
-        // Debug log para inspeccionar la respuesta del backend (remover si no es necesario)
-        console.log('[Historial] getMovimientos response:', resp);
+    this.movimientoService
+      .getMovimientos(this.currentPage, this.pageSize, filters)
+      .subscribe({
+        next: (resp) => {
+          // Debug log para inspeccionar la respuesta del backend (remover si no es necesario)
+          console.log('[Historial] getMovimientos response:', resp);
 
-        // Normalizar la propiedad que contiene el array de movimientos
-        let dataArray: any[] = [];
-        if (Array.isArray(resp)) {
-          dataArray = resp as any[];
-        } else if (Array.isArray(resp.data)) {
-          dataArray = resp.data;
-        } else if (Array.isArray(resp.data?.data)) {
-          dataArray = resp.data.data;
-        } else if (Array.isArray(resp.items)) {
-          dataArray = resp.items;
-        } else if (Array.isArray(resp.result)) {
-          dataArray = resp.result;
-        } else {
-          dataArray = [];
-        }
+          // Normalizar la propiedad que contiene el array de movimientos
+          let dataArray: any[] = [];
+          if (Array.isArray(resp)) {
+            dataArray = resp as any[];
+          } else if (Array.isArray(resp.data)) {
+            dataArray = resp.data;
+          } else if (Array.isArray(resp.data?.data)) {
+            dataArray = resp.data.data;
+          } else if (Array.isArray(resp.items)) {
+            dataArray = resp.items;
+          } else if (Array.isArray(resp.result)) {
+            dataArray = resp.result;
+          } else {
+            dataArray = [];
+          }
 
-        this.movimientos = dataArray;
+          this.movimientos = dataArray;
 
-        // Intentar sincronizar página, pageSize y total desde distintas ubicaciones posibles en la respuesta
-        const respPage = resp.data?.page ?? resp.page ?? resp.data?.pagination?.page ?? resp.pagination?.page;
-        const respPageSize = resp.data?.pageSize ?? resp.pageSize ?? resp.data?.pagination?.pageSize ?? resp.pagination?.pageSize;
+          // Intentar sincronizar página, pageSize y total desde distintas ubicaciones posibles en la respuesta
+          const respPage =
+            resp.data?.page ??
+            resp.page ??
+            resp.data?.pagination?.page ??
+            resp.pagination?.page;
+          const respPageSize =
+            resp.data?.pageSize ??
+            resp.pageSize ??
+            resp.data?.pagination?.pageSize ??
+            resp.pagination?.pageSize;
 
-        // Extraer total de registros (totalRecords / total)
-        const totalCandidates = [
-          resp.data?.totalRecords,
-          resp.data?.total,
-          resp.total,
-          resp.totalRecords,
-          resp.pagination?.totalRecords,
-          resp.pagination?.total,
-          resp.data?.pagination?.totalRecords,
-          resp.data?.pagination?.total,
-          resp.items?.total
-        ];
-        const foundTotal = totalCandidates.find(v => typeof v === 'number' && !isNaN(v)) as number | undefined;
+          // Extraer total de registros (totalRecords / total)
+          const totalCandidates = [
+            resp.data?.totalRecords,
+            resp.data?.total,
+            resp.total,
+            resp.totalRecords,
+            resp.pagination?.totalRecords,
+            resp.pagination?.total,
+            resp.data?.pagination?.totalRecords,
+            resp.data?.pagination?.total,
+            resp.items?.total,
+          ];
+          const foundTotal = totalCandidates.find(
+            (v) => typeof v === 'number' && !isNaN(v)
+          ) as number | undefined;
 
-        // Aplicar valores si vienen desde el backend
-        if (typeof respPage === 'number' && !isNaN(respPage)) {
-          this.currentPage = respPage;
-        }
-        if (typeof respPageSize === 'number' && !isNaN(respPageSize)) {
-          this.pageSize = respPageSize;
-        }
+          // Aplicar valores si vienen desde el backend
+          if (typeof respPage === 'number' && !isNaN(respPage)) {
+            this.currentPage = respPage;
+          }
+          if (typeof respPageSize === 'number' && !isNaN(respPageSize)) {
+            this.pageSize = respPageSize;
+          }
 
-        this.totalItems = typeof foundTotal === 'number' ? foundTotal : (dataArray.length || 0);
+          this.totalItems =
+            typeof foundTotal === 'number' ? foundTotal : dataArray.length || 0;
 
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error fetching movimientos:', err);
-        this.alertaService.error('Error al cargar los movimientos.');
-        this.loading = false;
-      }
-    });
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error fetching movimientos:', err);
+          this.alertaService.error('Error al cargar los movimientos.');
+          this.loading = false;
+        },
+      });
   }
 
   onSearch(): void {
@@ -158,16 +171,10 @@ export class HistorialComponent implements OnInit {
       this.filtroIdUsuarioGenera !== null ||
       this.filtroIdUsuarioResponsable !== null ||
       this.filtroIdTipoMovimiento !== null ||
-      this.filtroObra !== null ||
       this.filtroProveedor !== null ||
       this.filtroFechaDesde ||
       this.filtroFechaHasta
     );
-  }
-
-  onObraSelected(obra: any): void {
-    this.filtroObra = obra?.idObra || null;
-    this.fetchMovimientos();
   }
 
   onTipoMovimientoSelected(tipoMovimiento: any): void {
@@ -201,7 +208,6 @@ export class HistorialComponent implements OnInit {
     this.filtroIdUsuarioGenera = null;
     this.filtroIdUsuarioResponsable = null;
     this.filtroIdTipoMovimiento = null;
-    this.filtroObra = null;
     this.filtroProveedor = null;
     this.filtroFechaDesde = '';
     this.filtroFechaHasta = '';
@@ -226,9 +232,6 @@ export class HistorialComponent implements OnInit {
         break;
       case 'usuarioResponsable':
         this.filtroIdUsuarioResponsable = null;
-        break;
-      case 'obra':
-        this.filtroObra = null;
         break;
       case 'proveedor':
         this.filtroProveedor = null;
