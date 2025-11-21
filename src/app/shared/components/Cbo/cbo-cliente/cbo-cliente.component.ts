@@ -97,7 +97,7 @@ export class CboClienteComponent
         distinctUntilChanged(),
         switchMap((term) => {
           if (!this.isOpen) return of([]);
-          const searchTerm = (term || '').toString().trim();
+          const searchTerm = (term || '').trim();
           if (searchTerm.length >= 3) {
             return this.searchClientes(searchTerm);
           } else if (searchTerm.length === 0) {
@@ -121,6 +121,7 @@ export class CboClienteComponent
   private loadInitialData() {
     this.isLoading = true;
     const activoFilter = this.showOnlyActive ? true : undefined;
+
     return this.clienteService.getClientesCombo(undefined, activoFilter).pipe(
       switchMap((resp) => {
         const raw = resp?.data ?? [];
@@ -139,6 +140,7 @@ export class CboClienteComponent
   private searchClientes(searchTerm: string) {
     this.isLoading = true;
     const activoFilter = this.showOnlyActive ? true : undefined;
+
     return this.clienteService.getClientesCombo(searchTerm, activoFilter).pipe(
       switchMap((resp) => {
         const raw = resp?.data ?? [];
@@ -214,8 +216,10 @@ export class CboClienteComponent
   private selectCliente(cliente: ClienteOption | null): void {
     this.selectedCliente = cliente;
     this.selectedControl.setValue(cliente);
+
     if (cliente) this.onChange(cliente.idCliente);
     else this.onChange(null);
+
     this.clienteSelected.emit(cliente);
     this.updatePlaceholderText();
   }
@@ -242,37 +246,46 @@ export class CboClienteComponent
     else this.placeholder = 'Seleccionar cliente...';
   }
 
-  // ControlValueAccessor
+  // ***************
+  //   FIX PRINCIPAL
+  // ***************
   writeValue(value: any): void {
-    if (value && typeof value === 'number') {
-      this.findClienteById(value);
-    } else if (value && typeof value === 'object') {
-      this.selectCliente(value);
-    } else {
+    if (!value) {
       this.selectCliente(null);
+      return;
     }
+
+    const id = typeof value === 'number' ? value : value.idCliente;
+
+    // Si aún no cargó la lista, cargar primero y luego seleccionar
+    if (this.clientes.length === 0) {
+      this.loadInitialData().subscribe((list) => {
+        this.clientes = list;
+        this.findClienteById(id);
+      });
+      return;
+    }
+
+    this.findClienteById(id);
   }
 
   private findClienteById(id: number): void {
     const found = this.clientes.find((c) => c.idCliente === id);
+
     if (found) {
       this.selectCliente(found);
       return;
     }
-    // Fallback: try to fetch via combo endpoint with q as id
+
+    // Fallback: buscar por ID remoto, pero NO tomar raw[0]
     this.clienteService.getClientesCombo(String(id), undefined).subscribe({
       next: (resp) => {
         const raw = resp?.data ?? [];
-        if (raw.length > 0) {
-          const cliente = this.mapClientesToOptions(raw)[0];
-          this.selectCliente(cliente);
-        } else {
-          this.onChange(id);
-        }
+        const list = this.mapClientesToOptions(raw);
+        const cliente = list.find((c) => c.idCliente === id);
+        if (cliente) this.selectCliente(cliente);
       },
-      error: () => {
-        this.onChange(id);
-      },
+      error: () => {},
     });
   }
 

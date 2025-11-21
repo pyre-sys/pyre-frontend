@@ -21,11 +21,17 @@ import {
 } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../../services/alerta.service';
+import { CboClienteComponent } from '../../../../shared/components/Cbo/cbo-cliente/cbo-cliente.component';
 
 @Component({
   selector: 'app-obra-edit-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbTooltipModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgbTooltipModule,
+    CboClienteComponent,
+  ], // Asegurarnos de incluir CboClienteComponent
   templateUrl: './modal-obras.component.html',
   styleUrls: ['../../../../../styles/modal-style.css'], // Corregir la ruta relativa
 })
@@ -76,12 +82,8 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
     // Focus management
     setTimeout(() => {
-      const firstInput = this.elementRef.nativeElement.querySelector(
-        'input:not([style*="display:none"])'
-      );
-      if (firstInput) {
-        firstInput.focus();
-      }
+      const firstInput = this.getFirstFocusableInput();
+      if (firstInput) firstInput.focus();
     }, 150);
   }
 
@@ -106,10 +108,8 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     this.editingEnabled = true;
     this.setControlsDisabled(false);
     setTimeout(() => {
-      const firstInput = this.elementRef.nativeElement.querySelector(
-        'input:not([disabled])'
-      );
-      if (firstInput) firstInput.focus();
+      const firstInput = this.getFirstFocusableInput();
+      if (firstInput) (firstInput as HTMLElement).focus();
     }, 50);
   }
 
@@ -119,12 +119,8 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     this.setControlsDisabled(!this.editingEnabled);
     if (this.editingEnabled) {
       setTimeout(() => {
-        const firstInput = this.elementRef.nativeElement.querySelector(
-          'input:not([style*="display:none"])'
-        );
-        if (firstInput) {
-          firstInput.focus();
-        }
+        const firstInput = this.getFirstFocusableInput();
+        if (firstInput) (firstInput as HTMLElement).focus();
       }, 50);
     }
   }
@@ -145,6 +141,7 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
   private buildForm() {
     this.form = this.fb.group({
+      idCliente: ['', [Validators.required]], // Campo para el cliente
       NombreObra: ['', [Validators.required, Validators.maxLength(150)]],
       Codigo: ['', [Validators.required, Validators.maxLength(20)]],
       Descripcion: ['', [Validators.maxLength(500)]],
@@ -167,6 +164,7 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     console.log('💾 Obra ID saved:', this.obraId);
 
     const mapped = {
+      idCliente: data?.idCliente ?? null, // Mapear idCliente
       NombreObra: data?.nombreObra ?? '',
       Codigo: data?.codigo ?? data?.Codigo ?? '',
       Descripcion: data?.descripcion ?? data?.Descripcion ?? '',
@@ -298,5 +296,39 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
     this.obraId = null;
     this.form?.reset();
     this.serverErrors = {};
+  }
+
+  onClienteSeleccionado(cliente: any): void {
+    this.form.get('idCliente')?.setValue(cliente?.idCliente || null);
+  }
+
+  // Nuevo helper: obtiene el primer input/textarea/select focoable que NO está dentro de un app-cbo-cliente
+  private getFirstFocusableInput(): HTMLElement | null {
+    try {
+      const root = this.elementRef.nativeElement as HTMLElement;
+      const selectors =
+        'input:not([style*="display:none"]), textarea:not([style*="display:none"]), select:not([style*="display:none"])';
+      const nodes = Array.from(
+        root.querySelectorAll(selectors)
+      ) as HTMLElement[];
+
+      for (const node of nodes) {
+        // Ignorar inputs dentro del combo cliente
+        if (node.closest('app-cbo-cliente')) continue;
+        // Ignorar elementos deshabilitados
+        if ((node as HTMLInputElement).disabled) continue;
+        // Ignorar hidden
+        if ((node as HTMLInputElement).type === 'hidden') continue;
+        // Ignorar elementos no visibles (width/height 0)
+        const rect = node.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) continue;
+        // Devolver el primer candidato válido
+        return node;
+      }
+    } catch (e) {
+      // no-op: si algo falla, que vuelva a la selección por defecto
+      console.warn('getFirstFocusableInput failed', e);
+    }
+    return null;
   }
 }

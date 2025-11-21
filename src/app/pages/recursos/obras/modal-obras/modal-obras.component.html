@@ -49,6 +49,36 @@
       >
         <!-- Grid compacto de campos -->
         <div class="compact-form-grid">
+          <!-- Fila 1: Cliente -->
+          <div
+            class="field-group"
+            [class.has-error]="
+              (form.get('idCliente')?.invalid &&
+                form.get('idCliente')?.touched) ||
+              serverErrors['idCliente']
+            "
+          >
+            <label class="required">Cliente</label>
+            <app-cbo-cliente
+              formControlName="idCliente"
+              [isDisabled]="!editingEnabled"
+              (clienteSelected)="onClienteSeleccionado($event)"
+            ></app-cbo-cliente>
+            <div *ngIf="serverErrors['idCliente']" class="error-text">
+              {{ serverErrors["idCliente"] }}
+            </div>
+            <div
+              *ngIf="
+                !serverErrors['idCliente'] &&
+                form.get('idCliente')?.invalid &&
+                form.get('idCliente')?.touched
+              "
+              class="error-text"
+            >
+              El cliente es requerido
+            </div>
+          </div>
+
           <!-- Fila 1: Información básica -->
           <div
             class="field-group"
