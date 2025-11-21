@@ -112,9 +112,15 @@
 .pyre-filter-bar .filter-row app-cbo-familia-herramienta select.form-select,
 .pyre-filter-bar .filter-row app-cbo-usuario select.form-select,
 .pyre-filter-bar .filter-row app-cbo-obra select.form-select,
-.pyre-filter-bar .filter-row app-cbo-tipo-movimiento-herramienta select.form-select,
+.pyre-filter-bar
+  .filter-row
+  app-cbo-tipo-movimiento-herramienta
+  select.form-select,
 .pyre-filter-bar .filter-row app-cbo-proveedor select.form-select,
-.pyre-filter-bar .filter-row app-cbo-estado-fisico-herramienta select.form-select {
+.pyre-filter-bar
+  .filter-row
+  app-cbo-estado-fisico-herramienta
+  select.form-select {
   width: 100% !important;
   box-sizing: border-box;
   min-width: 0 !important;
@@ -253,4 +259,15 @@
   .reset-button-inline .ms-1 {
     display: inline !important;
   }
+}
+
+.pyre-filter-bar .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pyre-filter-bar .row > div {
+  flex: 1 1 calc(25% - 1rem); /* Cada columna ocupa el 25% del ancho */
+  min-width: 200px; /* Asegurar un ancho mínimo */
 }

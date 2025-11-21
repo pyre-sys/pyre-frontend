@@ -1,24 +1,19 @@
 <!-- Título y botón -->
 <div class="container-fluid page-shell page-header-container">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div></div>
-    <div class="d-flex gap-2">
-      <button
-        class="btn btn-outline-success"
-        (click)="downloadReporteExcel()"
-        title="Exportar Excel"
-      >
-        <i class="pi pi-file-excel"></i> Exportar Excel
-      </button>
-      <a
-        class="btn btn-primary header-action"
-        (click)="createNewTool()"
-        role="button"
-      >
-        <i class="bx bx-wrench bx-tada me-1" aria-hidden="true"></i> Nueva
-        Herramienta
-      </a>
-    </div>
+  <div class="d-flex justify-content-end align-items-center mb-3 gap-3">
+    <a
+      class="header-action-table-export"
+      (click)="downloadReporteExcel()"
+      role="button"
+      ngbTooltip="Exportar Excel"
+      placement="top"
+      container="body"
+    >
+      <i class="pi pi-file-excel pi-tada" aria-hidden="true"></i>
+    </a>
+    <a class="header-action" (click)="createNewTool()" role="button">
+      <i class="bx bx-plus bx-tada" aria-hidden="true"></i> Agregar
+    </a>
   </div>
 </div>
 
@@ -92,11 +87,13 @@
               class="reset-button-inline"
               (click)="onResetFilters()"
               [disabled]="!hasActiveFilters()"
-              [title]="
+              [ngbTooltip]="
                 hasActiveFilters()
                   ? 'Limpiar filtros'
                   : 'No hay filtros activos'
               "
+              placement="top"
+              container="body"
             >
               <i class="pi pi-filter-slash"></i>
             </button>
@@ -105,7 +102,9 @@
               type="button"
               class="btn btn-primary"
               (click)="onSearch()"
-              title="Buscar"
+              ngbTooltip="Buscar"
+              placement="top"
+              container="body"
             >
               <i class="pi pi-search"></i>
             </button>
@@ -131,7 +130,7 @@
             <th>Estado Físico</th>
             <th>Disponibilidad</th>
             <th>Estado</th>
-            <th>Acciones</th>
+            <th style="text-align: center">Acciones</th>
           </tr>
         </thead>
 

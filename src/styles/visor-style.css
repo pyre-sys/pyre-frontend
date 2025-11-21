@@ -37,7 +37,17 @@
 /* Contenedor del encabezado con espacio adicional para el topbar fijo */
 .page-header-container {
   padding-top: 1.75rem;
+  padding-right: 1rem;
+  padding-left: 1rem;
   margin-top: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Asegurar que el flex dentro del header respete los límites */
+.page-header-container .d-flex {
+  padding-right: 0;
+  padding-left: 0;
   width: 100%;
   box-sizing: border-box;
 }
@@ -51,6 +61,9 @@
 .header-actions {
   display: flex;
   margin-top: 0.5rem;
+  margin-right: 0;
+  margin-left: 0;
+  gap: 1rem;
 }
 
 .header-actions .btn-primary {
@@ -59,66 +72,118 @@
   padding: 0.375rem 1rem;
 }
 
-/* Clase para el botón de acción del encabezado: espacio a la derecha para no pegarse al borde */
+/* Clase para el botón de acción del encabezado: estilo minimalista sin fondo */
 .header-action {
-  margin-right: 3rem;
-  /* coincide con el padding interno de .pyre-table-wrapper.soft-edge */
   background: transparent !important;
-  /* quitar relleno visual */
   border: none !important;
-  /* quitar borde */
+  color: var(--color-primary, #0d6efd) !important;
   padding: 0 !important;
-  /* quitar padding para que solo quede icono + texto */
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--color-primary, #0d6efd);
-  /* usar color primario visible en lugar de blanco */
-  text-decoration: none;
-}
-
-/* Estilos para botones "Nuevo" en los visores */
-.header-action {
-  background: rgba(0, 123, 255, 0.85); /* Azul con opacidad para contraste */
-  color: var(--color-white, #ffffff);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  margin-right: 3rem !important;
 }
 
 .header-action:hover {
-  background: rgba(0, 105, 217, 0.9); /* Azul más oscuro en hover */
-  transform: translateY(-2px);
-  text-decoration: none;
+  color: #0056b3 !important;
+  transform: translateY(-2px) !important;
+  text-decoration: none !important;
 }
 
 .header-action:active {
-  background: rgba(0, 92, 190, 0.9); /* Azul aún más oscuro en active */
-  transform: translateY(0);
+  color: #004085 !important;
+  transform: translateY(0) !important;
+}
+
+.header-action:focus {
+  outline: none !important;
 }
 
 .header-action i {
   font-size: 1.2rem;
-}
-
-/* Asegurar que los iconos (Boxicons) dentro del botón estén alineados correctamente */
-.header-action i {
   display: inline-block;
   vertical-align: middle;
-  font-size: 1rem;
-  /* mantiene tamaño coherente con el texto */
   color: inherit;
-  /* hereda el color del enlace */
 }
 
-/* Separación entre icono y texto (siempre usar util clase 'me-1' de bootstrap, pero asegurar fallback) */
+/* Separación entre icono y texto */
 .header-action i.me-1 {
-  margin-right: 0.25rem;
+  margin-right: 0.5rem;
+}
+
+/* Animación para iconos en header-action */
+.header-action i {
+  transition: transform 0.2s ease;
+}
+
+.header-action:hover i {
+  transform: scale(1.1);
+}
+
+/* Estilo específico para botón de exportar en tabla */
+.header-action-table-export {
+  background: transparent !important;
+  border: none !important;
+  color: #10b981 !important;
+  padding: 0 !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  margin-left: 0 !important;
+}
+
+.header-action-table-export:hover {
+  color: #059669 !important;
+  transform: translateY(-2px) !important;
+  text-decoration: none !important;
+}
+
+.header-action-table-export i {
+  font-size: 1.2rem;
+  display: inline-block;
+  vertical-align: middle;
+  color: inherit;
+  /* Sin animación - icono estático */
+  animation: none;
+}
+
+/* Animación bx-tada y pi-tada */
+.bx-tada,
+.pi-tada {
+  animation: tada 0.6s ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes tada {
+  0% {
+    transform: rotate(0deg);
+  }
+  10%,
+  20% {
+    transform: rotate(-3deg);
+  }
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: rotate(3deg);
+  }
+  40%,
+  60%,
+  80% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 /* Contenedor principal */
@@ -167,6 +232,11 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+}
+
+.user-list-container .custom-table thead th:last-child {
+  text-align: right;
+  padding-right: 32px;
 }
 
 .user-list-container .custom-table tbody td {
@@ -284,6 +354,43 @@ input:checked + .toggle-slider::before {
   background: none; /* Sin fondo */
   transform: none; /* Sin desplazamiento */
   color: #b91c1c; /* Cambia sutilmente el color del icono */
+}
+
+/* Clase genérica para botones "Nuevo" */
+.btn-new {
+  background: rgba(0, 123, 255, 0.85); /* Azul con opacidad para contraste */
+  color: var(--color-white, #ffffff);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-new:hover {
+  background: rgba(0, 105, 217, 0.9); /* Azul más oscuro en hover */
+  transform: translateY(-2px);
+}
+
+.btn-new:active {
+  background: rgba(0, 92, 190, 0.9); /* Azul aún más oscuro en active */
+  transform: translateY(0);
+}
+
+.btn-new i {
+  font-size: 1.2rem;
+  display: inline-block;
+  vertical-align: middle;
+  color: inherit; /* Heredar color */
+}
+
+/* Espaciado entre ícono y texto */
+.btn-new i.me-1 {
+  margin-right: 0.25rem;
 }
 
 /* Filter bar styles */
