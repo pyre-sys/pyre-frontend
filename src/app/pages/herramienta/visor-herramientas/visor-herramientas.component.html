@@ -114,14 +114,11 @@
       </div>
     </div>
 
-    <!-- Cargando -->
-    <div *ngIf="loading" class="text-center py-4">
-      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-      <p>Cargando herramientas...</p>
-    </div>
+    <!-- Spinner global (overlay) -->
+    <app-spinner [isLoading]="isLoading"></app-spinner>
 
     <!-- Tabla -->
-    <div *ngIf="!loading" class="custom-table-container">
+    <div *ngIf="!isLoading" class="custom-table-container">
       <table class="custom-table">
         <thead>
           <tr>
@@ -235,7 +232,7 @@
     </div>
 
     <!-- Paginador -->
-    <div *ngIf="!loading && totalItems > 0" class="paginator-container">
+    <div *ngIf="!isLoading && totalItems > 0" class="paginator-container">
       <app-paginator
         [length]="totalItems"
         [pageSize]="pageSize"
@@ -253,7 +250,4 @@
     (submit)="onModalSubmit($event)"
     (close)="closeToolModal()"
   ></app-herramientas-modal>
-
-  <!-- Spinner para descarga de Excel -->
-  <app-spinner [isLoading]="isDownloadingExcel"></app-spinner>
 </div>

@@ -9,7 +9,7 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PageTitleService } from '../../../services/page-title.service';
 import { CboDisponibilidadHerramientaComponent } from '../../../shared/components/Cbo/cbo-disponibilidad-herramienta/cbo-disponibilidad-herramienta.component';
-import { SpinnerComponent } from "../../../shared/components/spinner/spinner.component";
+import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 
 interface DisplayHerramienta {
   id?: number;
@@ -36,7 +36,7 @@ interface DisplayHerramienta {
     PaginatorComponent,
     NgbTooltipModule,
     CboDisponibilidadHerramientaComponent,
-    SpinnerComponent
+    SpinnerComponent,
   ],
   templateUrl: './visor-herramientas.component.html',
   styleUrls: ['../../../../styles/visor-style.css'],
@@ -49,8 +49,7 @@ export class VisorHerramientasComponent implements OnInit {
   pageSize = 6;
   totalItems = 0;
   totalPages = 1;
-  loading = false;
-  isDownloadingExcel = false;
+  isLoading = false;
 
   filtroCodigo = '';
   filtroNombre = '';
@@ -66,7 +65,7 @@ export class VisorHerramientasComponent implements OnInit {
     private srvHerramienta: HerramientaService,
     private srvAlerta: AlertaService,
     private pageTitleService: PageTitleService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Listado de Herramientas');
@@ -74,7 +73,7 @@ export class VisorHerramientasComponent implements OnInit {
   }
 
   fetchHerramientas(): void {
-    this.loading = true;
+    this.isLoading = true;
 
     const filters: any = {};
     if (this.filtroCodigo.trim()) filters.codigo = this.filtroCodigo.trim();
@@ -97,11 +96,11 @@ export class VisorHerramientasComponent implements OnInit {
           this.filteredHerramientas = [...this.herramientas];
           this.totalItems = resp.total ?? data.length;
           this.calculatePagination();
-          this.loading = false;
+          this.isLoading = false;
         },
         error: () => {
           this.srvAlerta.error('Error al cargar las herramientas.');
-          this.loading = false;
+          this.isLoading = false;
         },
       });
   }
@@ -132,7 +131,8 @@ export class VisorHerramientasComponent implements OnInit {
 
   onDisponibilidadSelected(disponibilidad: any): void {
     this.selectedDisponibilidad = disponibilidad;
-    this.filtroDisponibilidadId = disponibilidad?.idEstadoDisponibilidad ?? null;
+    this.filtroDisponibilidadId =
+      disponibilidad?.idEstadoDisponibilidad ?? null;
     console.log('filtroDisponibilidadId set to:', this.filtroDisponibilidadId);
   }
 
@@ -298,7 +298,8 @@ export class VisorHerramientasComponent implements OnInit {
     this.srvAlerta
       .confirm(
         `¿Estás seguro de que deseas ${actionText} esta herramienta?`,
-        `${actionText.charAt(0).toUpperCase() + actionText.slice(1)
+        `${
+          actionText.charAt(0).toUpperCase() + actionText.slice(1)
         } Herramienta`
       )
       .then((result: any) => {
@@ -402,8 +403,8 @@ export class VisorHerramientasComponent implements OnInit {
     } else {
       const id = Number(
         this.modalInitialData?.id ??
-        this.modalInitialData?.idHerramienta ??
-        null
+          this.modalInitialData?.idHerramienta ??
+          null
       );
       if (!id) {
         const error = {
@@ -445,7 +446,7 @@ export class VisorHerramientasComponent implements OnInit {
 
   // Añadir método para descargar el reporte Excel
   downloadReporteExcel(): void {
-    this.isDownloadingExcel = true;
+    this.isLoading = true;
     this.srvHerramienta.reporteHerramientas().subscribe({
       next: (blob: Blob) => {
         try {
@@ -461,15 +462,18 @@ export class VisorHerramientasComponent implements OnInit {
           a.click();
           a.remove();
           window.URL.revokeObjectURL(url);
-          this.isDownloadingExcel = false;
-          this.srvAlerta.success('Reporte descargado correctamente.', 'Descarga');
+          this.isLoading = false;
+          this.srvAlerta.success(
+            'Reporte descargado correctamente.',
+            'Descarga'
+          );
         } catch (e) {
           console.error('Error al procesar el archivo:', e);
           this.srvAlerta.error('No se pudo procesar el archivo descargado.');
         }
       },
       error: (err: any) => {
-        this.isDownloadingExcel = false;
+        this.isLoading = false;
         console.error('Error al descargar reporteHerramientas:', err);
         const msg =
           err?.error?.message ||
