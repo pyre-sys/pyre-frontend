@@ -74,14 +74,11 @@
       </div>
     </div>
 
-    <!-- Loading indicator -->
-    <div *ngIf="loading" class="text-center py-4">
-      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-      <p>Cargando obras...</p>
-    </div>
+    <!-- Spinner global -->
+    <app-spinner [isLoading]="isLoading"></app-spinner>
 
     <!-- Custom table -->
-    <div *ngIf="!loading" class="custom-table-container">
+    <div *ngIf="!isLoading" class="custom-table-container">
       <table class="custom-table">
         <thead>
           <tr>
@@ -135,7 +132,7 @@
     </div>
 
     <!-- Reemplazar la paginación custom por app-paginator -->
-    <div *ngIf="!loading && totalItems > 0" class="paginator-container">
+    <div *ngIf="!isLoading && totalItems > 0" class="paginator-container">
       <app-paginator
         [length]="totalItems"
         [pageSize]="pageSize"

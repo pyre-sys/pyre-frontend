@@ -6,6 +6,7 @@ import { AlertaService } from '../../../../services/alerta.service';
 import { ObraEditModalComponent } from '../modal-obras/modal-obras.component';
 import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { PageTitleService } from '../../../../services/page-title.service';
 
 @Component({
@@ -17,11 +18,10 @@ import { PageTitleService } from '../../../../services/page-title.service';
     ObraEditModalComponent,
     PaginatorComponent,
     NgbTooltipModule,
+    SpinnerComponent,
   ],
   templateUrl: './visor-obras.component.html',
-  // Se elimina styleUrls para evitar error de fichero no encontrado.
-  // Los estilos globales deben cargarse desde src/styles/visor-style.css (angular.json).
-  // styleUrls: [],
+  styleUrls: ['./visor-obras.component.css'],
   providers: [ObrasService],
 })
 export class VisorObrasComponent implements OnInit {
@@ -36,8 +36,8 @@ export class VisorObrasComponent implements OnInit {
   ];
   rowsPerPageOptions: number[] = [5, 10, 20, 40];
   currentPage = 1;
-  pageSize = 10;
-  loading = false;
+  pageSize = 10; // usar 10 por defecto para coincidir con backend
+  isLoading = false;
   totalItems = 0;
   totalPages = 0;
 
@@ -67,7 +67,7 @@ export class VisorObrasComponent implements OnInit {
   }
 
   fetchObras(): void {
-    this.loading = true;
+    this.isLoading = true;
     this.obrasService.getObrasPaged(this.currentPage, this.pageSize).subscribe({
       next: (resp) => {
         const pagedData = resp?.data ?? {};
@@ -86,13 +86,13 @@ export class VisorObrasComponent implements OnInit {
         }));
         this.applyFilters();
         this.calculatePagination();
-        this.loading = false;
+        this.isLoading = false;
       },
-      error: () => {
+      error: (err: any) => {
         this.showSnack(
           'Error al cargar las obras. Por favor, inténtelo de nuevo.'
         );
-        this.loading = false;
+        this.isLoading = false;
       },
     });
   }
