@@ -59,6 +59,10 @@ export class HerramientaService {
         if (filters.search && filters.search.trim() !== '') {
           params = params.set('search', filters.search.trim());
         }
+        // Add disponibilidad filter
+        if (filters.idDisponibilidad !== undefined && filters.idDisponibilidad !== null) {
+          params = params.set('idDisponibilidad', String(filters.idDisponibilidad));
+        }
       }
     }
 

@@ -5,20 +5,23 @@
     <span *ngIf="objectErrors?.required" class="required-indicator">*</span>
   </label>
 
-  <!-- Search Container -->
   <div
     class="search-container"
     [class.has-error]="hasErrors()"
     [class.is-expanded]="isOpen"
   >
     <div class="search-input-group">
-      <!-- Input principal -->
+      <!-- Main input: muestra nombre de la disponibilidad o placeholder -->
       <input
         [id]="isId"
         class="search-input"
         [readonly]="!isOpen"
         [disabled]="isDisabled"
-        [value]="isOpen ? searchControl.value || '' : placeholder"
+        [value]="
+          isOpen
+            ? searchControl.value || selectedDisponibilidadName() || ''
+            : selectedDisponibilidadName() || placeholder
+        "
         (click)="onMainInputClick()"
         (focus)="onMainInputFocus()"
         (blur)="onMainInputBlur()"
@@ -27,9 +30,9 @@
         autocomplete="off"
       />
 
-      <!-- Botón limpiar -->
+      <!-- Clear button -->
       <button
-        *ngIf="selectedDisponibilidad && !isDisabled && isOpen"
+        *ngIf="selectedDisponibilidadId && !isDisabled && isOpen"
         type="button"
         class="clear-button"
         (click)="clearSelection()"
@@ -43,39 +46,36 @@
         <i class="pi pi-spinner pi-spin"></i>
       </div>
 
-      <!-- Flecha -->
+      <!-- Arrow -->
       <div class="dropdown-arrow" (click)="toggleDropdown($event)">
         <i class="pi pi-chevron-down" [class.rotated]="isOpen"></i>
       </div>
     </div>
 
-    <!-- Panel desplegable -->
+    <!-- Dropdown panel -->
     <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
       <div class="dropdown-content">
-        <!-- Mensaje sin resultados -->
         <div
-          *ngIf="disponibilidades.length === 0 && !isLoading"
+          *ngIf="filteredDisponibilidades.length === 0 && !isLoading"
           class="no-results"
         >
           <span *ngIf="searchControl.value && searchControl.value.length < 2">
             Ingrese al menos 2 caracteres para buscar
           </span>
           <span *ngIf="searchControl.value && searchControl.value.length >= 2">
-            No se encontraron estados de disponibilidad
+            No se encontraron disponibilidades
           </span>
-          <span *ngIf="!searchControl.value">No hay estados disponibles</span>
+          <span *ngIf="!searchControl.value">No hay disponibilidades</span>
         </div>
 
-        <!-- Opciones -->
         <div
           *ngFor="
-            let disponibilidad of disponibilidades;
+            let disponibilidad of filteredDisponibilidades;
             trackBy: trackByDisponibilidad
           "
           class="dropdown-option"
           [class.selected]="
-            selectedDisponibilidad?.idEstadoDisponibilidad ===
-            disponibilidad.idEstadoDisponibilidad
+            disponibilidad.idEstadoDisponibilidad === selectedDisponibilidadId
           "
           (click)="onOptionClick(disponibilidad)"
         >
@@ -94,11 +94,5 @@
   <!-- Error message -->
   <div *ngIf="hasErrors()" class="error-message">
     {{ getErrorMessage() }}
-  </div>
-
-  <!-- Indicador de carga -->
-  <div *ngIf="isLoading && !isOpen" class="loading-indicator">
-    <i class="pi pi-spinner pi-spin"></i>
-    <span>Cargando...</span>
   </div>
 </div>

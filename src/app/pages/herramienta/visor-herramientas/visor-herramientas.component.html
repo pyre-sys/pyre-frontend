@@ -73,7 +73,8 @@
             <div class="filter-input-group">
               <app-cbo-disponibilidad-herramienta
                 [isDisabled]="false"
-                [(selectedDisponibilidad)]="filtroDisponibilidad"
+                [(ngModel)]="filtroDisponibilidadId"
+                (disponibilidadSelected)="onDisponibilidadSelected($event)"
               ></app-cbo-disponibilidad-herramienta>
             </div>
           </div>

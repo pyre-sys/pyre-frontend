@@ -55,7 +55,8 @@ export class VisorHerramientasComponent implements OnInit {
   filtroCodigo = '';
   filtroNombre = '';
   filtroMarca = '';
-  filtroDisponibilidad: any = null;
+  filtroDisponibilidadId: number | null = null;
+  selectedDisponibilidad: any = null;
 
   showToolModal = false;
   modalInitialData: any = null;
@@ -80,12 +81,9 @@ export class VisorHerramientasComponent implements OnInit {
     if (this.filtroNombre.trim()) filters.nombre = this.filtroNombre.trim();
     if (this.filtroMarca.trim()) filters.marca = this.filtroMarca.trim();
 
-    if (this.filtroDisponibilidad) {
-      const id =
-        this.filtroDisponibilidad.idEstadoDisponibilidad ||
-        this.filtroDisponibilidad.id ||
-        null;
-      if (id) filters.idDisponibilidad = id;
+    // Fix disponibilidad filter
+    if (this.filtroDisponibilidadId) {
+      filters.idDisponibilidad = this.filtroDisponibilidadId;
     }
 
     this.srvHerramienta
@@ -132,11 +130,18 @@ export class VisorHerramientasComponent implements OnInit {
     this.fetchHerramientas();
   }
 
+  onDisponibilidadSelected(disponibilidad: any): void {
+    this.selectedDisponibilidad = disponibilidad;
+    this.filtroDisponibilidadId = disponibilidad?.idEstadoDisponibilidad ?? null;
+    console.log('filtroDisponibilidadId set to:', this.filtroDisponibilidadId);
+  }
+
   onResetFilters(): void {
     this.filtroCodigo = '';
     this.filtroNombre = '';
     this.filtroMarca = '';
-    this.filtroDisponibilidad = null;
+    this.filtroDisponibilidadId = null;
+    this.selectedDisponibilidad = null;
     this.currentPage = 1;
     this.fetchHerramientas();
   }
@@ -146,7 +151,7 @@ export class VisorHerramientasComponent implements OnInit {
       this.filtroCodigo?.trim() ||
       this.filtroNombre?.trim() ||
       this.filtroMarca?.trim() ||
-      this.filtroDisponibilidad
+      this.filtroDisponibilidadId
     );
   }
 
