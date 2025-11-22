@@ -7,6 +7,7 @@ import { ModalProveedorComponent } from '../modal-proveedor/modal-proveedor.comp
 import { PageTitleService } from '../../../../services/page-title.service';
 import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 
 export interface ProveedorDto {
   idProveedor: number;
@@ -30,6 +31,7 @@ export interface ProveedorDto {
     ModalProveedorComponent,
     PaginatorComponent,
     NgbTooltipModule,
+    SpinnerComponent,
   ],
   templateUrl: './visor-proveedores.component.html',
   styleUrls: ['./visor-proveedores.component.css'],
@@ -49,7 +51,7 @@ export class VisorProveedoresComponent implements OnInit {
   rowsPerPageOptions: number[] = [5, 10, 20, 40];
   currentPage = 1;
   pageSize = 10;
-  loading = false;
+  isLoading = false;
   totalItems = 0;
   totalPages = 0;
 
@@ -79,7 +81,7 @@ export class VisorProveedoresComponent implements OnInit {
   }
 
   fetchProveedores(): void {
-    this.loading = true;
+    this.isLoading = true;
     // El servicio espera 0-2 argumentos; no pasar el objeto de filtros aquí si no lo soporta.
     this.proveedoresService
       .getProveedores(this.currentPage, this.pageSize)
@@ -126,13 +128,13 @@ export class VisorProveedoresComponent implements OnInit {
           }
 
           this.filteredProveedores = this.proveedores;
-          this.loading = false;
+          this.isLoading = false;
         },
         error: () => {
           this.showSnack(
             'Error al cargar los proveedores. Por favor, inténtelo de nuevo.'
           );
-          this.loading = false;
+          this.isLoading = false;
         },
       });
   }
