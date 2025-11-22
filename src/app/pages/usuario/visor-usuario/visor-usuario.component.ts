@@ -12,6 +12,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PageTitleService } from '../../../services/page-title.service';
 import { CboRolUsuarioComponent } from '../../../shared/components/Cbo/cbo-rol-usuario/cbo-rol-usuario.component';
 import { CboEstadoComponent } from '../../../shared/components/Cbo/cbo-estado/cbo-estado.component';
+import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 
 interface UserRaw {
   [key: string]: any;
@@ -69,6 +70,7 @@ interface ApiResponse {
     UsuariosModalComponent,
     CboRolUsuarioComponent,
     CboEstadoComponent,
+    SpinnerComponent,
   ],
   templateUrl: './visor-usuario.component.html',
   styleUrls: ['../../../../styles/visor-style.css'],
@@ -80,7 +82,7 @@ export class VisorUsuariosComponent implements OnInit {
   columns: string[] = ['legajo', 'nombre', 'apellido', 'rol', 'estado'];
   currentPage = 1;
   pageSize = 6;
-  loading = false;
+  isLoading = false;
   totalItems = 0;
   totalPages = 0;
 
@@ -115,7 +117,7 @@ export class VisorUsuariosComponent implements OnInit {
   }
 
   fetchUsers(): void {
-    this.loading = true;
+    this.isLoading = true;
     console.log(
       `[UserList] fetchUsers page=${this.currentPage} size=${this.pageSize}`
     );
@@ -234,14 +236,14 @@ export class VisorUsuariosComponent implements OnInit {
 
           // Eliminar el filtrado local y depender únicamente de los datos del backend
           this.filteredUsers = this.users;
-          this.loading = false;
+          this.isLoading = false;
         },
         error: (error: any) => {
           console.error('Error fetching users:', error);
           this.alertService.error(
             'Error al cargar los usuarios. Por favor, inténtelo de nuevo.'
           );
-          this.loading = false;
+          this.isLoading = false;
         },
       });
   }
