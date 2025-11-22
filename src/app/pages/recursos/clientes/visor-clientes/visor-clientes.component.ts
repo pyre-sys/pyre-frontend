@@ -11,6 +11,7 @@ import { PaginatorComponent } from '../../../../shared/components/paginator/pagi
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PageTitleService } from '../../../../services/page-title.service';
 import { CboEstadoComponent } from '../../../../shared/components/Cbo/cbo-estado/cbo-estado.component';
+import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 
 interface UserRaw {
   [key: string]: any;
@@ -67,6 +68,7 @@ interface ApiResponse {
     NgbTooltipModule,
     ModalClientesComponent,
     CboEstadoComponent,
+    SpinnerComponent,
   ],
   templateUrl: './visor-clientes.component.html',
   styleUrls: ['./visor-clientes.component.css'],
@@ -79,7 +81,7 @@ export class VisorClientesComponent implements OnInit {
   columns: string[] = ['cuit', 'nombre', 'telefono', 'estado'];
   currentPage = 1;
   pageSize = 10; // usar 10 por defecto para coincidir con backend
-  loading = false;
+  isLoading = false;
   totalItems = 0;
   totalPages = 0;
 
@@ -112,7 +114,7 @@ export class VisorClientesComponent implements OnInit {
   }
 
   fetchUsers(): void {
-    this.loading = true;
+    this.isLoading = true;
     console.log(
       `[ClientList] fetchUsers page=${this.currentPage} size=${this.pageSize}`
     );
@@ -214,14 +216,14 @@ export class VisorClientesComponent implements OnInit {
 
           // Eliminar el filtrado local y depender únicamente de los datos del backend
           this.filteredUsers = this.users;
-          this.loading = false;
+          this.isLoading = false;
         },
         error: (error: any) => {
           console.error('Error fetching users:', error);
           this.alertService.error(
             'Error al cargar los usuarios. Por favor, inténtelo de nuevo.'
           );
-          this.loading = false;
+          this.isLoading = false;
         },
       });
   }
@@ -360,7 +362,7 @@ export class VisorClientesComponent implements OnInit {
       )
       .then((result: any) => {
         if (result && result.isConfirmed) {
-          // bloquear el botón y mostrar spinner en la fila
+          // bloquear el botón y mostrar estado pending (sin spinners inline)
           item._pending = true;
           this.clienteService.deleteCliente(Number(id)).subscribe({
             next: (resp: any) => {
@@ -373,7 +375,6 @@ export class VisorClientesComponent implements OnInit {
             error: (err: any) => {
               item._pending = false;
               console.error('[ClientList] deleteUser error', err);
-              // intentar mostrar message si viene en el objeto de error
               const errMsg =
                 err?.message ??
                 err?.error?.message ??
