@@ -9,6 +9,7 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PageTitleService } from '../../../services/page-title.service';
 import { CboDisponibilidadHerramientaComponent } from '../../../shared/components/Cbo/cbo-disponibilidad-herramienta/cbo-disponibilidad-herramienta.component';
+import { SpinnerComponent } from "../../../shared/components/spinner/spinner.component";
 
 interface DisplayHerramienta {
   id?: number;
@@ -35,6 +36,7 @@ interface DisplayHerramienta {
     PaginatorComponent,
     NgbTooltipModule,
     CboDisponibilidadHerramientaComponent,
+    SpinnerComponent
   ],
   templateUrl: './visor-herramientas.component.html',
   styleUrls: ['../../../../styles/visor-style.css'],
@@ -48,6 +50,7 @@ export class VisorHerramientasComponent implements OnInit {
   totalItems = 0;
   totalPages = 1;
   loading = false;
+  isDownloadingExcel = false;
 
   filtroCodigo = '';
   filtroNombre = '';
@@ -437,6 +440,7 @@ export class VisorHerramientasComponent implements OnInit {
 
   // Añadir método para descargar el reporte Excel
   downloadReporteExcel(): void {
+    this.isDownloadingExcel = true;
     this.srvHerramienta.reporteHerramientas().subscribe({
       next: (blob: Blob) => {
         try {
@@ -452,6 +456,7 @@ export class VisorHerramientasComponent implements OnInit {
           a.click();
           a.remove();
           window.URL.revokeObjectURL(url);
+          this.isDownloadingExcel = false;
           this.srvAlerta.success('Reporte descargado correctamente.', 'Descarga');
         } catch (e) {
           console.error('Error al procesar el archivo:', e);
@@ -459,6 +464,7 @@ export class VisorHerramientasComponent implements OnInit {
         }
       },
       error: (err: any) => {
+        this.isDownloadingExcel = false;
         console.error('Error al descargar reporteHerramientas:', err);
         const msg =
           err?.error?.message ||
