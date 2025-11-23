@@ -1,97 +1,76 @@
-.spinner-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    backdrop-filter: blur(2px);
+/* Overlay que cubre toda la pantalla */
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
 }
 
-.spinner-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
+/* Loader principal */
+.loader {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  border-radius: 50%;
+  border-top: 5px solid #e74c3c;
+  box-sizing: border-box;
+  animation: load 2s linear infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  color: #fff;
 }
 
-.spinner-circles {
-    position: relative;
-    width: 60px;
-    height: 60px;
+/* Círculos adicionales del loader */
+.loader::before,
+.loader::after {
+  content: "";
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  box-sizing: border-box;
 }
 
-.circle {
-    position: absolute;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
+.loader::before {
+  border-top: 5px solid #e67e22;
+  transform: rotate(120deg);
 }
 
-.circle-1 {
-    width: 60px;
-    height: 60px;
-    border-top: 3px solid #007bff;
-    animation: spin-slow 2s linear infinite;
+.loader::after {
+  border-top: 5px solid #3498db;
+  transform: rotate(240deg);
 }
 
-.circle-2 {
-    width: 40px;
-    height: 40px;
-    top: 10px;
-    left: 10px;
-    border-top: 3px solid #28a745;
-    animation: spin-medium 1.5s linear infinite reverse;
+/* Texto centrado */
+.loader span {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  line-height: 100px;
+  animation: text-rotate 2s linear infinite;
 }
 
-.circle-3 {
-    width: 20px;
-    height: 20px;
-    top: 20px;
-    left: 20px;
-    border-top: 3px solid #ffc107;
-    animation: spin-fast 1s linear infinite;
+/* Animaciones */
+@keyframes load {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-@keyframes spin-slow {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes spin-medium {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes spin-fast {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.spinner-text {
-    color: white;
-    font-size: 16px;
-    font-weight: 500;
-    margin: 0;
-    text-align: center;
+@keyframes text-rotate {
+  to {
+    transform: rotate(-360deg);
+  }
 }
