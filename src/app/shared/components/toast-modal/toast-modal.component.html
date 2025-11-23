@@ -1,5 +1,18 @@
-<div *ngIf="isVisible" class="toast" [ngClass]="'toast-' + type">
-    <div class="toast-message">
-        {{ message }}
-    </div>
+<div
+  *ngIf="isVisible"
+  class="toast toast-{{ type }}"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+>
+  <div class="toast-icon" aria-hidden="true">
+    <!-- Iconos simples según tipo -->
+    <span *ngIf="type === 'success'">✔</span>
+    <span *ngIf="type === 'error'">✖</span>
+    <span *ngIf="type === 'warning'">⚠</span>
+  </div>
+
+  <div class="toast-content">
+    <div class="toast-message">{{ message }}</div>
+  </div>
 </div>
