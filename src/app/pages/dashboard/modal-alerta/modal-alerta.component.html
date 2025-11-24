@@ -1,156 +1,89 @@
-<div
-  class="modal-overlay"
-  *ngIf="visible && alerta"
-  role="dialog"
-  aria-modal="true"
->
+<div class="modal-overlay" *ngIf="visible" role="dialog" aria-modal="true">
   <div class="modal-wrapper">
-    <div class="modal-content" [class.open]="visible">
+    <div class="modal-content">
+      <!-- Header -->
       <div class="modal-header">
-        <h3 class="modal-title">
-          <i class="bi bi-pencil-square me-2"></i>
-          Editar Alerta
-        </h3>
-        <button class="close-btn" (click)="onCancel()" aria-label="Cerrar">
-          <span class="pi pi-times" aria-hidden="true"></span>
+        <div class="modal-title-wrapper">
+          <h3 class="modal-title">Extender Plazo de Devolución</h3>
+          <small class="title-expired" *ngIf="formattedFechaVencimiento">
+            Vencimiento: {{ formattedFechaVencimiento }}
+          </small>
+        </div>
+        <button class="close-btn" aria-label="Cerrar" (click)="onCancel()">
+          <span class="pi pi-times"></span>
         </button>
       </div>
 
-      <form (ngSubmit)="onSaveEdit()" class="modal-form" autocomplete="off">
-        <div class="compact-form-grid">
-          <!-- Alert Type -->
-          <div class="field-group">
-            <label>
-              <i class="bi bi-tag me-1"></i>
-              Tipo de Alerta
-            </label>
-            <input
-              type="text"
-              class="form-control"
-              [value]="alerta.nombreTipoAlerta"
-              readonly
-            />
+      <!-- Loading -->
+      <div *ngIf="!alerta" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Cargando alerta...</p>
+      </div>
+
+      <!-- Form -->
+      <form *ngIf="alerta" (ngSubmit)="onSaveEdit()" class="modal-form">
+        <!-- Fila con Herramienta, Tipo de Alerta y Fecha Generación -->
+        <div class="info-row">
+          <div class="info-item">
+            <label>Herramienta</label>
+            <p>{{ alerta.nombreHerramienta }}</p>
           </div>
 
-          <!-- Tool Name -->
-          <div class="field-group">
-            <label>
-              <i class="bi bi-tools me-1"></i>
-              Nombre de Herramienta
-            </label>
-            <input
-              type="text"
-              class="form-control"
-              [value]="alerta.nombreHerramienta"
-              readonly
-            />
+          <div class="info-item">
+            <label>Generada</label>
+            <p>{{ alerta.fechaGeneracion | date : "dd/MM/yyyy HH:mm" }}</p>
           </div>
 
-          <!-- Generation Date -->
-          <div class="field-group">
-            <label>
-              <i class="bi bi-calendar3 me-1"></i>
-              Fecha de Generación
-            </label>
-            <input
-              type="datetime-local"
-              class="form-control"
-              [value]="formattedFechaGeneracion"
-              readonly
-            />
-          </div>
-
-          <!-- New Estimated Return Date (only for loan alerts) -->
-          <div class="field-group" *ngIf="alerta.idTipoAlerta === 2">
-            <label class="required">
-              <i class="bi bi-calendar-check me-1"></i>
-              Nueva Fecha Estimada de Devolución
-            </label>
-            <input
-              type="date"
-              class="form-control"
-              [(ngModel)]="nuevaFechaEstimada"
-              name="nuevaFechaEstimada"
-              required
-            />
-            <div class="form-text">
-              Actualizar la fecha estimada de devolución del préstamo
-            </div>
-          </div>
-
-          <!-- Responsible Person -->
-          <div class="field-group">
-            <label>
-              <i class="bi bi-person me-1"></i>
-              Responsable
-            </label>
-            <input
-              type="text"
-              class="form-control"
-              [value]="alerta.responsableNombre || 'No asignado'"
-              readonly
-            />
-          </div>
-
-          <!-- Comentario -->
-          <div class="field-group">
-            <label>
-              <i class="bi bi-chat-text me-1"></i>
-              Comentario
-            </label>
-            <textarea
-              class="form-control"
-              rows="3"
-              [(ngModel)]="nuevaComentario"
-              name="nuevaComentario"
-              placeholder="Agrega un comentario sobre la resolución de la alerta (obligatorio)"
-              required
-            ></textarea>
-            <div class="form-text">
-              Este comentario se guardará en la alerta
-            </div>
-          </div>
-
-          <!-- Alert Status Preview -->
-          <div class="field-group">
-            <label>
-              <i class="bi bi-info-circle me-1"></i>
-              Acción a Realizar
-            </label>
-            <div class="alert alert-warning">
-              <i class="bi bi-exclamation-triangle me-2"></i>
-              Al guardar los cambios, esta alerta se marcará como
-              <strong>inactiva</strong>
-              <span *ngIf="alerta.idTipoAlerta === 2">
-                y se actualizará la fecha estimada de devolución del préstamo.
-              </span>
-              <span *ngIf="alerta.idTipoAlerta === 1">
-                y se resolverá la alerta de mantenimiento.
-              </span>
-            </div>
+          <!-- MOVER Nueva Fecha Estimada dentro de la misma fila -->
+          <div class="info-item">
+            <label *ngIf="alerta?.idTipoAlerta === 2" class="required"
+              >Nueva Fecha Estimada</label
+            >
+            <ng-container *ngIf="alerta?.idTipoAlerta === 2; else noFecha">
+              <!-- Mostrar solo la fecha (sin hora). Min = mañana -->
+              <input
+                type="date"
+                [(ngModel)]="nuevaFechaEstimada"
+                name="nuevaFecha"
+                class="form-control"
+                [attr.min]="minDate"
+                required
+              />
+            </ng-container>
+            <ng-template #noFecha>
+              <!-- espacio reservado cuando no corresponde mostrar input -->
+              <p class="field-value">-</p>
+            </ng-template>
           </div>
         </div>
 
+        <!-- Comentario -->
+        <div class="field-group full-width">
+          <label class="required">Comentario</label>
+          <textarea
+            [(ngModel)]="nuevaComentario"
+            name="comentario"
+            rows="3"
+            required
+          ></textarea>
+        </div>
+
+        <!-- Actions -->
         <div class="actions">
           <button type="button" class="btn-cancel" (click)="onCancel()">
-            <i class="bi bi-x-circle me-1"></i>
             Cancelar
           </button>
           <button
             type="submit"
             class="btn-submit"
-            [disabled]="!isFormValid || !nuevaComentario.trim() || isProcessing"
+            [disabled]="!isFormValid || isProcessing"
           >
-            <span
-              *ngIf="isProcessing"
-              class="spinner-border spinner-border-sm me-2"
-              role="status"
-            ></span>
-            <i class="bi bi-check-circle me-1" *ngIf="!isProcessing"></i>
-            {{ isProcessing ? "Guardando..." : "Guardar Cambios" }}
+            Guardar Cambios
           </button>
         </div>
       </form>
+
+      <!-- confirmación manejada por AlertaService.confirm (SweetAlert2) -->
     </div>
   </div>
 </div>

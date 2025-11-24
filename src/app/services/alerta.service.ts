@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -163,5 +164,10 @@ export class AlertaService {
       .pipe(
         tap(() => this.notificarCambioEnAlertas()) // Notificar cambios después de actualizar
       );
+  }
+
+  exportarAlertasExcel(): Observable<Blob> {
+    const url = `${this.apiUrl}/exportar-excel`;
+    return this.http.get(url, { responseType: 'blob' });
   }
 }

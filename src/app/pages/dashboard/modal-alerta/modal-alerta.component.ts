@@ -1,48 +1,48 @@
-import { Component, EventEmitter, Output, OnInit, Input, OnChanges, SimpleChanges, HostListener, ElementRef } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output,
+  OnInit,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  HostListener,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AlertaService, UpdateAlertaMovimientoDto } from '../../../services/alerta.service';
-import { MovimientoService } from '../../../services/movimiento.service';
+import {
+  AlertaService,
+  UpdateAlertaMovimientoDto,
+} from '../../../services/alerta.service';
 import { AuthService } from '../../../services/auth.service';
-
-interface Alerta {
-  idAlerta: number;
-  idMovimiento: number;
-  nombreHerramienta: string;
-  idTipoAlerta: number;
-  nombreTipoAlerta: string;
-  fechaGeneracion: string;
-  comentario: string;
-  activo: boolean;
-  diasVencido?: number;
-  responsableNombre?: string;
-  tipoMovimiento?: string;
-}
 
 @Component({
   selector: 'app-modal-alerta',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './modal-alerta.component.html',
-  styleUrls: ['../../../../styles/modal-style.css']
+  styleUrls: ['../../../../styles/modal-style.css'],
 })
 export class ModalAlertaComponent implements OnInit, OnChanges {
   @Output() close = new EventEmitter<void>();
   @Output() alertaUpdated = new EventEmitter<void>();
 
-  @Input() alerta: Alerta | null = null;
+  @Input() alerta: any | null = null;
   @Input() visible = false;
 
   nuevaFechaEstimada: string = '';
   nuevaComentario: string = '';
   isProcessing = false;
 
+  // Nueva propiedad: fecha mínima permitida (YYYY-MM-DD) -> mañana
+  minDate: string = '';
+
   constructor(
     private alertaService: AlertaService,
-    private movimientoService: MovimientoService,
     private authService: AuthService,
     private elementRef: ElementRef
-  ) { }
+  ) {}
 
   @HostListener('document:keydown.escape', ['$event'])
   onEscapeKey(event: Event | KeyboardEvent) {
@@ -50,9 +50,11 @@ export class ModalAlertaComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    // Focus on first input when modal opens
+    this.computeMinDate();
     setTimeout(() => {
-      const firstInput = this.elementRef.nativeElement.querySelector('input:not([readonly]):not([disabled])');
+      const firstInput = this.elementRef.nativeElement.querySelector(
+        'input:not([readonly]):not([disabled])'
+      );
       if (firstInput) firstInput.focus();
     }, 150);
   }
@@ -61,44 +63,94 @@ export class ModalAlertaComponent implements OnInit, OnChanges {
     if (changes['alerta'] && this.alerta) {
       this.nuevaFechaEstimada = '';
       this.nuevaComentario = this.alerta.comentario ?? '';
+      this.computeMinDate(); // recalcular por si la apertura se hace en cambio de día
     }
+  }
+
+  // Calcula la fecha mínima (mañana) con formato YYYY-MM-DD
+  private computeMinDate(): void {
+    const hoy = new Date();
+    const manana = new Date(
+      hoy.getFullYear(),
+      hoy.getMonth(),
+      hoy.getDate() + 1
+    );
+    const yyyy = manana.getFullYear();
+    const mm = String(manana.getMonth() + 1).padStart(2, '0');
+    const dd = String(manana.getDate()).padStart(2, '0');
+    this.minDate = `${yyyy}-${mm}-${dd}`;
+  }
+
+  // Convierte fecha 'YYYY-MM-DD' a ISO datetime para la API (00:00:00)
+  private toApiDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const iso = new Date(dateStr + 'T00:00:00').toISOString();
+    return iso;
   }
 
   onSaveEdit(): void {
     if (!this.alerta) return;
 
-    this.isProcessing = true;
+    // Validación adicional por seguridad
+    if (this.alerta.idTipoAlerta === 2 && !this.nuevaFechaEstimada) return;
+    if (
+      this.alerta.idTipoAlerta === 2 &&
+      this.nuevaFechaEstimada < this.minDate
+    )
+      return;
 
-    const alertId = this.alerta.idAlerta;
-    const currentUser = this.authService.getUser();
-
-    // Prepare update DTO for the combined endpoint
+    // preparar DTO pero NO ejecutar aún
     const updateDto: UpdateAlertaMovimientoDto = {
-      IdAlerta: alertId,
+      IdAlerta: this.alerta.idAlerta,
       Activo: false,
       Comentario: this.nuevaComentario,
-      IdModifica: currentUser?.id || null
+      IdModifica: this.authService.getUser()?.id || null,
     };
 
-    // Add movement data if it's a loan alert and new date is provided
     if (this.alerta.idTipoAlerta === 2 && this.nuevaFechaEstimada) {
       updateDto.IdMovimiento = this.alerta.idMovimiento;
-      updateDto.FechaEstimadaDevolucion = this.nuevaFechaEstimada;
+      updateDto.FechaEstimadaDevolucion = this.toApiDate(
+        this.nuevaFechaEstimada
+      );
     }
 
-    // Execute single API call
-    this.alertaService.updateAlertaAndMovimiento(alertId, updateDto)
-      .toPromise()
-      .then((result) => {
-        this.isProcessing = false;
-        this.alertaService.success('Los cambios se guardaron correctamente', '¡Éxito!');
-        this.alertaUpdated.emit();
-        this.onCancel();
+    // Usar AlertaService.confirm para solicitar confirmación al usuario
+    this.alertaService
+      .confirm(
+        'Esta acción eliminará la alerta hasta que vuelva a vencer el préstamo. ¿Desea continuar?',
+        'Confirmar dilatación'
+      )
+      .then((result: any) => {
+        if (result?.isConfirmed) {
+          // el usuario confirmó -> ejecutar la actualización
+          this.isProcessing = true;
+          this.alertaService
+            .updateAlertaAndMovimiento(this.alerta!.idAlerta, updateDto)
+            .toPromise()
+            .then(() => {
+              this.isProcessing = false;
+              this.alertaService.success(
+                'Los cambios se guardaron correctamente',
+                '¡Éxito!'
+              );
+              this.alertaUpdated.emit();
+              this.onCancel();
+            })
+            .catch((err) => {
+              this.isProcessing = false;
+              console.error('Error al guardar cambios:', err);
+              this.alertaService.error(
+                'Ocurrió un error al guardar los cambios',
+                'Error'
+              );
+            });
+        } else {
+          // usuario canceló: no hacer nada
+        }
       })
-      .catch((error) => {
-        this.isProcessing = false;
-        console.error('Error al guardar cambios:', error);
-        this.alertaService.error('Ocurrió un error al guardar los cambios', 'Error');
+      .catch((err) => {
+        // en caso de error con el modal de confirmación
+        console.error('Error mostrando confirmación:', err);
       });
   }
 
@@ -109,29 +161,41 @@ export class ModalAlertaComponent implements OnInit, OnChanges {
     this.close.emit();
   }
 
-  // Format date for datetime-local input
-  formatDateForInput(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  }
-
   get formattedFechaGeneracion(): string {
     if (!this.alerta?.fechaGeneracion) return '';
     const date = new Date(this.alerta.fechaGeneracion);
     return this.formatDateForInput(date);
   }
 
+  formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  // Ajustar la validación del formulario para prevenir fechas no permitidas
   get isFormValid(): boolean {
-    // For loan alerts, require new estimated date and a non-empty comment
     if (this.alerta?.idTipoAlerta === 2) {
-      return !!this.nuevaFechaEstimada && !!this.nuevaComentario.trim();
+      const fechaOk =
+        !!this.nuevaFechaEstimada && this.nuevaFechaEstimada >= this.minDate;
+      return fechaOk && !!this.nuevaComentario.trim();
     }
-    // For maintenance alerts, require a non-empty comment
     return !!this.nuevaComentario.trim();
+  }
+
+  // Formatea fecha de vencimiento para mostrar en el header (dd/MM/yyyy)
+  get formattedFechaVencimiento(): string {
+    const raw =
+      this.alerta?.fechaVencimiento ?? this.alerta?.fecha_vencimiento ?? null;
+    if (!raw) return '';
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return '';
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
   }
 }

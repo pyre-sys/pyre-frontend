@@ -1,0 +1,280 @@
+/* modal-alerta.component.css */
+
+/* Contenedor principal con padding */
+.modal-content {
+  padding: 1.25rem;
+  background: #fff;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #334155;
+  font-size: 1rem;
+  line-height: 1.4;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Grid compacto para los campos */
+.compact-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  align-items: center; /* Alinear verticalmente */
+}
+
+/* Cada grupo de campo */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 60px;
+}
+
+/* Aumentar espacio para el textarea de comentario (más compacto ahora) */
+.field-group.full-width {
+  min-height: 90px; /* reducido a la mitad respecto a lo anterior */
+}
+
+/* Etiquetas */
+.modal-form label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  margin-top: 0.45rem;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Campo de texto estático para mostrar info */
+.field-value {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1e293b;
+  user-select: none; /* evitar selección */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Inputs y textarea */
+.modal-form input:not([style*="display:none"]),
+.modal-form select,
+.modal-form textarea {
+  padding: 0.6rem 0.8rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #1e293b;
+  transition: all 0.18s ease;
+  width: 100%;
+  box-sizing: border-box;
+  height: 38px;
+  resize: vertical;
+}
+
+.modal-form textarea {
+  min-height: 80px; /* altura inicial menor */
+  max-height: 260px; /* límite inferior proporcional */
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Inputs y textarea foco */
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-form textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1),
+    0 4px 12px rgba(37, 99, 235, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Contenedor de acciones botones */
+.actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Botones */
+.btn-cancel {
+  background: transparent;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btn-submit {
+  background: linear-gradient(
+    135deg,
+    var(--color-success, #10b981),
+    var(--color-success-dark, #059669)
+  );
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-submit:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Responsividad */
+
+/* Para pantallas medianas y menos */
+@media (max-width: 768px) {
+  .compact-form-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem 0.8rem;
+  }
+}
+
+/* Para pantallas pequeñas */
+@media (max-width: 480px) {
+  .compact-form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .field-group {
+    min-height: 65px;
+  }
+  .modal-form input:not([style*="display:none"]),
+  .modal-form select {
+    font-size: 0.85rem;
+    height: 36px;
+    padding: 0.5rem 0.7rem;
+  }
+  .field-group.full-width {
+    min-height: 70px;
+  }
+  .modal-form textarea {
+    min-height: 70px;
+    max-height: 200px;
+  }
+}
+
+/* =========================================================
+   Estilos específicos del Modal Alerta
+   Diseñados para complementar modal-style.css
+   sin interferir ni romper estilos globales.
+   ========================================================= */
+
+/* ------- FILA HORIZONTAL: forzar 3 items en una sola fila -------- */
+.info-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap; /* Cambiar a nowrap para mantener en una fila */
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ------- COLUMNA INDIVIDUAL: ocupar 1/3 del ancho -------- */
+.info-item {
+  flex: 1 1 0; /* Mantener para ocupar igual espacio */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------- TITULO DE CAMPO -------- */
+.info-item label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.25rem;
+}
+
+/* ------- VALOR NO EDITABLE -------- */
+.info-item p {
+  margin: 0;
+  padding: 0.55rem 0.8rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 0.9rem;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------- RESPONSIVE: apilar en pantallas pequeñas -------- */
+@media (max-width: 768px) {
+  .info-row {
+    flex-direction: column !important;
+    gap: 0.75rem;
+  }
+  .info-item {
+    flex: 1 1 100%;
+  }
+}
+
+/* Título y meta en header: fecha de vencimiento */
+.modal-title-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.modal-title-wrapper .modal-title {
+  margin: 0;
+}
+.title-expired {
+  color: #dc3545; /* rojo claro/alerta */
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+/* Forzar small rojo a la derecha del título dentro del header */
+.modal-header .modal-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* permitir que el título y el small estén en línea */
+}
+
+.modal-header .modal-title-wrapper .modal-title {
+  margin: 0;
+  line-height: 1;
+  display: inline-block;
+}
+
+/* Small mostrado inmediatamente a la derecha del título, en rojo y pequeño */
+.modal-header .modal-title-wrapper .title-expired {
+  display: inline-block !important;
+  margin-left: 0.5rem !important; /* separación a la derecha del título */
+  color: #dc3545 !important; /* rojo (mayor prioridad) */
+  font-size: 0.85rem !important; /* tamaño pequeño */
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  opacity: 0.95 !important;
+}

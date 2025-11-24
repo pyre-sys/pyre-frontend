@@ -3,17 +3,21 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap'; // Asegurarse de que esté importado
 import { AlertaService } from '../../../services/alerta.service';
 import { PageTitleService } from '../../../services/page-title.service';
 import { ModalAlertaComponent } from '../modal-alerta/modal-alerta.component';
+import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 
 interface Alerta {
   idAlerta: number;
   idMovimiento: number;
-  nombreHerramienta: string;
+  nombreHerramienta: string; // Ya existe
+  herramientaNombre?: string; // Agregada para evitar conflictos
   idTipoAlerta: number;
   nombreTipoAlerta: string;
   fechaGeneracion: string;
+  fechaVencimiento?: string; // Agregada
   comentario: string;
   activo: boolean;
   diasVencido?: number;
@@ -21,147 +25,174 @@ interface Alerta {
   tipoMovimiento?: string;
 }
 
-type TipoFiltro = 'todas' | 'pendientes' | 'vencidas' | 'noLeidas';
-
 @Component({
   selector: 'app-alertas',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModalAlertaComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgbTooltipModule, // Asegurarse de que esté incluido aquí
+    ModalAlertaComponent,
+    SpinnerComponent,
+  ],
   templateUrl: './alertas.component.html',
   styleUrls: ['./alertas.component.css', '../../../../styles/visor-style.css'],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(-10px)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
+        animate(
+          '300ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' })
+        ),
+      ]),
     ]),
-    trigger('slideIn', [
-      transition(':enter', [
-        style({ transform: 'translateX(-20px)', opacity: 0 }),
-        animate('400ms ease-out', style({ transform: 'translateX(0)', opacity: 1 }))
-      ])
-    ])
-  ]
+  ],
 })
 export class AlertasComponent implements OnInit {
   alertas: Alerta[] = [];
   alertasFiltradas: Alerta[] = [];
   isLoading = false;
-  tipoFiltroActual: TipoFiltro = 'todas';
-  searchTerm = '';
+
+  // Contadores para las tarjetas
+  totalAlertas = 0;
+  prestamosVencidos = 0;
+  reparacionesVencidas = 0;
 
   // Modal properties
   selectedAlerta: Alerta | null = null;
   showEditModal = false;
-
-  // Estadísticas
-  stats = {
-    total: 0,
-    pendientes: 0,
-    vencidas: 0,
-    noLeidas: 0
-  };
-
-  Math = Math; // Expose Math as a public property
 
   constructor(
     private alertaService: AlertaService,
     private pageTitleService: PageTitleService,
     private route: ActivatedRoute,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Gestión de Alertas');
-
-    // Check for initial filter from route params
-    this.route.queryParams.subscribe(params => {
-      const tipo = params['tipo'];
-      if (tipo === 'pendientes' || tipo === 'vencidas') {
-        this.tipoFiltroActual = tipo;
-      }
-      this.loadAlertas();
-    });
+    this.fetchAlertas(); // ahora fetchAlertas obtiene también el total oficial
   }
 
-  loadAlertas(): void {
+  fetchAlertas(): void {
     this.isLoading = true;
 
-    this.alertaService.getAlertas().subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        if (response.success && response.data) {
-          this.alertas = this.processAlertas(response.data);
-          this.calculateStats();
-        } else {
-          this.alertas = [];
-          this.alertasFiltradas = [];
-        }
+    // 1) obtener total oficial primero
+    this.alertaService.getCountAlertasVencidas().subscribe({
+      next: (countResp: any) => {
+        this.totalAlertas = Number(countResp?.data ?? 0);
+
+        // 2) luego traer la lista completa de alertas
+        this.alertaService.getAlertas().subscribe({
+          next: (resp: any) => {
+            this.alertas = (resp.data || []).map((alerta: any) => ({
+              ...alerta,
+              herramientaNombre:
+                alerta.nombreHerramienta ?? alerta.herramientaNombre,
+              fechaVencimiento:
+                alerta.fechaVencimiento ?? alerta.fecha_vencimiento ?? null,
+              diasVencido: this.calcularDiasVencido(
+                alerta.fechaVencimiento ?? alerta.fecha_vencimiento ?? null
+              ),
+            }));
+            this.alertasFiltradas = [...this.alertas];
+
+            // 3) calcular préstamos y mantenimientos a partir de tipoMovimiento
+            const normalize = (s?: string) =>
+              (s ?? '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+
+            const prestamos = this.alertas.filter((a) =>
+              normalize(a.tipoMovimiento).includes('prestamo')
+            ).length;
+
+            const mantenimientos = this.alertas.filter((a) =>
+              normalize(a.tipoMovimiento).includes('mantenimiento')
+            ).length;
+
+            // 4) asegurar que la suma coincide con el total oficial (siempre respetar totalAlertas)
+            this.prestamosVencidos = prestamos;
+            // asignar la diferencia a mantenimiento para que la suma coincida con totalAlertas
+            const diff = this.totalAlertas - this.prestamosVencidos;
+            this.reparacionesVencidas =
+              diff >= 0
+                ? Math.max(mantenimientos, diff)
+                : Math.max(mantenimientos, 0);
+
+            this.isLoading = false;
+          },
+          error: () => {
+            this.alertas = [];
+            this.alertasFiltradas = [];
+            this.prestamosVencidos = 0;
+            this.reparacionesVencidas = Math.max(
+              0,
+              this.totalAlertas - this.prestamosVencidos
+            );
+            this.isLoading = false;
+          },
+        });
       },
-      error: (error) => {
-        this.isLoading = false;
-        console.error('Error al cargar alertas:', error);
-        this.alertas = [];
-        this.alertasFiltradas = [];
-      }
+      error: () => {
+        // Si falla obtener el total, caemos a cargar lista y calcular desde ella
+        this.alertaService.getAlertas().subscribe({
+          next: (resp: any) => {
+            this.alertas = (resp.data || []).map((alerta: any) => ({
+              ...alerta,
+              herramientaNombre:
+                alerta.nombreHerramienta ?? alerta.herramientaNombre,
+              fechaVencimiento:
+                alerta.fechaVencimiento ?? alerta.fecha_vencimiento ?? null,
+              diasVencido: this.calcularDiasVencido(
+                alerta.fechaVencimiento ?? alerta.fecha_vencimiento ?? null
+              ),
+            }));
+            this.alertasFiltradas = [...this.alertas];
+            this.totalAlertas = this.alertas.length;
+
+            const normalize = (s?: string) =>
+              (s ?? '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+
+            this.prestamosVencidos = this.alertas.filter((a) =>
+              normalize(a.tipoMovimiento).includes('prestamo')
+            ).length;
+            this.reparacionesVencidas =
+              this.totalAlertas - this.prestamosVencidos;
+            this.isLoading = false;
+          },
+          error: () => {
+            this.alertas = [];
+            this.alertasFiltradas = [];
+            this.totalAlertas = 0;
+            this.prestamosVencidos = 0;
+            this.reparacionesVencidas = 0;
+            this.isLoading = false;
+          },
+        });
+      },
     });
   }
 
-  private processAlertas(alertas: any[]): Alerta[] {
-    return alertas.map(alerta => ({
-      ...alerta,
-      diasVencido: this.calculateDaysOverdue(alerta.fechaGeneracion, alerta.idTipoAlerta)
-    }));
+  // Calcular días vencido
+  private calcularDiasVencido(fechaVencimiento: string | null): number {
+    if (!fechaVencimiento) return 0;
+
+    const hoy = new Date();
+    const vencimiento = new Date(fechaVencimiento);
+    const diferenciaTiempo = hoy.getTime() - vencimiento.getTime();
+    const diasVencido = Math.floor(diferenciaTiempo / (1000 * 60 * 60 * 24));
+
+    return diasVencido > 0 ? diasVencido : 0; // Solo devolver días vencidos positivos
   }
 
-  private calculateDaysOverdue(fechaGeneracion: string, tipoAlerta: number): number {
-    if (tipoAlerta !== 2) return 0; // Solo calcular para alertas vencidas
-
-    const today = new Date();
-    const fechaGen = new Date(fechaGeneracion);
-
-    if (fechaGen.getFullYear() === 1) return 0; // Fecha inválida del backend
-
-    const diffTime = today.getTime() - fechaGen.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    return diffDays > 0 ? diffDays : 0;
-  }
-
-  private extractCodigoFromName(nombreHerramienta: string): string {
-    // Extract code pattern from tool name (e.g., "TALADRO MANUAL 01" -> "01")
-    const match = nombreHerramienta.match(/\d+$/);
-    return match ? match[0] : '';
-  }
-
-  // Get alert count by type name (use tipoMovimiento primero, fallback to nombreTipoAlerta)
-  getAlertCountByType(tipoMovimiento: string): number {
-    const normalize = (s: string) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    const target = normalize(tipoMovimiento);
-
-    return this.alertas.filter(a => {
-      const tipoMov = normalize(a.tipoMovimiento || '');
-      const nombreTipo = normalize(a.nombreTipoAlerta || '');
-
-      // Prefer matching tipoMovimiento
-      if (tipoMov) {
-        if (tipoMov === target) return true;
-        if (tipoMov.includes(target)) return true;
-      }
-
-      // Fallback to nombreTipoAlerta
-      if (nombreTipo) {
-        if (nombreTipo === target) return true;
-        if (nombreTipo.includes(target)) return true;
-      }
-
-      return false;
-    }).length;
-  }
-
-  // Open edit modal
-  openEditModal(alerta: Alerta): void {
+  // Open dilatar modal
+  openDilatarModal(alerta: Alerta): void {
     this.selectedAlerta = { ...alerta };
     this.showEditModal = true;
   }
@@ -174,108 +205,31 @@ export class AlertasComponent implements OnInit {
 
   // Handle alert updated
   onAlertaUpdated(): void {
-    this.loadAlertas(); // Reload alerts after update
+    this.fetchAlertas(); // Reload alerts after update
     this.onCloseEditModal();
   }
 
-  // Get alert type name by ID
-  getAlertTypeName(idTipoAlerta: number): string {
-    switch (idTipoAlerta) {
-      case 1:
-        return 'Mantenimiento';
-      case 2:
-        return 'Préstamo Vencido';
-      default:
-        return 'Desconocido';
-    }
-  }
-
-  // Apply current filters
-  private applyFilters(): void {
-    let filtered = [...this.alertas];
-
-    // Apply search filter
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(alerta =>
-        alerta.nombreHerramienta.toLowerCase().includes(term) ||
-        alerta.nombreTipoAlerta.toLowerCase().includes(term) ||
-        (alerta.responsableNombre && alerta.responsableNombre.toLowerCase().includes(term))
-      );
-    }
-
-    // Apply type filter
-    switch (this.tipoFiltroActual) {
-      case 'pendientes':
-        filtered = filtered.filter(a => a.idTipoAlerta === 1);
-        break;
-      case 'vencidas':
-        filtered = filtered.filter(a => a.idTipoAlerta === 2);
-        break;
-      // 'todas' shows all alerts
-    }
-
-    this.alertasFiltradas = filtered;
-  }
-
-  private calculateStats(): void {
-    this.stats.total = this.alertas.length;
-    this.stats.pendientes = this.alertas.filter(a => a.idTipoAlerta === 1).length;
-    this.stats.vencidas = this.alertas.filter(a => a.idTipoAlerta === 2).length;
-
-    // Apply filters after calculating stats
-    this.applyFilters();
-  }
-
-  onFilterChange(filtro: any): void {
-    this.tipoFiltroActual = filtro;
-
-    // Update URL without navigation
-    const queryParams = filtro !== 'todas' ? { tipo: filtro } : {};
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams,
-      queryParamsHandling: 'merge'
+  downloadReporteExcel(): void {
+    console.log('Descargando reporte de alertas...');
+    // Verificar que el método exportarAlertasExcel exista en AlertaService
+    this.alertaService.exportarAlertasExcel().subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Reporte_Alertas_${new Date()
+          .toISOString()
+          .slice(0, 10)
+          .replace(/-/g, '')}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        console.log('Reporte descargado correctamente.');
+      },
+      error: (err: unknown) => {
+        console.error('Error al descargar el reporte:', err);
+      },
     });
-  }
-
-
-
-  getAlertIcon(tipoAlerta: number): string {
-    return tipoAlerta === 1 ? 'bi-exclamation-triangle' : 'bi-exclamation-octagon';
-  }
-
-  getAlertColor(tipoAlerta: number): string {
-    return tipoAlerta === 1 ? 'warning' : 'danger';
-  }
-
-  getFilterCount(filtro: any): number {
-    switch (filtro) {
-      case 'todas': return this.stats.total;
-      case 'pendientes': return this.stats.pendientes;
-      case 'vencidas': return this.stats.vencidas;
-      case 'noLeidas': return this.stats.noLeidas;
-      default: return 0;
-    }
-  }
-
-  private showSuccessToast(message: string): void {
-    // Implement toast notification or use AlertaService
-    console.log('Success:', message);
-  }
-
-  private showErrorToast(message: string): void {
-    // Implement toast notification or use AlertaService
-    console.error('Error:', message);
-  }
-
-  private showInfoToast(message: string): void {
-    // Implement toast notification or use AlertaService
-    console.info('Info:', message);
-  }
-
-  // Track by function for performance
-  trackByAlerta(index: number, alerta: Alerta): number {
-    return alerta.idAlerta;
   }
 }

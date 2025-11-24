@@ -1,224 +1,123 @@
-<div class="alertas-container">
-  <!-- Header Section -->
-  <div class="alertas-header" @fadeIn>
-    <div class="header-content">
-      <div class="title-section">
-        <h2 class="page-title">
-          <i class="bi bi-bell-fill me-2"></i>
-          Gestión de Alertas
-        </h2>
-        <p class="page-subtitle">
-          Monitoreo y seguimiento de alertas del sistema
-        </p>
+<div class="container-fluid page-shell page-header-container">
+  <div class="d-flex justify-content-end align-items-center mb-3 gap-3">
+    <!-- Botón de exportar Excel eliminado -->
+  </div>
+</div>
+
+<div class="alertas-container container-fluid page-shell mt-2">
+  <div class="pyre-table-shell">
+    <!-- 🔔 TARJETAS DE RESUMEN (reemplazan filtros) -->
+    <div class="row g-3 mb-3">
+      <div class="col-sm-4">
+        <div class="stat-card primary">
+          <div class="stat-icon primary"><i class="pi pi-info-circle"></i></div>
+          <div class="stat-info">
+            <h3>{{ totalAlertas }}</h3>
+            <p>Alertas por vencimiento</p>
+          </div>
+        </div>
       </div>
 
-      <!-- Alert Count Cards - Fixed Layout -->
-      <div class="row g-3 mt-3">
-        <div class="col-md-4">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center">
-              <div class="flex-shrink-0">
-                <div class="icon-circle bg-primary">
-                  <i class="bi bi-bell-fill text-white"></i>
-                </div>
-              </div>
-              <div class="flex-grow-1 ms-3">
-                <div class="text-xs fw-bold text-primary text-uppercase mb-1">
-                  Total Alertas
-                </div>
-                <div class="h5 mb-0 fw-bold">{{ alertas.length }}</div>
-              </div>
-            </div>
+      <div class="col-sm-4">
+        <div class="stat-card warning">
+          <div class="stat-icon warning">
+            <i class="pi pi-exclamation-triangle"></i>
+          </div>
+          <div class="stat-info">
+            <h3>{{ prestamosVencidos }}</h3>
+            <p>Préstamos Vencidos</p>
           </div>
         </div>
+      </div>
 
-        <div class="col-md-4">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center">
-              <div class="flex-shrink-0">
-                <div class="icon-circle bg-warning">
-                  <i class="bi bi-tools text-white"></i>
-                </div>
-              </div>
-              <div class="flex-grow-1 ms-3">
-                <div class="text-xs fw-bold text-warning text-uppercase mb-1">
-                  Mantenimiento
-                </div>
-                <div class="h5 mb-0 fw-bold">
-                  {{ getAlertCountByType("Mantenimiento") }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center">
-              <div class="flex-shrink-0">
-                <div class="icon-circle bg-danger">
-                  <i class="bi bi-exclamation-triangle-fill text-white"></i>
-                </div>
-              </div>
-              <div class="flex-grow-1 ms-3">
-                <div class="text-xs fw-bold text-danger text-uppercase mb-1">
-                  Préstamos
-                </div>
-                <div class="h5 mb-0 fw-bold">
-                  {{ getAlertCountByType("Préstamo") }}
-                </div>
-              </div>
-            </div>
+      <div class="col-sm-4">
+        <div class="stat-card info">
+          <div class="stat-icon info"><i class="pi pi-wrench"></i></div>
+          <div class="stat-info">
+            <h3>{{ reparacionesVencidas }}</h3>
+            <p>Mantenimientos Vencidos</p>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando alertas...</span>
-    </div>
-    <p class="loading-text">Cargando alertas...</p>
-  </div>
+    <!-- Spinner global (overlay) -->
+    <app-spinner [isLoading]="isLoading"></app-spinner>
 
-  <!-- Empty State -->
-  <div
-    *ngIf="!isLoading && alertasFiltradas.length === 0"
-    class="empty-state"
-    @fadeIn
-  >
-    <div class="empty-icon">
-      <i class="bi bi-bell-slash"></i>
-    </div>
-    <h3>No se encontraron alertas</h3>
-  </div>
+    <!-- Tabla -->
+    <div *ngIf="!isLoading" class="pyre-table-container">
+      <table class="pyre-table">
+        <thead>
+          <tr>
+            <th>Herramienta</th>
+            <th>Responsable</th>
+            <th>Fecha Entrega</th>
+            <th>Fecha Vencimiento</th>
+            <th>DIAS VENCIDO</th>
+            <th style="text-align: center">Acciones</th>
+          </tr>
+        </thead>
 
-  <!-- Alerts Grid -->
-  <div *ngIf="!isLoading && alertasFiltradas.length > 0" class="alertas-grid">
-    <div
-      *ngFor="let alerta of alertasFiltradas; trackBy: trackByAlerta"
-      class="alerta-card"
-      [class.warning-alert]="alerta.idTipoAlerta === 1"
-      [class.danger-alert]="alerta.idTipoAlerta === 2"
-      @fadeIn
-    >
-      <!-- Card Header -->
-      <div class="card-header">
-        <div class="alert-indicator">
-          <i
-            [class]="getAlertIcon(alerta.idTipoAlerta)"
-            [class]="'text-' + getAlertColor(alerta.idTipoAlerta)"
-          ></i>
-        </div>
-
-        <div class="alert-title">
-          <h6 class="tool-name">{{ alerta.nombreHerramienta }}</h6>
-          <span
-            class="alert-type"
-            [class]="'badge-' + getAlertColor(alerta.idTipoAlerta)"
+        <tbody>
+          <tr
+            *ngFor="let alerta of alertasFiltradas; let i = index"
+            [ngClass]="{
+              'row-critical': (alerta?.diasVencido ?? 0) > 10,
+              'row-warning':
+                (alerta?.diasVencido ?? 0) >= 5 &&
+                (alerta?.diasVencido ?? 0) <= 9
+            }"
           >
-            {{ alerta.nombreTipoAlerta }}
-          </span>
-        </div>
+            <td>{{ alerta?.herramientaNombre || "-" }}</td>
+            <td>{{ alerta?.responsableNombre || "-" }}</td>
+            <td>
+              <ng-container *ngIf="alerta?.fechaGeneracion; else noFechaEnt">
+                <div class="fecha-inline">
+                  <span class="fecha-line">
+                    {{ alerta.fechaGeneracion | date : "dd/MM/yyyy" }}
+                  </span>
+                  <span class="time-chip" aria-hidden="true">
+                    <i class="pi pi-clock time-icon" aria-hidden="true"></i>
+                    {{ alerta.fechaGeneracion | date : "HH:mm" }}
+                  </span>
+                </div>
+              </ng-container>
+              <ng-template #noFechaEnt>-</ng-template>
+            </td>
+            <td>
+              <ng-container *ngIf="alerta?.fechaVencimiento; else noFechaVenc">
+                <span class="fecha-line">
+                  {{ alerta.fechaVencimiento | date : "dd/MM/yyyy" }}
+                </span>
+              </ng-container>
+              <ng-template #noFechaVenc>-</ng-template>
+            </td>
+            <td>
+              {{ (alerta?.diasVencido ?? 0) > 0 ? alerta.diasVencido : "-" }}
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="btn-icon btn-dilatar"
+                  (click)="openDilatarModal(alerta)"
+                  ngbTooltip="Dilatar el préstamo"
+                  placement="top"
+                  container="body"
+                >
+                  <i class="pi pi-clock"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
 
-        <div class="card-actions">
-          <button
-            type="button"
-            class="btn btn-outline-primary btn-sm"
-            (click)="openEditModal(alerta)"
-            title="Editar alerta"
-          >
-            <i class="bi bi-pencil"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Card Body -->
-      <div class="card-body">
-        <div class="alert-details">
-          <!-- <div class="detail-row">
-            <span class="detail-label">
-              <i class="bi bi-tools"></i>
-              Herramienta:
-            </span>
-            <span class="detail-value">
-              <span class="tool-code" *ngIf="alerta.nombreHerramienta"
-                >#{{ alerta.nombreHerramienta }}</span
-              >
-              {{ alerta.nombreHerramienta }}
-            </span>
-          </div> -->
-
-          <div class="detail-row">
-            <span class="detail-label">
-              <i class="bi bi-calendar3"></i>
-              Generada:
-            </span>
-            <span class="detail-value">
-              {{ alerta.fechaGeneracion | date : "dd/MM/yyyy HH:mm" }}
-            </span>
-          </div>
-
-          <div
-            class="detail-row"
-            *ngIf="
-              alerta.idTipoAlerta === 2 &&
-              alerta.diasVencido &&
-              alerta.diasVencido > 0
-            "
-          >
-            <span class="detail-label">
-              <i class="bi bi-clock-history"></i>
-              Días vencida:
-            </span>
-            <span class="detail-value text-danger fw-bold">
-              {{ alerta.diasVencido }} día{{
-                alerta.diasVencido > 1 ? "s" : ""
-              }}
-            </span>
-          </div>
-
-          <div class="detail-row">
-            <span class="detail-label">
-              <i class="bi bi-eye"></i>
-              Responsable:
-            </span>
-            <span class="detail-value">
-              <span class="detail-value">
-                {{ alerta?.responsableNombre }}
-              </span>
-            </span>
-          </div>
-        </div>
-
-        <!-- Priority Indicator for Overdue -->
-        <!-- <div *ngIf="alerta.idTipoAlerta === 2" class="priority-indicator">
-          <div
-            class="priority-bar"
-            [style.width.%]="Math.min(100, (alerta.diasVencido || 0) * 10)"
-          ></div>
-          <span class="priority-text">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            Requiere atención inmediata
-          </span>
-        </div> -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Results Summary -->
-  <div
-    *ngIf="!isLoading && alertasFiltradas.length > 0"
-    class="results-summary"
-    @fadeIn
-  >
-    <div class="summary-text">
-      Mostrando {{ alertasFiltradas.length }} de {{ alertas.length }} alertas
-      <span *ngIf="searchTerm" class="search-info">
-        • Búsqueda: "{{ searchTerm }}"
-      </span>
+          <tr *ngIf="alertasFiltradas.length === 0">
+            <td colspan="6" class="empty-message">
+              No se encontraron alertas.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
