@@ -124,8 +124,9 @@ export class VisorClientesComponent implements OnInit {
     if (this.filtroCuit?.trim()) filters.cuit = this.filtroCuit.trim();
     if (this.filtroNombre?.trim()) filters.nombre = this.filtroNombre.trim();
     // Convertir estado de string a boolean para el backend (si aplica)
+    // En la API el parámetro es 'activo', por eso lo enviamos como activo=true|false
     if (this.filtroEstado) {
-      filters.estado = this.filtroEstado === 'activo';
+      filters.activo = this.filtroEstado === 'activo';
     }
 
     this.clienteService
