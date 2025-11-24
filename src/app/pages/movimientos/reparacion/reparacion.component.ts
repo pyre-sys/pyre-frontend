@@ -1,15 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { CboHerramientasComponent, HerramientaOption } from '../../../shared/components/Cbo/cbo-herramientas/cbo-herramientas.component';
-import { MovimientoService, CreateMovimientoDto } from '../../../services/movimiento.service';
+import {
+  CboHerramientasComponent,
+  HerramientaOption,
+} from '../../../shared/components/Cbo/cbo-herramientas/cbo-herramientas.component';
+import {
+  MovimientoService,
+  CreateMovimientoDto,
+} from '../../../services/movimiento.service';
 import { AuthService } from '../../../services/auth.service';
 import { PageTitleService } from '../../../services/page-title.service';
 import { AlertaService } from '../../../services/alerta.service';
-import { CboProveedorComponent } from "../../../shared/components/Cbo/cbo-proveedor/cbo-proveedor.component";
-
+import { CboProveedorComponent } from '../../../shared/components/Cbo/cbo-proveedor/cbo-proveedor.component';
 
 @Component({
   selector: 'app-reparacion',
@@ -19,18 +29,25 @@ import { CboProveedorComponent } from "../../../shared/components/Cbo/cbo-provee
     RouterModule,
     ReactiveFormsModule,
     CboHerramientasComponent,
-    CboProveedorComponent
+    CboProveedorComponent,
   ],
   templateUrl: './reparacion.component.html',
-  styleUrls: ['../../../../styles/visor-style.css', '../../../../styles/movimientos-style.css', './reparacion.component.css'],
+  styleUrls: [
+    '../../../../styles/visor-style.css',
+    '../../../../styles/movimientos-style.css',
+    './reparacion.component.css',
+  ],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(-10px)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
-    ])
-  ]
+        animate(
+          '300ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' })
+        ),
+      ]),
+    ]),
+  ],
 })
 export class ReparacionComponent implements OnInit {
   reparacionForm!: FormGroup;
@@ -45,14 +62,15 @@ export class ReparacionComponent implements OnInit {
   private requiredFields = ['proveedorId', 'fechaEstimadaFinalizacion'];
 
   // Placeholder original para observaciones
-  private originalPlaceholder: string = 'Agregue cualquier detalle adicional sobre la reparación... (Opcional)';
+  private originalPlaceholder: string =
+    'Agregue cualquier detalle adicional sobre el préstamo...';
 
   // Opciones para estado físico (ejemplo; no usado en reparación pero para consistencia)
   estadoFisicoOptions = [
     { id: 1, nombre: 'Excelente' },
     { id: 2, nombre: 'Bueno' },
     { id: 3, nombre: 'Regular' },
-    { id: 4, nombre: 'Malo' }
+    { id: 4, nombre: 'Malo' },
   ];
 
   constructor(
@@ -61,7 +79,7 @@ export class ReparacionComponent implements OnInit {
     private authService: AuthService,
     private pageTitleService: PageTitleService,
     private alertService: AlertaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Registrar Reparación');
@@ -75,7 +93,7 @@ export class ReparacionComponent implements OnInit {
       herramientaId: [''], // Solo para selección temporal
       proveedorId: ['', Validators.required],
       fechaEstimadaFinalizacion: ['', [Validators.required]],
-      observaciones: ['', Validators.maxLength(500)]
+      observaciones: ['', Validators.maxLength(500)],
     });
   }
 
@@ -88,7 +106,9 @@ export class ReparacionComponent implements OnInit {
 
   private setInitialPlaceholder(): void {
     setTimeout(() => {
-      const textarea = document.querySelector('textarea[formControlName="observaciones"]') as HTMLTextAreaElement;
+      const textarea = document.querySelector(
+        'textarea[formControlName="observaciones"]'
+      ) as HTMLTextAreaElement;
       if (textarea) {
         textarea.placeholder = this.originalPlaceholder;
       }
@@ -111,7 +131,7 @@ export class ReparacionComponent implements OnInit {
       filledFields++;
     }
 
-    this.requiredFields.forEach(field => {
+    this.requiredFields.forEach((field) => {
       const control = this.reparacionForm.get(field);
       if (control && control.value && control.valid) {
         filledFields++;
@@ -127,14 +147,22 @@ export class ReparacionComponent implements OnInit {
 
   addHerramienta(): void {
     if (!this.currentHerramientaSelection) {
-      this.alertService.error('Debe seleccionar una herramienta primero', 'Selección requerida');
+      this.alertService.error(
+        'Debe seleccionar una herramienta primero',
+        'Selección requerida'
+      );
       return;
     }
 
     // Verificar si la herramienta ya está en la lista
-    const exists = this.selectedHerramientas.some(h => h.id === this.currentHerramientaSelection!.id);
+    const exists = this.selectedHerramientas.some(
+      (h) => h.id === this.currentHerramientaSelection!.id
+    );
     if (exists) {
-      this.alertService.error('Esta herramienta ya está en la lista', 'Herramienta duplicada');
+      this.alertService.error(
+        'Esta herramienta ya está en la lista',
+        'Herramienta duplicada'
+      );
       return;
     }
 
@@ -165,7 +193,10 @@ export class ReparacionComponent implements OnInit {
   onSubmit(): void {
     // Validar herramientas seleccionadas
     if (this.selectedHerramientas.length === 0) {
-      this.alertService.error('Debe seleccionar al menos una herramienta', 'Herramientas requeridas');
+      this.alertService.error(
+        'Debe seleccionar al menos una herramienta',
+        'Herramientas requeridas'
+      );
       return;
     }
 
@@ -177,14 +208,18 @@ export class ReparacionComponent implements OnInit {
     }
 
     // Crear mensaje de confirmación con los datos esenciales de la reparación
-    const herramientasText = this.selectedHerramientas.map(h => h.nombre).join(', ');
+    const herramientasText = this.selectedHerramientas
+      .map((h) => h.nombre)
+      .join(', ');
     const confirmMessage = `¿Confirmar registro de reparación?<br><br>Herramientas (${this.selectedHerramientas.length}): ${herramientasText}<br>Proveedor: ${this.selectedProveedorInfo?.nombreProveedor}`;
 
-    this.alertService.confirm(confirmMessage, 'Confirmar Reparación').then((result) => {
-      if (result.isConfirmed) {
-        this.registrarReparacion();
-      }
-    });
+    this.alertService
+      .confirm(confirmMessage, 'Confirmar Reparación')
+      .then((result) => {
+        if (result.isConfirmed) {
+          this.registrarReparacion();
+        }
+      });
   }
 
   private registrarReparacion(): void {
@@ -195,12 +230,15 @@ export class ReparacionComponent implements OnInit {
 
     if (!currentUserId) {
       this.isLoading = false;
-      this.alertService.error('No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.', 'Error de Autenticación');
+      this.alertService.error(
+        'No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.',
+        'Error de Autenticación'
+      );
       return;
     }
 
     // Crear una reparación por cada herramienta seleccionada
-    const reparaciones = this.selectedHerramientas.map(herramienta => ({
+    const reparaciones = this.selectedHerramientas.map((herramienta) => ({
       idHerramienta: herramienta.id,
       idUsuarioGenera: currentUserId,
       idUsuarioResponsable: null, // Para reparaciones no hay usuario responsable
@@ -217,22 +255,35 @@ export class ReparacionComponent implements OnInit {
     this.movimientoService.registrarMultiplesPrestamos(reparaciones).subscribe({
       next: (responses: any[]) => {
         this.isLoading = false;
-        const herramientasText = this.selectedHerramientas.map(h => h.codigo).join(', ');
-        this.alertService.success(`Las reparaciones de las herramientas ${herramientasText} han sido registradas exitosamente.`, '✓ Reparaciones Registradas');
+        const herramientasText = this.selectedHerramientas
+          .map((h) => h.codigo)
+          .join(', ');
+        this.alertService.success(
+          `Las reparaciones de las herramientas ${herramientasText} han sido registradas exitosamente.`,
+          '✓ Reparaciones Registradas'
+        );
         this.resetForm();
       },
       error: (error) => {
         this.isLoading = false;
-        this.alertService.error(error.error?.message || 'Ha ocurrido un error inesperado. Por favor, intente nuevamente.', '✗ Error al Registrar');
+        this.alertService.error(
+          error.error?.message ||
+            'Ha ocurrido un error inesperado. Por favor, intente nuevamente.',
+          '✗ Error al Registrar'
+        );
         console.error('Error al crear reparaciones:', error);
-      }
+      },
     });
   }
 
   private formatDate(dateString: string): string {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
   }
 
   /**
@@ -254,7 +305,9 @@ export class ReparacionComponent implements OnInit {
 
   // Métodos para manejar el placeholder del textarea
   onTextareaFocus(): void {
-    const textarea = document.querySelector('textarea[formControlName="observaciones"]') as HTMLTextAreaElement;
+    const textarea = document.querySelector(
+      'textarea[formControlName="observaciones"]'
+    ) as HTMLTextAreaElement;
     if (textarea) {
       textarea.placeholder = '';
     }
@@ -263,7 +316,9 @@ export class ReparacionComponent implements OnInit {
   onTextareaBlur(): void {
     const control = this.reparacionForm.get('observaciones');
     if (!control?.value) {
-      const textarea = document.querySelector('textarea[formControlName="observaciones"]') as HTMLTextAreaElement;
+      const textarea = document.querySelector(
+        'textarea[formControlName="observaciones"]'
+      ) as HTMLTextAreaElement;
       if (textarea) {
         textarea.placeholder = this.originalPlaceholder;
       }

@@ -78,7 +78,7 @@ export class PrestamoComponent implements OnInit {
 
   // Placeholder original para observaciones
   private originalPlaceholder: string =
-    'Agregue cualquier detalle adicional sobre el préstamo... (Opcional)';
+    'Agregue cualquier detalle adicional sobre el préstamo...';
 
   // Opciones para estado físico (ejemplo; no usado en préstamo pero para consistencia)
   estadoFisicoOptions = [
