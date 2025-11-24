@@ -62,7 +62,7 @@
 
     <!-- SECCIÓN DE TÍTULO CON BREADCRUMBS -->
     <div class="topbar-title-section" [@titleChange]>
-      <!-- Breadcrumbs (si existen) -->
+      <!-- Breadcrumbs (si existen y no es móvil) -->
       <nav
         *ngIf="hasBreadcrumbs && !isSmallScreen"
         class="breadcrumbs"
@@ -74,7 +74,6 @@
             class="breadcrumb-item"
             [@breadcrumbSlide]
           >
-            <!-- Si tiene ruta, es clickeable -->
             <a
               *ngIf="crumb.route && !last"
               [routerLink]="crumb.route"
@@ -83,8 +82,6 @@
               <i *ngIf="crumb.icon" [class]="'bi ' + crumb.icon + ' me-1'"></i>
               {{ crumb.label }}
             </a>
-
-            <!-- Último elemento o sin ruta -->
             <span
               *ngIf="!crumb.route || last"
               class="breadcrumb-current"
@@ -93,8 +90,6 @@
               <i *ngIf="crumb.icon" [class]="'bi ' + crumb.icon + ' me-1'"></i>
               {{ crumb.label }}
             </span>
-
-            <!-- Separador -->
             <i
               *ngIf="!last"
               class="bi bi-chevron-right breadcrumb-separator"
@@ -103,30 +98,14 @@
         </ol>
       </nav>
 
-      <!-- Título Principal con Icono -->
-      <div class="page-title-container">
-        <div class="page-title-wrapper">
-          <!-- Título y Subtítulo -->
-          <div class="page-title-content">
-            <h1 class="page-title">
-              {{ pageTitle }}
+      <!-- TÍTULO PRINCIPAL FIJO (GRANDE) -->
+      <div class="topbar-title-main" aria-hidden="true">
+        <h1>Sistema de Gestión de Pañol</h1>
+      </div>
 
-              <!-- Badge opcional (ej: notificaciones) -->
-              <span
-                *ngIf="pageBadge"
-                class="badge ms-2"
-                [class]="'bg-' + pageBadge.color"
-              >
-                {{ pageBadge.text }}
-              </span>
-            </h1>
-
-            <!-- Subtítulo (descripción breve) -->
-            <p *ngIf="pageSubtitle && !isSmallScreen" class="page-subtitle">
-              {{ pageSubtitle }}
-            </p>
-          </div>
-        </div>
+      <!-- SUBTÍTULO DINÁMICO (MÁS CHICO) - SOLO UNA VEZ -->
+      <div class="topbar-subtitle" *ngIf="displayTitle">
+        <span>{{ displayTitle }}</span>
       </div>
     </div>
 

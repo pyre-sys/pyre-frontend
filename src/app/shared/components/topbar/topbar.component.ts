@@ -72,6 +72,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
   @Input() userRole: string | null = null;
   @Input() displayRole: string | null = null;
   @Input() userLabel: string | null = null;
+  @Input() pageTitle: string = 'Sistema de Gestión'; // Asegurarse de que este Input exista
 
   @Output() perfilModalToggled = new EventEmitter<boolean>();
   @Output() homeNavigation = new EventEmitter<void>();
@@ -171,10 +172,6 @@ export class TopbarComponent implements OnInit, OnDestroy {
   }
 
   // Getters para acceso fácil en la plantilla
-  get pageTitle(): string {
-    return this.pageMetadata.title;
-  }
-
   get pageIcon(): string | undefined {
     return this.pageMetadata.icon;
   }
@@ -420,5 +417,15 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.router.navigate(['/dashboard/alertas']).catch((error) => {
       console.error('Error al navegar a /dashboard/alertas:', error);
     });
+  }
+
+  // Nombre interno por defecto para mostrar si no se pasa pageTitle desde Sidebar
+  defaultPageTitle = 'Sistema de Gestión';
+
+  // Getter simplificado que solo devuelve el título dinámico
+  get displayTitle(): string {
+    return this.pageTitle && this.pageTitle.trim().length > 0
+      ? this.pageTitle
+      : 'Inicio';
   }
 }

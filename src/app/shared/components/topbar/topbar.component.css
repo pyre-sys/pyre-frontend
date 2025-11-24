@@ -918,3 +918,20 @@
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
+
+/* ========================================
+   ESTILOS ESPECÍFICOS DEL COMPONENTE TOPBAR
+   ======================================== */
+.topbar-title-main h1 {
+  font-size: 1.25rem; /* reducido desde 1.5rem */
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.topbar-subtitle span {
+  font-size: 1rem;
+  font-weight: normal;
+  color: #666;
+  margin-top: 2px;
+}
