@@ -1,0 +1,76 @@
+<div class="container-fluid page-shell page-header-container">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- Título movido al topbar -->
+    <div></div>
+    <div></div>
+  </div>
+</div>
+
+<div class="user-list-container container-fluid page-shell mt-2">
+  <div class="pyre-table-shell">
+    <!-- Indicador de carga simple (reemplaza app-spinner) -->
+    <div *ngIf="isLoading" class="loading-center">
+      <!-- Puedes estilizar .loading-center en el css del componente -->
+      Cargando...
+    </div>
+
+    <div *ngIf="!isLoading" class="custom-table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Legajo</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+            <!-- Nueva columna -->
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="user">
+            <td>{{ user.legajo }}</td>
+            <td>{{ user.nombre }}</td>
+            <td>{{ user.apellido }}</td>
+            <td>{{ user.rolNombre || user.rol }}</td>
+            <td>
+              <span
+                [class.text-success]="user.activo"
+                [class.text-muted]="!user.activo"
+              >
+                {{ user.activo ? "Activo" : "Inactivo" }}
+              </span>
+            </td>
+            <td>
+              <!-- Botón que abre modal para cambiar contraseña -->
+              <button
+                type="button"
+                class="btn-icon btn-action"
+                ngbTooltip="Cambiar contraseña"
+                placement="top"
+                container="body"
+                (click)="openChangePasswordModal()"
+              >
+                <i class="pi pi-key" aria-hidden="true"></i>
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="!user">
+            <td colspan="6" class="empty-message">
+              No se encontraron datos del perfil.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal: abierto cuando showChangePasswordModal === true -->
+  <app-modal-perfil
+    *ngIf="showChangePasswordModal"
+    [user]="user"
+    (save)="onChangePassword($event)"
+    (close)="closeChangePasswordModal()"
+  ></app-modal-perfil>
+</div>

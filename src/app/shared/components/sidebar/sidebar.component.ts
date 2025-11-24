@@ -7,7 +7,8 @@ import {
   ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router'; // agregué NavigationEnd
+import { filter } from 'rxjs/operators'; // nuevo import
 import { AuthService } from '../../../services/auth.service';
 import { AlertaService } from '../../../services/alerta.service';
 import { Roles } from '../../enums/roles';
@@ -32,7 +33,7 @@ interface MenuItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, TopbarComponent, NgbTooltipModule], // Agregar NgbTooltipModule
+  imports: [CommonModule, RouterModule, TopbarComponent, NgbTooltipModule], // Asegurarse de incluir TopbarComponent
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css'],
 })
@@ -59,6 +60,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const role = this.displayRole || '';
     return role ? `${leg} — ${role}` : leg;
   }
+
+  // Nuevo: título dinámico para topbar
+  pageTitle: string = 'Sistema de Gestión';
 
   private subscription = new Subscription();
 
@@ -402,6 +406,84 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadUserData();
 
+    // Suscribir al router para actualizar el título de la página
+    this.subscription.add(
+      this.router.events
+        .pipe(filter((e) => e instanceof NavigationEnd))
+        .subscribe((nav) => {
+          const navEnd = nav as NavigationEnd;
+          const path = navEnd.urlAfterRedirects || navEnd.url;
+
+          // Determinar título específico según la ruta - ser más conciso
+          if (path && path.startsWith('/perfil')) {
+            this.pageTitle = 'Mi Perfil';
+          } else if (path && path.startsWith('/herramienta')) {
+            this.pageTitle = 'Herramientas';
+          } else if (path && path.startsWith('/user')) {
+            this.pageTitle = 'Usuarios';
+          } else if (path && path.startsWith('/recursos/proveedores')) {
+            this.pageTitle = 'Proveedores';
+          } else if (path && path.startsWith('/recursos/clientes')) {
+            this.pageTitle = 'Clientes';
+          } else if (path && path.startsWith('/recursos/obras')) {
+            this.pageTitle = 'Obras';
+          } else if (path && path.startsWith('/movimientos')) {
+            // Rutas específicas dentro de /movimientos
+            const segments = path.split('/').filter((s) => s.length > 0);
+            const sub = (segments[1] ?? '').toLowerCase();
+            switch (sub) {
+              case 'prestamo':
+                this.pageTitle = 'Registrar Préstamo';
+                break;
+              case 'devolucion':
+                this.pageTitle = 'Registrar Devolución';
+                break;
+              case 'reparacion':
+                this.pageTitle = 'Registrar Reparación';
+                break;
+              case 'historial':
+                this.pageTitle = 'Historial de Movimientos';
+                break;
+              default:
+                this.pageTitle = 'Movimientos';
+            }
+          } else if (path && path.startsWith('/reportes')) {
+            // Rutas específicas dentro de /reportes
+            const segments = path.split('/').filter((s) => s.length > 0);
+            const sub = (segments[1] ?? '').toLowerCase();
+            switch (sub) {
+              case 'estado':
+                this.pageTitle = 'Herramientas por Estado';
+                break;
+              case 'valorizacion':
+              case 'valorización':
+                this.pageTitle = 'Stock Valorizado';
+                break;
+              case 'operario':
+                this.pageTitle = 'Uso por Operario';
+                break;
+              case 'disponibilidad':
+                this.pageTitle = 'Disponibilidad de Herramientas';
+                break;
+              default:
+                this.pageTitle = 'Reportes';
+            }
+          } else if (path && path.startsWith('/configuracion')) {
+            this.pageTitle = 'Configuración';
+          } else if (
+            path &&
+            (path.startsWith('/dashboard') ||
+              path === '/inicio' ||
+              path === '/')
+          ) {
+            this.pageTitle = 'Inicio';
+          } else {
+            // Para rutas no reconocidas, usar un título neutro específico
+            this.pageTitle = 'Navegación';
+          }
+        })
+    );
+
     this.subscription.add(
       this.authService.loggedIn$.subscribe((isLoggedIn: boolean) => {
         this.isLoggedIn = isLoggedIn;
@@ -443,8 +525,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         mappedRoleId != null
           ? mappedRoleId
           : user.id_acceso != null
-            ? Number(user.id_acceso)
-            : 0;
+          ? Number(user.id_acceso)
+          : 0;
 
       const nombre = user.nombre || '';
       const apellido = user.apellido || '';

@@ -1,0 +1,177 @@
+<div class="modal-overlay modal-open" role="dialog" aria-modal="true">
+  <div class="modal-wrapper">
+    <div class="modal-content open">
+      <div class="modal-header">
+        <div class="header-controls">
+          <h3 class="modal-title">Cambiar Contraseña</h3>
+        </div>
+        <button class="close-btn" (click)="onClose()" aria-label="Cerrar">
+          <span class="pi pi-times" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        class="modal-form"
+        autocomplete="off"
+      >
+        <!-- Inputs ocultos para reducir autofill del navegador -->
+        <input
+          type="text"
+          name="fakeusernameremembered"
+          autocomplete="username"
+          style="display: none"
+        />
+        <input
+          type="password"
+          name="fakepasswordremembered"
+          autocomplete="new-password"
+          style="display: none"
+        />
+
+        <!-- VERTICAL STACK: cada field-group ocupa toda la fila -->
+        <div class="vertical-form">
+          <!-- currentPassword -->
+          <div class="field-group full-width">
+            <label class="required">Contraseña Actual</label>
+            <input
+              formControlName="currentPassword"
+              type="password"
+              placeholder="Contraseña actual"
+            />
+            <div
+              *ngIf="
+                form.get('currentPassword')?.touched &&
+                form.get('currentPassword')?.invalid
+              "
+              class="error-text"
+            >
+              <span *ngIf="form.get('currentPassword')?.errors?.['required']"
+                >La contraseña actual es requerida</span
+              >
+              <span *ngIf="form.get('currentPassword')?.errors?.['minlength']"
+                >Mínimo 3 caracteres</span
+              >
+            </div>
+          </div>
+
+          <!-- newPassword -->
+          <div class="field-group full-width">
+            <label class="required">Nueva Contraseña</label>
+            <div class="input-with-icon">
+              <!-- status icon appears inside input when confirm has value -->
+              <span
+                class="status-icon"
+                *ngIf="
+                  passwordsMatch !== null &&
+                  (form.get('confirmPassword')?.value || '').length > 0
+                "
+                [ngClass]="{
+                  'status-ok': passwordsMatch === true,
+                  'status-bad': passwordsMatch === false
+                }"
+                aria-hidden="true"
+              >
+                <i
+                  [class]="
+                    passwordsMatch === true ? 'pi pi-check' : 'pi pi-times'
+                  "
+                ></i>
+              </span>
+
+              <input
+                [type]="showNewPassword ? 'text' : 'password'"
+                formControlName="newPassword"
+                placeholder="Nueva contraseña (mín 6 caracteres)"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="icon-btn"
+                (click)="showNewPassword = !showNewPassword"
+                [attr.aria-label]="
+                  showNewPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                "
+              >
+                <span
+                  [class]="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                ></span>
+              </button>
+            </div>
+            <div *ngIf="passwordFeedback" class="error-text">
+              {{ passwordFeedback }}
+            </div>
+          </div>
+
+          <!-- confirmPassword -->
+          <div class="field-group full-width">
+            <label class="required">Confirmar Nueva Contraseña</label>
+            <div class="input-with-icon">
+              <span
+                class="status-icon"
+                *ngIf="
+                  passwordsMatch !== null &&
+                  (form.get('confirmPassword')?.value || '').length > 0
+                "
+                [ngClass]="{
+                  'status-ok': passwordsMatch === true,
+                  'status-bad': passwordsMatch === false
+                }"
+                aria-hidden="true"
+              >
+                <i
+                  [class]="
+                    passwordsMatch === true ? 'pi pi-check' : 'pi pi-times'
+                  "
+                ></i>
+              </span>
+
+              <input
+                [type]="showConfirm ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                placeholder="Confirma la nueva contraseña"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="icon-btn"
+                (click)="showConfirm = !showConfirm"
+                [attr.aria-label]="
+                  showConfirm ? 'Ocultar confirmación' : 'Mostrar confirmación'
+                "
+              >
+                <span
+                  [class]="showConfirm ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                ></span>
+              </button>
+            </div>
+
+            <div
+              *ngIf="confirmFeedback && passwordsMatch !== true"
+              class="error-text"
+            >
+              {{ confirmFeedback }}
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn-cancel" (click)="onClose()">
+            Cancelar
+          </button>
+          <!-- Deshabilitar hasta que el formulario sea válido, las contraseñas coincidan y haya pasado el delay -->
+          <button
+            type="submit"
+            class="btn-submit"
+            [disabled]="
+              form.invalid || passwordsMatch === false || !allowSubmit
+            "
+          >
+            Cambiar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

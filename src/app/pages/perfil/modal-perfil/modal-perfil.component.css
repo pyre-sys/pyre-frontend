@@ -1,0 +1,83 @@
+/* Asegurar apilado vertical si hace falta */
+.vertical-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Hacer los inputs un poco más angostos y centrados dentro de cada field-group */
+.field-group.full-width {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centrar contenido */
+}
+
+/* Aplicar ancho reducido y centrado a inputs normales (contraseña actual) */
+.field-group.full-width > input,
+.input-with-icon input {
+  width: 92%; /* reducido para dejar espacio lateral */
+  max-width: 520px;
+  box-sizing: border-box;
+  margin: 0.15rem auto; /* centrar y dar pequeño espacio vertical */
+  padding-right: 3.2rem; /* espacio para eye + status */
+}
+
+/* Para los inputs con iconos (ojo + status) ajustar ancho dentro del wrapper */
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* centrar el input dentro del wrapper */
+}
+
+.input-with-icon .status-icon {
+  position: absolute;
+  right: calc(
+    (100% - 92%) / 2 + 3.2rem
+  ); /* posiciona respecto al input centrado */
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 0.95rem;
+  pointer-events: none;
+  color: #198754;
+}
+
+.input-with-icon .status-icon.status-bad {
+  color: #dc3545;
+}
+
+.input-with-icon .icon-btn {
+  position: absolute;
+  right: calc((100% - 92%) / 2 + 0.6rem);
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  padding: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 576px) {
+  .field-group.full-width > input,
+  .input-with-icon input {
+    width: 95%;
+    padding-right: 2.8rem;
+    max-width: none;
+  }
+  .input-with-icon .status-icon {
+    right: calc((100% - 95%) / 2 + 2.8rem);
+  }
+  .input-with-icon .icon-btn {
+    right: calc((100% - 95%) / 2 + 0.4rem);
+  }
+}

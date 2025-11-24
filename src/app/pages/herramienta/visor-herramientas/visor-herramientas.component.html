@@ -1,16 +1,6 @@
 <!-- Título y botón -->
 <div class="container-fluid page-shell page-header-container">
   <div class="d-flex justify-content-end align-items-center mb-3 gap-3">
-    <a
-      class="header-action-table-export"
-      (click)="downloadReporteExcel()"
-      role="button"
-      ngbTooltip="Exportar Excel"
-      placement="top"
-      container="body"
-    >
-      <i class="pi pi-file-excel pi-tada" aria-hidden="true"></i>
-    </a>
     <a class="header-action" (click)="createNewTool()" role="button">
       <i class="bx bx-plus bx-tada" aria-hidden="true"></i> Agregar
     </a>
@@ -80,9 +70,21 @@
           </div>
         </div>
 
-        <!-- Botón Buscar -->
+        <!-- Reset + Buscar -->
         <div class="col-lg-2 col-md-12 col-sm-12 d-flex justify-content-end">
           <div class="filter-actions d-flex gap-2">
+            <!-- MOVIDO: Botón Exportar colocado a la izquierda de Limpiar filtros -->
+            <a
+              class="header-action-table-export"
+              (click)="downloadReporteExcel()"
+              role="button"
+              ngbTooltip="Exportar Excel"
+              placement="top"
+              container="body"
+            >
+              <i class="pi pi-file-excel pi-tada" aria-hidden="true"></i>
+            </a>
+
             <button
               type="button"
               class="reset-button-inline"
@@ -93,8 +95,6 @@
                   ? 'Limpiar filtros'
                   : 'No hay filtros activos'
               "
-              placement="top"
-              container="body"
             >
               <i class="pi pi-filter-slash"></i>
             </button>

@@ -14,12 +14,12 @@
   [userRole]="displayRole"
   [displayRole]="displayRole"
   [userLabel]="displayUserLabel"
+  [pageTitle]="pageTitle"
   (perfilModalToggled)="onPerfilModalToggled($event)"
   (homeNavigation)="navigateToHome()"
   (logoutRequested)="confirmLogout()"
   (sidebarToggled)="toggleSidebar()"
->
-</app-topbar>
+></app-topbar>
 
 <!-- Sidebar -->
 <div *ngIf="isLoggedIn">
@@ -68,6 +68,19 @@
             </a>
           </li>
         </ul>
+      </li>
+
+      <!-- Nuevo ítem "Perfil" visible solo para roles distintos a SuperAdmin -->
+      <li class="nav-item" *ngIf="!isRole('SuperAdmin')">
+        <a
+          class="nav-link"
+          routerLink="/perfil"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <i class="bx bx-user" aria-hidden="true"></i>
+          <span>Perfil</span>
+        </a>
       </li>
     </ul>
 
