@@ -133,55 +133,42 @@
     <!-- Sección de notificaciones unificada (REEMPLAZA la anterior) -->
     <div class="topbar-alerts-section">
       <div class="notifications-container">
-        <!-- Versión desktop -->
+        <!-- Versión desktop: solo icono + badge numérico -->
         <div
           class="notifications-btn"
           [class.empty]="getTotalNotifications() === 0"
           [class.has-critical]="hasCriticalAlerts()"
-          (click)="navigateToAlertas()"
+          (click)="onNotificationsClick()"
           [ngbTooltip]="getTooltipMessage()"
           container="body"
         >
           <!-- Icono principal -->
-          <div class="notifications-icon">
-            <i class="bi bi-bell"></i>
-            <div *ngIf="hasCriticalAlerts()" class="critical-dot"></div>
-          </div>
-
-          <!-- Contenido textual -->
-          <div class="notifications-content">
-            <div class="notifications-title">
+          <div
+            class="notifications-icon"
+            [class.attention]="animateAlerts"
+            [class.shake]="animateShake"
+          >
+            <i class="bi bi-bell" aria-hidden="true"></i>
+            <!-- Badge numérico en la esquina superior derecha del icono -->
+            <div
+              *ngIf="getTotalNotifications() > 0"
+              class="critical-dot"
+              aria-live="polite"
+              aria-atomic="true"
+              title="{{ getTotalNotifications() + ' alertas vencidas' }}"
+            >
               {{
-                getTotalNotifications() === 0
-                  ? "Sin alertas"
-                  : getTotalNotifications() +
-                    " préstamo" +
-                    (getTotalNotifications() > 1 ? "s vencidos" : " vencido")
+                getTotalNotifications() > 99 ? "99+" : getTotalNotifications()
               }}
             </div>
-            <div class="notifications-subtitle">
-              {{ getNotificationsSubtitle() }}
-            </div>
+          </div>
+
+          <!-- Texto oculto: mantenemos por accesibilidad pero escondido visualmente -->
+          <div class="notifications-content visually-hidden" aria-hidden="true">
+            <div class="notifications-title"></div>
+            <div class="notifications-subtitle"></div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Versión móvil -->
-    <div
-      class="notifications-mobile"
-      [class.critical]="hasCriticalAlerts()"
-      [title]="getNotificationsTooltip()"
-      (click)="navigateToAlertas()"
-    >
-      <i class="bi bi-bell"></i>
-      <div
-        *ngIf="getTotalNotifications() > 0"
-        class="mobile-counter"
-        [class.normal]="!hasWarningAlerts() && !hasCriticalAlerts()"
-        [class.warning]="hasWarningAlerts() && !hasCriticalAlerts()"
-      >
-        {{ getTotalNotifications() > 99 ? "99+" : getTotalNotifications() }}
       </div>
     </div>
 
