@@ -160,23 +160,42 @@
                     </div> -->
 
           <!-- Fila 2: Descripción completa -->
-          <div class="field-group full-width">
-            <label
-              >Descripción <span class="optional-text">(opcional)</span></label
-            >
+          <div
+            class="field-group full-width"
+            [class.has-error]="
+              (form.get('Descripcion')?.invalid &&
+                form.get('Descripcion')?.touched) ||
+              serverErrors['Descripcion']
+            "
+          >
+            <label class="required">Descripción</label>
             <textarea
               formControlName="Descripcion"
               rows="3"
               placeholder="Descripción detallada de la obra"
+              [class.error]="
+                (form.get('Descripcion')?.invalid &&
+                  form.get('Descripcion')?.touched) ||
+                serverErrors['Descripcion']
+              "
             ></textarea>
+            <div *ngIf="serverErrors['Descripcion']" class="error-text">
+              {{ serverErrors["Descripcion"] }}
+            </div>
             <div
               *ngIf="
+                !serverErrors['Descripcion'] &&
                 form.get('Descripcion')?.invalid &&
                 form.get('Descripcion')?.touched
               "
               class="error-text"
             >
-              Máximo 200 caracteres
+              <span *ngIf="form.get('Descripcion')?.errors?.['required']"
+                >La descripción es requerida</span
+              >
+              <span *ngIf="form.get('Descripcion')?.errors?.['maxlength']"
+                >Máximo 500 caracteres</span
+              >
             </div>
           </div>
 
@@ -203,10 +222,26 @@
 
           <!-- Fila 4: Fechas y presupuesto -->
           <div class="field-group">
-            <label
-              >Fecha Inicio <span class="optional-text">(opcional)</span></label
+            <label class="required">Fecha Inicio</label>
+            <input
+              formControlName="FechaInicio"
+              type="date"
+              [class.error]="
+                form.get('FechaInicio')?.invalid &&
+                form.get('FechaInicio')?.touched
+              "
+            />
+            <div
+              *ngIf="
+                form.get('FechaInicio')?.invalid &&
+                form.get('FechaInicio')?.touched
+              "
+              class="error-text"
             >
-            <input formControlName="FechaInicio" type="date" />
+              <span *ngIf="form.get('FechaInicio')?.errors?.['required']"
+                >La fecha de inicio es requerida</span
+              >
+            </div>
           </div>
 
           <div class="field-group">
@@ -267,14 +302,20 @@
           >
             <button
               *ngIf="mode === 'edit'"
-              [disabled]="!editingEnabled"
+              [disabled]="!editingEnabled || form.invalid"
               type="submit"
               class="btn-submit"
             >
               Actualizar
             </button>
           </span>
-          <button *ngIf="mode !== 'edit'" type="submit" class="btn-submit">
+          <!-- Deshabilitar Crear hasta que el formulario sea válido -->
+          <button
+            *ngIf="mode !== 'edit'"
+            type="submit"
+            class="btn-submit"
+            [disabled]="form.invalid"
+          >
             Crear
           </button>
         </div>

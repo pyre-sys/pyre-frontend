@@ -144,8 +144,10 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       idCliente: ['', [Validators.required]], // Campo para el cliente
       NombreObra: ['', [Validators.required, Validators.maxLength(150)]],
       Codigo: ['', [Validators.required, Validators.maxLength(20)]],
-      Descripcion: ['', [Validators.maxLength(500)]],
-      FechaInicio: [''],
+      // Descripción ahora obligatoria
+      Descripcion: ['', [Validators.required, Validators.maxLength(500)]],
+      // FechaInicio ahora obligatoria
+      FechaInicio: ['', [Validators.required]],
       FechaFin: [''],
       Estado: ['Activo', [Validators.required]],
       Presupuesto: ['', [Validators.min(0)]],
@@ -248,17 +250,31 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
     // En modo edición, incluir el ID de la obra como IdObra (backend espera IdObra)
     if (this.mode === 'edit' && this.obraId) {
-      // Aseguramos el nombre de campo IdObra; mantenemos Id por compatibilidad si fuera necesario
       (value as any).IdObra = this.obraId;
       (value as any).Id = this.obraId;
       console.log('🔄 Including obra ID in update (IdObra):', this.obraId);
     }
 
-    console.log('📤 Final data being sent:', value);
+    // Normalizar/limpiar fechas: '' => null, Date => 'YYYY-MM-DD'
+    const cleaned: any = { ...value };
+    ['FechaInicio', 'FechaFin'].forEach((f) => {
+      const v = cleaned[f];
+      if (v === '' || v === undefined) {
+        cleaned[f] = null;
+      } else if (v instanceof Date) {
+        cleaned[f] = v.toISOString().split('T')[0];
+      } else if (typeof v === 'string') {
+        // Asegurar formato 'YYYY-MM-DD' si viene con time: extraer la parte date
+        const match = v.match(/^\d{4}-\d{2}-\d{2}/);
+        cleaned[f] = match ? match[0] : v;
+      }
+    });
+
+    console.log('📤 Final cleaned data being sent:', cleaned);
 
     this.submit.emit({
       mode: this.mode,
-      data: value,
+      data: cleaned, // enviar objeto limpio; el servicio añadirá el wrapper createDto
       onSuccess: () => {
         this.alertService.success(
           `La obra ha sido ${

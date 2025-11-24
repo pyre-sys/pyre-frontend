@@ -13,8 +13,23 @@
     <!-- Filter bar: estructura unificada con otros visores -->
     <div class="pyre-filter-bar container-fluid">
       <div class="row g-3 align-items-end">
-        <!-- Nombre de la obra -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
+        <!-- Código (nuevo, primero) -->
+        <div class="col-lg-3 col-md-4 col-sm-12">
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="filtroCodigo"
+                placeholder="Código"
+                (keyup.enter)="onSearch()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Nombre de la obra (ya existía, ahora segundo) -->
+        <div class="col-lg-5 col-md-6 col-sm-12">
           <div class="filter-item">
             <div class="filter-input-group">
               <input
@@ -28,24 +43,11 @@
           </div>
         </div>
 
-        <!-- Estado -->
-        <div class="col-lg-2 col-md-3 col-sm-6">
-          <div class="filter-item">
-            <div class="filter-input-group">
-              <select class="form-control" [(ngModel)]="filtroEstado">
-                <option value="">Todos los estados</option>
-                <option value="activo">Activo</option>
-                <option value="inactivo">Inactivo</option>
-              </select>
-            </div>
-          </div>
-        </div>
+        <!-- Ajuste: eliminar filtro Estado y dejar espacio flexible -->
+        <div class="col-lg-2 col-md-2 col-sm-6 d-none d-md-block"></div>
 
-        <!-- Espacio flexible -->
-        <div class="col-lg-2 col-md-3 col-sm-6 d-none d-md-block"></div>
-
-        <!-- Reset + Buscar (alineados a la derecha, igual que otros visores) -->
-        <div class="col-lg-4 col-md-12 col-sm-12 d-flex justify-content-end">
+        <!-- Reset + Buscar -->
+        <div class="col-lg-2 col-md-12 col-sm-12 d-flex justify-content-end">
           <div class="d-flex gap-2">
             <button
               type="button"

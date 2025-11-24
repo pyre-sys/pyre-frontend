@@ -46,7 +46,7 @@ export class VisorObrasComponent implements OnInit {
 
   // Filtros
   filtroNombre: string = '';
-  filtroEstado: string = '';
+  filtroCodigo: string = ''; // nuevo filtro: código
 
   showObraModal = false;
   modalInitialData: any = null;
@@ -68,49 +68,72 @@ export class VisorObrasComponent implements OnInit {
 
   fetchObras(): void {
     this.isLoading = true;
-    this.obrasService.getObrasPaged(this.currentPage, this.pageSize).subscribe({
-      next: (resp) => {
-        const pagedData = resp?.data ?? {};
-        const rawList = Array.isArray(pagedData.data) ? pagedData.data : [];
-        this.totalItems = pagedData.totalRecords ?? rawList.length ?? 0;
-        this.currentPage = pagedData.page ?? 1;
-        this.pageSize = pagedData.pageSize ?? this.pageSize;
-        this.obras = rawList.map((o: any) => ({
-          idObra: o.idObra,
-          codigo: o.codigo,
-          nombreObra: o.nombreObra,
-          descripcion: o.descripcion,
-          fechaInicio: o.fechaInicio,
-          fechaFin: o.fechaFin,
-          estado: o.estado || 'Activo', // Default state
-        }));
-        this.applyFilters();
-        this.calculatePagination();
-        this.isLoading = false;
-      },
-      error: (err: any) => {
-        this.showSnack(
-          'Error al cargar las obras. Por favor, inténtelo de nuevo.'
-        );
-        this.isLoading = false;
-      },
-    });
+    // Enviar filtros de nombre y codigo al backend para que realice la búsqueda concatenada
+    const filters: any = {
+      nombre: this.filtroNombre?.trim() || undefined,
+      codigo: this.filtroCodigo?.trim() || undefined,
+    };
+
+    this.obrasService
+      .getObrasPaged(this.currentPage, this.pageSize, filters)
+      .subscribe({
+        next: (resp) => {
+          const pagedData = resp?.data ?? {};
+          const rawList = Array.isArray(pagedData.data) ? pagedData.data : [];
+          this.totalItems = pagedData.totalRecords ?? rawList.length ?? 0;
+          this.currentPage = pagedData.page ?? 1;
+          this.pageSize = pagedData.pageSize ?? this.pageSize;
+          this.obras = rawList.map((o: any) => ({
+            idObra: o.idObra,
+            codigo: o.codigo,
+            nombreObra: o.nombreObra,
+            descripcion: o.descripcion,
+            fechaInicio: o.fechaInicio,
+            fechaFin: o.fechaFin,
+            estado: o.estado || 'Activo',
+          }));
+          // No filtrar localmente; confiamos en backend
+          this.filteredObras = [...this.obras];
+          this.calculatePagination();
+          this.isLoading = false;
+        },
+        error: (err: any) => {
+          this.showSnack(
+            'Error al cargar las obras. Por favor, inténtelo de nuevo.'
+          );
+          this.isLoading = false;
+        },
+      });
   }
 
   applyFilters(): void {
+    // Cuando la lista ya está cargada localmente, permitimos un filtrado rápido en cliente
+    // por Código y/o Nombre. Si prefieres que siempre lo haga el backend, simplemente
+    // llama a fetchObras() en lugar de filtrar localmente.
+    if (!this.obras || this.obras.length === 0) {
+      this.filteredObras = [];
+      this.totalItems = 0;
+      this.calculatePagination();
+      return;
+    }
+
+    const codigoFilter = (this.filtroCodigo || '')
+      .toString()
+      .trim()
+      .toLowerCase();
+    const nombreFilter = (this.filtroNombre || '')
+      .toString()
+      .trim()
+      .toLowerCase();
+
     this.filteredObras = this.obras.filter((obra) => {
-      const matchesNombre =
-        !this.filtroNombre ||
-        obra.nombreObra
-          ?.toLowerCase()
-          .includes(this.filtroNombre.toLowerCase());
+      const codigo = (obra.codigo ?? '').toString().toLowerCase();
+      const nombre = (obra.nombreObra ?? '').toString().toLowerCase();
 
-      const matchesEstado =
-        !this.filtroEstado ||
-        this.filtroEstado === 'activo' ||
-        this.filtroEstado === 'inactivo';
+      const matchesCodigo = !codigoFilter || codigo.includes(codigoFilter);
+      const matchesNombre = !nombreFilter || nombre.includes(nombreFilter);
 
-      return matchesNombre && matchesEstado;
+      return matchesCodigo && matchesNombre;
     });
 
     this.totalItems = this.filteredObras.length;
@@ -132,18 +155,18 @@ export class VisorObrasComponent implements OnInit {
 
   onSearch(): void {
     this.currentPage = 1;
-    this.applyFilters();
+    this.fetchObras();
   }
 
   onResetFilters(): void {
     this.filtroNombre = '';
-    this.filtroEstado = '';
+    this.filtroCodigo = '';
     this.currentPage = 1;
-    this.applyFilters();
+    this.fetchObras();
   }
 
   hasActiveFilters(): boolean {
-    return !!(this.filtroNombre?.trim() || this.filtroEstado);
+    return !!(this.filtroNombre?.trim() || this.filtroCodigo?.trim());
   }
 
   onPageChange(page: number): void {
