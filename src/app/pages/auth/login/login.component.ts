@@ -103,51 +103,44 @@ export class LoginComponent implements OnInit {
         },
         error: (error) => {
           console.error('Login error:', error);
-          let errorMessage =
-            'Hubo un problema al intentar iniciar sesión. Por favor, intente nuevamente.';
+
+          // Normalizar mensaje amigable
+          const normalizedMessage = this.normalizeError(error);
 
           // Si es 401 (contraseña/usuario incorrecto) mantener spinner hasta completar el retardo mínimo
-          if (error.status === 401) {
+          if (this.isUnauthorized(error)) {
             const now = Date.now();
             const elapsed = this.loginStartTime ? now - this.loginStartTime : 0;
             const remaining = Math.max(0, this.ARTIFICIAL_DELAY_MS - elapsed);
 
-            // Esperar el tiempo restante antes de ocultar spinner y mostrar el error
             setTimeout(() => {
-              // Asegurarse de limpiar estado
               this.isLoading = false;
               this.loginStartTime = null;
 
-              // Mensaje específico
-              errorMessage =
-                error.error?.message || 'Legajo o contraseña incorrectos.';
-              // Limpiar el campo de contraseña para que el usuario pueda reintentar
-              this.loginForm.patchValue({ password: '' });
+              // Usar mensaje normalizado (preferir backend si lo había)
+              const errorMessage =
+                normalizedMessage || 'Legajo o contraseña incorrectos.';
 
-              // Mostrar toast-modal de error
+              this.loginForm.patchValue({ password: '' });
               this.showErrorToast(errorMessage);
 
-              // Focus en el campo de legajo para facilitar el reintento
               setTimeout(() => {
                 const legajoElement = document.getElementById(
                   'legajo'
                 ) as HTMLInputElement;
-                if (legajoElement) {
-                  legajoElement.focus();
-                }
+                if (legajoElement) legajoElement.focus();
               }, 100);
 
-              // Resetear cualquier estado de error previo
               this.errorMessage = null;
             }, remaining);
           } else {
-            // Para otros errores, comportarse como antes (ocultar spinner inmediatamente y mostrar toast)
+            // Otros errores: ocultar spinner y mostrar mensaje amigable inmediatamente
             this.isLoading = false;
             this.loginStartTime = null;
 
-            if (error.error?.message) {
-              errorMessage = error.error.message;
-            }
+            const errorMessage =
+              normalizedMessage ||
+              'Hubo un problema al intentar iniciar sesión. Por favor, intente nuevamente.';
             this.showErrorToast(errorMessage);
             this.errorMessage = null;
           }
@@ -244,5 +237,67 @@ export class LoginComponent implements OnInit {
   onTouchEndPassword(event: TouchEvent): void {
     event.preventDefault();
     this.showPassword = false;
+  }
+
+  // Nuevo: normaliza distintos tipos de error a mensajes amigables (incluye "Failed to fetch")
+  private normalizeError(err: any): string {
+    try {
+      // Si no hay conexión de red
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        return 'No hay conexión a Internet. Verifica tu red.';
+      }
+
+      // Si es Error nativo (por ejemplo fetch lanza TypeError con "Failed to fetch")
+      if (err instanceof Error) {
+        const msg = err.message || '';
+        const lower = msg.toLowerCase();
+        if (
+          lower.includes('failed to fetch') ||
+          lower.includes('networkrequestfailed') ||
+          lower.includes('networkerror') ||
+          lower.includes('network request failed')
+        ) {
+          return 'No se pudo conectar con el servidor. Verifica tu conexión o intenta más tarde.';
+        }
+        return msg || '';
+      }
+
+      // Si es HttpErrorResponse-like (objeto con status)
+      if (err && typeof err === 'object') {
+        if ('status' in err) {
+          const status = Number((err as any).status);
+          if (status === 0) {
+            return 'No se pudo conectar con el servidor. Verifica tu conexión o intenta más tarde.';
+          }
+          // Si backend envía mensaje amigable en err.error.message o err.error
+          const backendMsg =
+            err.error?.message ||
+            (typeof err.error === 'string' ? err.error : null);
+          if (backendMsg) return backendMsg;
+          if (status === 401) return 'Legajo o contraseña incorrectos.';
+          return `Error ${status}: ${
+            err.statusText || 'Error en la comunicación con el servidor'
+          }`;
+        }
+
+        // Fallback: si viene { error: '...' } o { message: '...' }
+        if (err.error && typeof err.error === 'string') return err.error;
+        if (err.message && typeof err.message === 'string') return err.message;
+      }
+
+      return '';
+    } catch {
+      return 'Ocurrió un error inesperado. Intente nuevamente.';
+    }
+  }
+
+  // Nuevo: determina si el error representa un 401
+  private isUnauthorized(err: any): boolean {
+    if (!err) return false;
+    if (err instanceof Error) return false; // Error genérico no incluye status
+    if (err && typeof err === 'object' && 'status' in err) {
+      return Number((err as any).status) === 401;
+    }
+    return false;
   }
 }

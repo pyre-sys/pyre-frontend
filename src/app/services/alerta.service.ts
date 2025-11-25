@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, Subject, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 
 declare const Swal: any;
 
@@ -40,7 +40,10 @@ export class AlertaService {
   // Subject para notificar cambios en las alertas
   private alertasActualizadas = new Subject<void>();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    // Nuevo: parchear fetch global para normalizar errores tipo "Failed to fetch" y mostrar modal
+    this.patchFetch();
+  }
 
   // Método para obtener el observable de cambios
   getAlertasActualizadas$() {
@@ -135,25 +138,121 @@ export class AlertaService {
     });
   }
 
+  // Nuevo: formateador centralizado de errores HTTP
+  private formatHttpError(err: any): string {
+    try {
+      if (err instanceof HttpErrorResponse) {
+        // Error de red / sin respuesta del servidor
+        if (err.status === 0) {
+          return 'No se pudo conectar con el servidor. Verifica tu conexión o intenta más tarde.';
+        }
+        // Si el backend devolvió un mensaje legible en body
+        const backendMsg =
+          (err.error &&
+            (err.error.message ||
+              (typeof err.error === 'string' ? err.error : null))) ||
+          null;
+        if (backendMsg) return backendMsg;
+        // Fallback con código de estado
+        return `Error ${err.status}: ${
+          err.statusText || 'Error en la comunicación con el servidor'
+        }`;
+      } else {
+        // Otros errores (p. ej. errores de fetch en algunos navegadores)
+        const msg = err?.message || (typeof err === 'string' ? err : '');
+        const lower = (msg || '').toLowerCase();
+        if (
+          lower.includes('failed to fetch') ||
+          lower.includes('networkrequestfailed') ||
+          lower.includes('networkerror') ||
+          lower.includes('network request failed')
+        ) {
+          return 'No se pudo conectar con el servidor. Verifica tu conexión o intenta más tarde.';
+        }
+        return msg || 'Ocurrió un error de red. Intenta nuevamente.';
+      }
+    } catch (e) {
+      return 'Ocurrió un error inesperado. Intenta nuevamente.';
+    }
+  }
+
+  // Nuevo: mostrar el modal y re-lanzar el error como Observable
+  private handleAndThrow(err: any) {
+    const mensaje =
+      this.formatHttpError(err) || 'Ocurrió un error. Intenta nuevamente.';
+    try {
+      // Mostrar modal global de error
+      this.error(mensaje, 'Error de comunicación');
+    } catch {
+      // noop: si Swal falla no detenemos la propagación del error
+    }
+    return throwError(() => new Error(mensaje));
+  }
+
+  // Nuevo: parchea window.fetch para convertir errores nativos en mensajes amigables y mostrar modal
+  private patchFetch() {
+    try {
+      if (typeof window === 'undefined') return;
+      const w: any = window;
+      if (!w.fetch || w.__fetchPatched) return;
+      const originalFetch = w.fetch.bind(w);
+      w.fetch = async (...args: any[]) => {
+        try {
+          return await originalFetch(...args);
+        } catch (err: any) {
+          const msg = err && err.message ? '' + err.message : String(err);
+          const lower = msg.toLowerCase();
+          if (
+            lower.includes('failed to fetch') ||
+            lower.includes('networkerror') ||
+            lower.includes('network request failed')
+          ) {
+            const friendly =
+              'No se pudo conectar con el servidor. Verifica tu conexión o intenta más tarde.';
+            // Mostrar modal inmediato
+            try {
+              this.error(friendly, 'Error de comunicación');
+            } catch {}
+            // Reemplazamos el error crudo por uno con mensaje amigable
+            throw new Error(friendly);
+          }
+          // Re-lanzar otros errores sin modificar
+          throw err;
+        }
+      };
+      // Marcar para evitar doble parcheo
+      w.__fetchPatched = true;
+    } catch {
+      // noop: si algo falla al parchear, no queremos bloquear la app
+    }
+  }
+
   // GET /api/Alerta/alertas-pendientes
   getCountAlertasPendientes() {
-    return this.http.get<any>(`${this.apiUrl}/Alerta/count-alertas-pendientes`);
+    return this.http
+      .get<any>(`${this.apiUrl}/Alerta/count-alertas-pendientes`)
+      .pipe(catchError((err) => this.handleAndThrow(err)));
   }
 
   // GET /api/Alerta/alertas-vencidas
   getCountAlertasVencidas() {
-    return this.http.get<any>(`${this.apiUrl}/Alerta/count-alertas-vencidas`);
+    return this.http
+      .get<any>(`${this.apiUrl}/Alerta/count-alertas-vencidas`)
+      .pipe(catchError((err) => this.handleAndThrow(err)));
   }
 
   // GET /api/Alerta - Get all alerts
   getAlertas() {
-    return this.http.get<any>(`${this.apiUrl}/Alerta`);
+    return this.http
+      .get<any>(`${this.apiUrl}/Alerta`)
+      .pipe(catchError((err) => this.handleAndThrow(err)));
   }
 
   // PUT /api/Alerta/{id} -> actualizar alerta (requiere rol SuperAdmin en el backend)
   updateAlerta(id: number, updateDto: UpdateAlertaDto) {
     return this.http.put<any>(`${this.apiUrl}/Alerta/${id}`, updateDto).pipe(
-      tap(() => this.notificarCambioEnAlertas()) // Notificar cambios después de actualizar
+      tap(() => this.notificarCambioEnAlertas()), // Notificar cambios después de actualizar
+      catchError((err) => this.handleAndThrow(err))
     );
   }
 
@@ -162,12 +261,15 @@ export class AlertaService {
     return this.http
       .patch<any>(`${this.apiUrl}/Alerta/${id}/update-with-movement`, updateDto)
       .pipe(
-        tap(() => this.notificarCambioEnAlertas()) // Notificar cambios después de actualizar
+        tap(() => this.notificarCambioEnAlertas()), // Notificar cambios después de actualizar
+        catchError((err) => this.handleAndThrow(err))
       );
   }
 
   exportarAlertasExcel(): Observable<Blob> {
     const url = `${this.apiUrl}/exportar-excel`;
-    return this.http.get(url, { responseType: 'blob' });
+    return this.http
+      .get(url, { responseType: 'blob' })
+      .pipe(catchError((err) => this.handleAndThrow(err)));
   }
 }
