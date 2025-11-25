@@ -12,15 +12,74 @@
   padding: 12px 16px;
   border-radius: 10px;
   color: #fff;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-  transform: translateX(12px);
-  opacity: 0;
-  animation: toast-in 300ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  box-shadow: 0 14px 40px rgba(11, 22, 40, 0.25);
+  transform-origin: center right;
+  opacity: 1;
   font-weight: 600;
   pointer-events: auto;
+  will-change: transform, opacity, filter;
 }
 
-/* Tipos */
+/* Estados de animación aplicados dinámicamente */
+.toast.enter {
+  animation: toast-in-3d 480ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.18));
+}
+
+.toast.exit {
+  animation: toast-out 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.toast.idle {
+  /* sutil flotación para aspecto profesional */
+  animation: toast-float 6s ease-in-out 0.5s infinite;
+}
+
+/* Entrada 3D: desliza desde la derecha, rota levemente y escala */
+@keyframes toast-in-3d {
+  0% {
+    transform: translate3d(24px, 8px, -50px) rotateZ(6deg) scale(0.96);
+    opacity: 0;
+    filter: blur(6px);
+  }
+  60% {
+    transform: translate3d(-6px, 0, 0) rotateZ(-2deg) scale(1.02);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotateZ(0deg) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* Salida: pequeña elevación y fade */
+@keyframes toast-out {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(12px, -10px, 0) scale(0.98);
+    opacity: 0;
+  }
+}
+
+/* Flota sutil cuando está idle */
+@keyframes toast-float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Tipos (mantener previamente definidos) */
 .toast-success {
   background: linear-gradient(90deg, #4caf50, #2e7d32);
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -32,8 +91,9 @@
 }
 
 .toast-warning {
-  background: linear-gradient(90deg, #f39c12, #e67e22);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: linear-gradient(90deg, #ff7043, #e64a19);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #ffffff;
 }
 
 /* Icono */
@@ -63,18 +123,6 @@
   word-break: break-word;
 }
 
-/* Animación de entrada */
-@keyframes toast-in {
-  from {
-    transform: translateX(12px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
 /* Pequeñas adaptaciones móviles */
 @media (max-width: 600px) {
   .toast {
@@ -84,8 +132,148 @@
     min-width: auto;
     max-width: calc(100% - 2rem);
     transform: translateX(0);
+    border-radius: 8px;
   }
   .toast-icon {
     display: none;
+  }
+}
+
+/* Mantener contraste y estilos previos para warning */
+.toast-warning .toast-message {
+  color: #ffffff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* Quitar fondo del icono (ya aplicado) */
+.toast-warning .toast-icon {
+  color: #ffffff;
+  opacity: 1;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* PRESET 1: slide desde la derecha + sutil pulso (default / ya similar al actual) */
+.toast.enter.preset-1 {
+  animation: toast-in-3d 480ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.toast.exit.preset-1 {
+  animation: toast-out 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.toast.idle.preset-1 {
+  animation: toast-float 6s ease-in-out 0.5s infinite;
+}
+
+/* PRESET 2: flip-in con rebote (más enérgico, profesional) */
+.toast.enter.preset-2 {
+  animation: toast-flip-in 520ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: right center;
+}
+.toast.exit.preset-2 {
+  animation: toast-flip-out 360ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.toast.idle.preset-2 {
+  animation: toast-bounce-subtle 4s ease-in-out 0.6s infinite;
+}
+
+@keyframes toast-flip-in {
+  0% {
+    transform: perspective(800px) translateX(20px) rotateY(30deg) scale(0.96);
+    opacity: 0;
+    filter: blur(6px);
+  }
+  60% {
+    transform: perspective(800px) translateX(-8px) rotateY(-6deg) scale(1.02);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: perspective(800px) translateX(0) rotateY(0) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes toast-flip-out {
+  0% {
+    transform: perspective(800px) translateX(0) rotateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(800px) translateX(24px) rotateY(12deg) scale(0.98);
+    opacity: 0;
+  }
+}
+
+@keyframes toast-bounce-subtle {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
+  60% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* PRESET 3: glass/fade con desenfoque y brillo (elegante, discreto) */
+.toast.enter.preset-3 {
+  animation: toast-glass-in 420ms cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  backdrop-filter: blur(0px);
+}
+.toast.exit.preset-3 {
+  animation: toast-glass-out 320ms ease-in forwards;
+}
+.toast.idle.preset-3 {
+  animation: toast-glass-breath 8s ease-in-out 0.4s infinite;
+}
+
+@keyframes toast-glass-in {
+  0% {
+    transform: translateY(8px) scale(0.985);
+    opacity: 0;
+    filter: blur(6px) saturate(0.8);
+  }
+  60% {
+    transform: translateY(-2px) scale(1.01);
+    opacity: 1;
+    filter: blur(0) saturate(1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    filter: blur(0) saturate(1);
+  }
+}
+
+@keyframes toast-glass-out {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(8px) scale(0.995);
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+@keyframes toast-glass-breath {
+  0% {
+    transform: translateY(0) scale(1);
+    filter: none;
+  }
+  50% {
+    transform: translateY(-3px) scale(1.002);
+    filter: brightness(1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    filter: none;
   }
 }

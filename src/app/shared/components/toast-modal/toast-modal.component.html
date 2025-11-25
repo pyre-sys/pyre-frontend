@@ -1,6 +1,12 @@
 <div
-  *ngIf="isVisible"
+  *ngIf="internalVisible"
   class="toast toast-{{ type }}"
+  [class.enter]="animState === 'enter'"
+  [class.exit]="animState === 'exit'"
+  [class.idle]="animState === 'idle'"
+  [class.preset-1]="animationPreset === 'preset-1'"
+  [class.preset-2]="animationPreset === 'preset-2'"
+  [class.preset-3]="animationPreset === 'preset-3'"
   role="status"
   aria-live="polite"
   aria-atomic="true"
