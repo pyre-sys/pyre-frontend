@@ -383,6 +383,24 @@ export class HerramientaService {
   }
 
   /**
+   * Elimina lógicamente una herramienta (solo SuperAdmin)
+   * Endpoint: DELETE /api/Herramienta/{id}
+   */
+  deleteToolLogico(id: number): Observable<any> {
+    const url = `${this.baseUrl}/${id}`;
+
+    return this.http.delete(url).pipe(
+      tap((response) =>
+        console.debug('[HerramientaService] deleteToolLogico response:', response)
+      ),
+      catchError((error) => {
+        console.error('[HerramientaService] deleteToolLogico error:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
    * @deprecated Use updateToolStatus instead
    */
   toggleActivo(id: number): Observable<any> {

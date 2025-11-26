@@ -65,7 +65,7 @@ export class VisorHerramientasComponent implements OnInit {
     private srvHerramienta: HerramientaService,
     private srvAlerta: AlertaService,
     private pageTitleService: PageTitleService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Listado de Herramientas');
@@ -268,7 +268,7 @@ export class VisorHerramientasComponent implements OnInit {
       )
       .then((result: any) => {
         if (result?.isConfirmed) {
-          this.srvHerramienta.deleteTool(Number(id)).subscribe({
+          this.srvHerramienta.deleteToolLogico(Number(id)).subscribe({
             next: (resp: any) => {
               const msg =
                 resp?.message ??
@@ -298,8 +298,7 @@ export class VisorHerramientasComponent implements OnInit {
     this.srvAlerta
       .confirm(
         `¿Estás seguro de que deseas ${actionText} esta herramienta?`,
-        `${
-          actionText.charAt(0).toUpperCase() + actionText.slice(1)
+        `${actionText.charAt(0).toUpperCase() + actionText.slice(1)
         } Herramienta`
       )
       .then((result: any) => {
@@ -403,8 +402,8 @@ export class VisorHerramientasComponent implements OnInit {
     } else {
       const id = Number(
         this.modalInitialData?.id ??
-          this.modalInitialData?.idHerramienta ??
-          null
+        this.modalInitialData?.idHerramienta ??
+        null
       );
       if (!id) {
         const error = {
