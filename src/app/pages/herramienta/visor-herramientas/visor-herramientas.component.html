@@ -7,7 +7,9 @@
   </div>
 </div>
 
-<div class="user-list-container container-fluid page-shell mt-2">
+<div
+  class="user-list-container visor-herramientas container-fluid page-shell mt-2"
+>
   <div class="pyre-table-shell">
     <!-- 🔍 Filtros -->
     <div class="pyre-filter-bar container-fluid">
@@ -139,18 +141,31 @@
               let i = index
             "
           >
-            <td>{{ herramienta.codigo }}</td>
+            <td>
+              <span class="codigo-badge">{{ herramienta.codigo }}</span>
+            </td>
             <td>{{ herramienta.nombre }}</td>
             <td>{{ herramienta.marca }}</td>
-            <td>{{ herramienta.estadoFisico }}</td>
+            <td>
+              <span
+                class="estado-badge"
+                [ngClass]="
+                  'estado-' + getEstadoClass(herramienta.estadoFisico || '')
+                "
+              >
+                {{ herramienta.estadoFisico }}
+              </span>
+            </td>
             <td>{{ herramienta.disponibilidad }}</td>
 
             <td>
-              <div class="estado-toggle d-flex align-items-center">
-                <!--  Candado abierto (no bloqueada) -->
+              <div
+                class="estado-toggle d-flex align-items-center justify-content-center"
+              >
+                <!-- 🔓 Candado abierto (no bloqueada) -->
                 <button
                   type="button"
-                  class="btn-icon btn-lock"
+                  class="btn-icon"
                   *ngIf="!herramienta.bloqueado"
                   [disabled]="
                     herramienta.disponibilidad?.toLowerCase() !==
@@ -171,27 +186,23 @@
                   "
                   placement="top"
                   container="body"
+                  style="color: #28a745"
                 >
-                  <i
-                    class="pi pi-lock-open text-success"
-                    style="font-size: 1.2rem"
-                  ></i>
+                  <i class="pi pi-lock-open" style="font-size: 1.2rem"></i>
                 </button>
 
                 <!-- 🔒 Candado cerrado (bloqueada) -->
                 <button
                   type="button"
-                  class="btn-icon btn-lock"
+                  class="btn-icon"
                   *ngIf="herramienta.bloqueado"
                   (click)="toggleBloqueo(herramienta)"
                   ngbTooltip="Desbloquear herramienta"
                   placement="top"
                   container="body"
+                  style="color: #dc3545"
                 >
-                  <i
-                    class="pi pi-lock text-danger"
-                    style="font-size: 1.2rem"
-                  ></i>
+                  <i class="pi pi-lock" style="font-size: 1.2rem"></i>
                 </button>
               </div>
             </td>

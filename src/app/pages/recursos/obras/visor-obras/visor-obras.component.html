@@ -8,7 +8,7 @@
 </div>
 
 <!-- Reemplazar wrapper específico por clases compartidas -->
-<div class="user-list-container container-fluid page-shell mt-2">
+<div class="user-list-container visor-obras container-fluid page-shell mt-2">
   <div class="pyre-table-shell">
     <!-- Filter bar: estructura unificada con otros visores -->
     <div class="pyre-filter-bar container-fluid">
@@ -95,7 +95,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let obra of getPaginatedObras(); let i = index">
-            <td>{{ obra.codigo }}</td>
+            <td>
+              <span class="codigo-badge">{{ obra.codigo }}</span>
+            </td>
             <td>{{ obra.nombreObra }}</td>
             <td>{{ obra.descripcion }}</td>
             <td>{{ obra.fechaInicio | date : "dd/MM/yyyy" }}</td>

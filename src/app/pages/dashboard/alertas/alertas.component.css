@@ -206,14 +206,22 @@
    4 = Fecha Vencimiento, 5 = DIAS VENCIDO, 6 = Acciones */
 .pyre-table thead th:nth-child(4),
 .pyre-table thead th:nth-child(5),
-.pyre-table thead th:nth-child(6),
+.pyre-table thead th:nth-child(6) {
+  text-align: center !important; /* Centrar títulos específicos */
+}
+
 .pyre-table tbody td:nth-child(4),
 .pyre-table tbody td:nth-child(5),
 .pyre-table tbody td:nth-child(6) {
   vertical-align: middle !important; /* forzar centro vertical */
-  text-align: center !important; /* opcional: centrar contenido horizontalmente */
+  text-align: center !important; /* centrar contenido de estas columnas específicas */
   /* asegurar que el contenido interno no fuerce alineamiento diferente */
   display: table-cell !important;
+}
+
+/* Aplicar centrado a TODOS los títulos de la tabla de alertas */
+.pyre-table thead th {
+  text-align: center !important;
 }
 
 /* Si dentro de las celdas hay elementos flex (por ejemplo .action-buttons),

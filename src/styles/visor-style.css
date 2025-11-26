@@ -237,7 +237,7 @@
   font-size: 13px;
   font-weight: 600;
   padding: 12px 16px;
-  text-align: center;
+  text-align: center; /* Centrar títulos */
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid rgba(0, 0, 0, 0.06);
@@ -286,7 +286,7 @@
   font-size: 13px;
   font-weight: 600;
   padding: 12px 16px;
-  text-align: center;
+  text-align: center; /* Centrar títulos */
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid rgba(0, 0, 0, 0.06);
@@ -375,6 +375,7 @@ input:checked + .toggle-slider::before {
   align-items: center;
 }
 
+/* BOTÓN BÁSICO: Sin fondo, solo icono */
 .btn-icon {
   display: inline-flex;
   align-items: center;
@@ -384,35 +385,51 @@ input:checked + .toggle-slider::before {
   border-radius: 6px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease; /* Solo transiciones de color */
+  background: transparent !important; /* Forzar transparente */
+  transition: color 0.2s ease;
+  padding: 0; /* Sin padding interno */
+  outline: none; /* Sin outline */
 }
 
+/* SIN HOVER: mantener transparente */
 .btn-icon:hover {
-  background: none; /* Sin fondo */
-  box-shadow: none; /* Sin sombra */
-  transform: none; /* Sin transformación */
+  background: transparent !important;
+  box-shadow: none;
+  transform: none;
 }
 
+/* COLORES ESPECÍFICOS: solo color de texto */
 .btn-edit {
-  background: #fef3c7;
-  color: #d97706;
+  color: #d97706 !important; /* Amarillo/naranja para editar */
+  background: transparent !important;
 }
 
 .btn-edit:hover {
-  background: none; /* Sin fondo */
-  transform: none; /* Sin desplazamiento */
-  color: #b45309; /* Cambia sutilmente el color del icono */
+  color: #b45309 !important; /* Más oscuro en hover */
+  background: transparent !important;
 }
 
 .btn-delete {
-  background: #fee2e2;
-  color: #dc2626;
+  color: #dc2626 !important; /* Rojo para eliminar */
+  background: transparent !important;
 }
 
 .btn-delete:hover {
-  background: none; /* Sin fondo */
-  transform: none; /* Sin desplazamiento */
-  color: #b91c1c; /* Cambia sutilmente el color del icono */
+  color: #b91c1c !important; /* Más oscuro en hover */
+  background: transparent !important;
+}
+
+/* BOTONES DE CANDADO: sin clases adicionales como btn-lock */
+.btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: transparent !important;
+}
+
+/* ASEGURAR que no haya herencia de Bootstrap */
+.btn-icon.btn {
+  background: transparent !important;
+  border: none !important;
 }
 
 /* Clase genérica para botones "Nuevo" */
@@ -733,407 +750,6 @@ input:checked + .toggle-slider::before {
   margin-bottom: 1rem;
 }
 
-/* Badges para roles y estados */
-.role-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.15rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  background-color: #e0e8f7;
-  color: #1967d2;
-  white-space: nowrap;
-}
-
-.role-admin {
-  background-color: #e0e8f7;
-  color: #1967d2;
-}
-
-.role-superadmin {
-  background-color: #e0e8f7;
-  color: #1967d2;
-}
-
-.role-supervisor {
-  background-color: #e5f2ff;
-  color: #0d6efd;
-}
-
-.role-operator {
-  background-color: #eee;
-  color: #666;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.875rem;
-  font-weight: normal;
-  white-space: nowrap;
-}
-
-.status-indicator {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.status-active .status-indicator {
-  background-color: #28a745;
-}
-
-.status-inactive .status-indicator {
-  background-color: #dc3545;
-}
-
-/* Columna de acciones */
-.actions-column {
-  width: 120px;
-  white-space: nowrap;
-  text-align: center;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-/* Ajustar tamaño de los botones de acción */
-.btn-icon {
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 1rem;
-  line-height: 1;
-  transition: all 0.2s;
-}
-
-.btn-icon.view-btn {
-  color: #17a2b8;
-}
-
-.btn-icon.view-btn:hover {
-  color: #117a8b;
-}
-
-.btn-icon.edit-btn {
-  color: #007bff;
-}
-
-.btn-icon.edit-btn:hover {
-  color: #0056b3;
-}
-
-.btn-icon.delete-btn {
-  color: #dc3545;
-}
-
-.btn-icon.delete-btn:hover {
-  color: #bd2130;
-}
-
-.btn-icon:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Estado vacío */
-.empty-state {
-  padding: 3rem 1rem;
-  text-align: center;
-}
-
-.empty-state-content {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-/* Paginador */
-.paginator-container {
-  padding: 0.75rem;
-  border-top: 1px solid #dee2e6;
-  display: flex;
-  justify-content: center;
-}
-
-/* Estilos adicionales para la paginación */
-:host ::ng-deep .paginator button {
-  min-width: 32px;
-  height: 32px;
-  padding: 0;
-  border-radius: 4px;
-  margin: 0 2px;
-}
-
-:host ::ng-deep .paginator button.active {
-  background-color: #dc3545;
-  color: white;
-}
-
-/* Modal de confirmación */
-.delete-confirmation-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1050;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: -1;
-}
-
-.modal-content {
-  background-color: var(--color-bg-surface);
-  border-radius: 8px;
-  width: 100%;
-  box-shadow: var(--shadow-lg);
-  animation: modalFadeIn 0.3s ease-out;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  border-bottom: 1px solid var(--color-border-light);
-}
-
-.modal-title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.modal-body {
-  padding: 1.5rem 1rem;
-}
-
-.modal-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding: 1rem;
-  border-top: 1px solid var(--color-border-light);
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* En pantallas grandes, forzar el layout de 7 columnas */
-@media (min-width: 1400px) {
-  .user-list-container .pyre-filter-bar .filter-row {
-    grid-template-columns: repeat(7, 1fr) !important;
-  }
-
-  /* Asignar columnas específicas solo en pantallas grandes */
-  .filter-row > .filter-item:nth-child(1) {
-    grid-column: 1 / 2;
-  }
-  .filter-row > .filter-item:nth-child(2) {
-    grid-column: 2 / 3;
-  }
-  .filter-row > .filter-item:nth-child(3) {
-    grid-column: 3 / 4;
-  }
-  .filter-row > .filter-item:nth-child(4) {
-    grid-column: 4 / 5;
-  }
-  .filter-row > .filter-item:nth-child(5) {
-    grid-column: 5 / 6;
-  }
-  .filter-row > .filter-item.filter-item-with-reset {
-    grid-column: 6 / 7;
-  }
-  .filter-row > .filter-actions {
-    grid-column: 7 / 8;
-    justify-self: end;
-  }
-}
-
-/* Pantallas medianas: 3 columnas */
-@media (min-width: 769px) and (max-width: 1399px) {
-  .user-list-container .pyre-filter-bar .filter-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .filter-actions {
-    grid-column: 3 / 4;
-    justify-self: end;
-  }
-}
-
-.filter-item {
-  display: block;
-  width: 100%;
-}
-
-.filter-item-with-reset {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-/* Asegurar que los hijos ocupen el ancho del item */
-.filter-item > * {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* Componentes CBO dentro del grid */
-.filter-item app-cbo-rol-usuario,
-.filter-item app-cbo-estado {
-  display: block;
-  width: 100% !important;
-}
-
-.filter-item app-cbo-rol-usuario select.form-select,
-.filter-item app-cbo-estado select.form-select {
-  width: 100% !important;
-}
-
-.filter-item select.form-select,
-.filter-item .form-select {
-  width: 100% !important;
-}
-
-/* IMPORTANTE: Eliminar min-width fijo y usar 100% */
-.filter-item input,
-.filter-item select,
-.filter-item textarea,
-.filter-item app-cbo-rol-usuario,
-.filter-item app-cbo-estado {
-  min-width: 0; /* Permitir que se comprima */
-  width: 100%;
-}
-
-.filter-input-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-}
-
-.filter-input-group select,
-.filter-item input {
-  flex: 1;
-  padding: 10px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(16, 24, 40, 0.1);
-  background: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-  transition: all 0.2s ease;
-  min-width: 0; /* Permitir compresión */
-}
-
-.filter-input-group select:focus,
-.filter-item input:focus {
-  outline: none;
-  border-color: var(--color-primary, #0d6efd);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-}
-
-.filter-actions {
-  position: static;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.search-button {
-  background: #3b82f6;
-  border: none;
-  color: white;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: 600;
-  min-width: 44px;
-  max-width: 44px;
-  height: 44px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.search-button:hover:not(:disabled) {
-  background: #2563eb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.search-button:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.reset-button-inline {
-  background: transparent;
-  border: none;
-  color: #9ca3af;
-  padding: 6px;
-  border-radius: 50%;
-  min-width: 32px;
-  max-width: 32px;
-  height: 32px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.6;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.reset-button-inline:hover {
-  background: #f3f4f6;
-  color: #6b7280;
-  opacity: 1;
-  transform: scale(1.1);
-}
-
 /* Forzar alineado a la izquierda en todas las tablas de visores y tablas custom */
 .pyre-table thead th,
 .pyre-table tbody td,
@@ -1142,6 +758,103 @@ input:checked + .toggle-slider::before {
 .custom-table thead th,
 .custom-table tbody td {
   text-align: left !important;
+}
+
+/* Títulos centrados */
+.pyre-table thead th,
+.user-list-container .custom-table thead th,
+.custom-table thead th {
+  text-align: center !important;
+}
+
+/* ============================================
+   BADGES - CÓDIGO Y ESTADO (COPIADO EXACTO DE REPORTES-STYLE.CSS)
+   ============================================ */
+
+/* CÓDIGO BADGE - Aplicar !important para forzar */
+.codigo-badge {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
+  padding: 0.35rem 0.85rem !important;
+  border-radius: 6px !important;
+  font-family: "Courier New", monospace !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  display: inline-block !important;
+  border: none !important;
+}
+
+/* LEGAJO BADGE - Similar al código pero con color diferente */
+.legajo-badge {
+  background: #f3e8ff !important;
+  color: #7c3aed !important;
+  padding: 0.35rem 0.85rem !important;
+  border-radius: 6px !important;
+  font-family: "Courier New", monospace !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  display: inline-block !important;
+  border: none !important;
+}
+
+/* ESTADO BADGE */
+.estado-badge {
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.estado-badge.estado-excelente {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.estado-badge.estado-usada {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.estado-badge.estado-desgastada {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.estado-badge.estado-danada {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.estado-badge.estado-no-apta {
+  background: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+/* ============================================
+   RESPONSIVE PARA BADGES (COPIADO DE REPORTES)
+   ============================================ */
+
+@media (max-width: 600px) {
+  .codigo-badge {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .legajo-badge {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .estado-badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
 }
 
 /* Responsive para móvil */
@@ -1172,4 +885,69 @@ input:checked + .toggle-slider::before {
     justify-content: flex-end;
     padding: 0 16px;
   }
+}
+
+/* Ajuste: mover ligeramente a la izquierda los títulos de columnas en visor-herramientas
+   (Código, Nombre, Marca, Estado Físico, Disponibilidad) */
+.visor-herramientas .custom-table thead th:nth-child(-n + 5) {
+  text-align: left !important;
+  padding-left: 1.25rem !important; /* ajustar valor para desplazar más/menos */
+}
+
+/* Mantener Acciones (última columna) alineada a la derecha/centro */
+.visor-herramientas .custom-table thead th:last-child {
+  text-align: center !important;
+  padding-right: 2rem !important;
+}
+
+/* Ajuste: mover ligeramente a la izquierda los títulos de columnas en visor-usuarios
+   (Legajo, Nombre, Apellido, Rol) */
+.visor-usuarios .custom-table thead th:nth-child(-n + 4) {
+  text-align: left !important;
+  padding-left: 1.25rem !important; /* ajustar valor para desplazar más/menos */
+}
+
+/* Mantener Acciones (última columna) alineada a la derecha/centro en visor-usuarios */
+.visor-usuarios .custom-table thead th:last-child {
+  text-align: center !important;
+  padding-right: 2rem !important;
+}
+
+/* Ajuste: mover ligeramente a la izquierda los títulos de columnas en visor-proveedores
+   (Nombre, Contacto, Descripción, Teléfono, Email) */
+.visor-proveedores .custom-table thead th:nth-child(-n + 5) {
+  text-align: left !important;
+  padding-left: 1.25rem !important; /* ajustar valor si quieres más/menos desplazamiento */
+}
+
+/* Mantener Acciones (última columna) alineada a la derecha/centro en visor-proveedores */
+.visor-proveedores .custom-table thead th:last-child {
+  text-align: center !important;
+  padding-right: 2rem !important;
+}
+
+/* Ajuste: mover ligeramente a la izquierda los títulos de columnas en visor-clientes
+   (CUIT, Nombre, Teléfono) */
+.visor-clientes .custom-table thead th:nth-child(-n + 3) {
+  text-align: left !important;
+  padding-left: 1.25rem !important; /* ajustar valor para desplazar más/menos */
+}
+
+/* Mantener Acciones (última columna) alineada a la derecha/centro en visor-clientes */
+.visor-clientes .custom-table thead th:last-child {
+  text-align: center !important;
+  padding-right: 2rem !important;
+}
+
+/* Ajuste: mover ligeramente a la izquierda los títulos de columnas en visor-obras
+   (Código, Nombre, Descripción, Fecha Inicio, Fecha Fin) */
+.visor-obras .custom-table thead th:nth-child(-n + 5) {
+  text-align: left !important;
+  padding-left: 1.25rem !important; /* ajustar valor para desplazar más/menos */
+}
+
+/* Mantener Acciones (última columna) alineada a la derecha/centro en visor-obras */
+.visor-obras .custom-table thead th:last-child {
+  text-align: center !important;
+  padding-right: 2rem !important;
 }

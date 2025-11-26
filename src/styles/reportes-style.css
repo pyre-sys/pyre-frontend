@@ -342,7 +342,7 @@
   font-size: 13px;
   font-weight: 600;
   padding: 12px 16px;
-  text-align: left;
+  text-align: left !important;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid rgba(0, 0, 0, 0.06);
@@ -351,7 +351,7 @@
 .custom-table tbody td {
   padding: 15px 16px;
   border-bottom: 1px solid var(--color-border-light, #e0e0e0);
-  text-align: left;
+  text-align: left; /* Contenido alineado a la izquierda */
   color: #4b5563;
   font-size: 0.95rem;
   vertical-align: middle;

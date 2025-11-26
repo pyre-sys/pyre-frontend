@@ -311,6 +311,7 @@ app-root,
   text-transform: uppercase;
   letter-spacing: 0.02em;
   border-bottom: 1px solid var(--table-border);
+  text-align: center; /* Centrar títulos globalmente */
 }
 
 /* Encabezado oscuro alternativo: fondo gris oscuro y texto blanco
@@ -534,6 +535,8 @@ app-root,
   color: #ffffff !important;
   font-size: 13px;
   padding: 0.5rem !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+  text-align: center !important; /* Centrar títulos PrimeNG */
 }
 
 .p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
@@ -635,6 +638,7 @@ a:hover {
   font-size: 13px;
   padding: 0.5rem !important;
   border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+  text-align: center !important; /* Centrar títulos PrimeNG */
 }
 
 .p-datatable .p-datatable-tbody > tr:nth-child(odd) {
@@ -666,6 +670,7 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 2;
+  text-align: center !important; /* Mantener centrado en sticky */
 }
 
 /* Responsive tweaks for smaller screens */

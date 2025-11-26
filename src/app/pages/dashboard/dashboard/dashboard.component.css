@@ -601,7 +601,7 @@
 
 .ranking-table th {
   padding: 0.75rem 0.85rem;
-  text-align: left;
+  text-align: center; /* Centrar títulos de ranking */
   font-size: 0.8rem;
   font-weight: 600;
   color: #6b7280;

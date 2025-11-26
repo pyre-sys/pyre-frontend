@@ -39,7 +39,7 @@ interface DisplayHerramienta {
     SpinnerComponent,
   ],
   templateUrl: './visor-herramientas.component.html',
-  styleUrls: ['../../../../styles/visor-style.css'],
+  styleUrls: ['../../../../styles/visor-style.css'], // Usar visor-style.css
   providers: [HerramientaService, AlertaService],
 })
 export class VisorHerramientasComponent implements OnInit {
@@ -482,5 +482,19 @@ export class VisorHerramientasComponent implements OnInit {
         this.srvAlerta.error(msg);
       },
     });
+  }
+
+  // Helper method para clases de estado físico
+  getEstadoClass(estado: string): string {
+    if (!estado) return 'default';
+
+    const est = estado.toLowerCase();
+    if (est.includes('excelente')) return 'excelente';
+    if (est.includes('usada') || est.includes('usado')) return 'usada';
+    if (est.includes('desgastada') || est.includes('desgastado'))
+      return 'desgastada';
+    if (est.includes('dañada') || est.includes('dañado')) return 'danada';
+    if (est.includes('no apta') || est.includes('no apte')) return 'no-apta';
+    return 'default';
   }
 }

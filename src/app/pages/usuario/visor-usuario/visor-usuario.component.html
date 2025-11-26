@@ -8,7 +8,7 @@
   </div>
 </div>
 
-<div class="user-list-container container-fluid page-shell mt-2">
+<div class="user-list-container visor-usuarios container-fluid page-shell mt-2">
   <div class="pyre-table-shell">
     <!-- Filter bar -->
     <div class="pyre-filter-bar container-fluid">
@@ -137,7 +137,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let user of getPaginatedUsers(); let i = index">
-            <td>{{ user.legajo }}</td>
+            <td>
+              <span class="legajo-badge">{{ user.legajo }}</span>
+            </td>
             <td>{{ user.nombre }}</td>
             <td>{{ user.apellido }}</td>
             <td>{{ user.rol }}</td>
