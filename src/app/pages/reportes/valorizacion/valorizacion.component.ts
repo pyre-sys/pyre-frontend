@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PageTitleService } from '../../../services/page-title.service';
 import { HerramientaService } from '../../../services/herramienta.service';
-import { PaginatorComponent } from "../../../shared/components/paginator/paginator.component";
+import { PaginatorComponent } from '../../../shared/components/paginator/paginator.component';
 import { AlertaService } from '../../../services/alerta.service';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 
 interface HerramientasRaw {
   [key: string]: any;
@@ -20,12 +22,15 @@ interface DisplayHerramienta {
   estadoFisico?: string;
   disponibilidad?: string;
   ubicacion?: string;
-  planta?: string;
   costoDolares?: number;
   fechaDeIngreso?: string;
   activo?: boolean;
   valorActual?: number;
   categoria?: string;
+  // AGREGAR la propiedad que falta
+  idDisponibilidad?: number;
+  // Nuevo: exponer estado (Activo / Inactivo) para usar en plantillas como otros componentes
+  estado?: string;
 }
 
 type RangoPrecio = 'todos' | 'bajo' | 'medio' | 'alto' | 'premium';
@@ -36,14 +41,16 @@ type RangoPrecio = 'todos' | 'bajo' | 'medio' | 'alto' | 'premium';
     CommonModule,
     FormsModule,
     PaginatorComponent,
+    NgbTooltipModule,
+    SpinnerComponent,
   ],
   templateUrl: './valorizacion.component.html',
-  styleUrl: './valorizacion.component.css'
+  styleUrls: ['../../../../styles/reportes-style.css'],
 })
 export class ValorizacionComponent implements OnInit {
-
   herramientas: DisplayHerramienta[] = [];
   filteredHerramientas: DisplayHerramienta[] = [];
+  paginatedHerramientas: DisplayHerramienta[] = [];
   currentPage = 1;
   pageSize = 8;
   loading = false;
@@ -58,34 +65,57 @@ export class ValorizacionComponent implements OnInit {
   herramientasAltas = 0;
   herramientasPremium = 0;
 
-  // Filtros
+  // Filtros de búsqueda (local) - IGUAL QUE ESTADO
+  filtroCodigo = '';
+  filtroNombre = '';
+  filtroMarca = '';
+  filtroDisponibilidadId: number | null = null;
+  selectedDisponibilidad: any = null;
   rangoPrecioSelect: RangoPrecio = 'todos';
-  searchTerm = '';
 
   // Rangos de precios (en USD)
   rangosPrecio = [
-    { value: 'todos' as RangoPrecio, label: 'Todas las Herramientas', icon: 'bi-collection', color: 'primary', min: 0, max: Infinity },
-    { value: 'bajo' as RangoPrecio, label: 'Económicas (< $500)', icon: 'bi-cash-stack', color: 'success', min: 0, max: 499.99 },
-    { value: 'medio' as RangoPrecio, label: 'Estándar ($500 - $2000)', icon: 'bi-currency-dollar', color: 'info', min: 500, max: 1999.99 },
-    { value: 'alto' as RangoPrecio, label: 'Premium ($2000 - $5000)', icon: 'bi-gem', color: 'warning', min: 2000, max: 4999.99 },
-    { value: 'premium' as RangoPrecio, label: 'Profesional (> $5000)', icon: 'bi-star-fill', color: 'danger', min: 5000, max: Infinity }
+    {
+      value: 'todos' as RangoPrecio,
+      label: 'Todas',
+      icon: 'bi-collection',
+      color: 'primary',
+    },
+    {
+      value: 'bajo' as RangoPrecio,
+      label: 'Económicas (< $500)',
+      icon: 'bi-cash-stack',
+      color: 'success',
+    },
+    {
+      value: 'medio' as RangoPrecio,
+      label: 'Estándar ($500-$2k)',
+      icon: 'bi-currency-dollar',
+      color: 'info',
+    },
+    {
+      value: 'alto' as RangoPrecio,
+      label: 'Premium ($2k-$5k)',
+      icon: 'bi-gem',
+      color: 'warning',
+    },
+    {
+      value: 'premium' as RangoPrecio,
+      label: 'Profesional (>$5k)',
+      icon: 'bi-star-fill',
+      color: 'danger',
+    },
   ];
-
-  Math = Math; // <-- exponer Math para usar Math.min en template
 
   constructor(
     private pageTitleService: PageTitleService,
     private srvHerramienta: HerramientaService,
     private srvAlerta: AlertaService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Valorización de Inventario');
     this.loadAllHerramientas();
-  }
-
-  getPaginatedHerramientas(): DisplayHerramienta[] {
-    return this.filteredHerramientas;
   }
 
   loadAllHerramientas(): void {
@@ -97,9 +127,11 @@ export class ValorizacionComponent implements OnInit {
         this.loading = false;
         if (response && response.data) {
           const herramientasData = response.data;
-          this.herramientas = herramientasData.map((h: any) => this.mapHerramientaToDisplayFormat(h));
+          this.herramientas = herramientasData.map((h: any) =>
+            this.mapHerramientaToDisplayFormat(h)
+          );
           this.calculateFinancialStats();
-          this.applyFilters();
+          this.applyFiltersLocal();
         } else {
           this.herramientas = [];
           this.filteredHerramientas = [];
@@ -109,80 +141,143 @@ export class ValorizacionComponent implements OnInit {
       error: (error: any) => {
         this.loading = false;
         console.error('Error al cargar herramientas:', error);
-        this.srvAlerta.error('Error al cargar las herramientas. Por favor, inténtelo de nuevo.');
+        this.srvAlerta.error('Error al cargar las herramientas.');
         this.herramientas = [];
         this.filteredHerramientas = [];
         this.totalItems = 0;
-      }
+      },
     });
   }
 
   private calculateFinancialStats(): void {
-    const herramientasConPrecio = this.herramientas.filter(h => h.costoDolares && h.costoDolares > 0);
+    const herramientasConPrecio = this.herramientas.filter(
+      (h) => h.costoDolares && h.costoDolares > 0
+    );
 
-    // Valor total del inventario (sin depreciación)
-    this.valorInventarioTotal = herramientasConPrecio.reduce((sum, h) => sum + (h.valorActual || 0), 0);
+    // Valor total del inventario
+    this.valorInventarioTotal = herramientasConPrecio.reduce(
+      (sum, h) => sum + (h.valorActual || 0),
+      0
+    );
 
     // Valor promedio por herramienta
-    this.valorPromedioHerramienta = herramientasConPrecio.length > 0 ?
-      this.valorInventarioTotal / herramientasConPrecio.length : 0;
+    this.valorPromedioHerramienta =
+      herramientasConPrecio.length > 0
+        ? this.valorInventarioTotal / herramientasConPrecio.length
+        : 0;
 
-    // Distribución por rangos de precio (basada en valorActual que ahora == costoDolares)
-    this.herramientasBajas = herramientasConPrecio.filter(h => (h.valorActual || 0) < 500).length;
-    this.herramientasMedias = herramientasConPrecio.filter(h => (h.valorActual || 0) >= 500 && (h.valorActual || 0) < 2000).length;
-    this.herramientasAltas = herramientasConPrecio.filter(h => (h.valorActual || 0) >= 2000 && (h.valorActual || 0) < 5000).length;
-    this.herramientasPremium = herramientasConPrecio.filter(h => (h.valorActual || 0) >= 5000).length;
+    // Distribución por rangos de precio
+    this.herramientasBajas = herramientasConPrecio.filter(
+      (h) => (h.valorActual || 0) < 500
+    ).length;
+    this.herramientasMedias = herramientasConPrecio.filter(
+      (h) => (h.valorActual || 0) >= 500 && (h.valorActual || 0) < 2000
+    ).length;
+    this.herramientasAltas = herramientasConPrecio.filter(
+      (h) => (h.valorActual || 0) >= 2000 && (h.valorActual || 0) < 5000
+    ).length;
+    this.herramientasPremium = herramientasConPrecio.filter(
+      (h) => (h.valorActual || 0) >= 5000
+    ).length;
   }
 
   onRangoPrecioSelected(rango: RangoPrecio): void {
     this.rangoPrecioSelect = rango;
     this.currentPage = 1;
-    this.applyFilters();
+    this.filtroCodigo = '';
+    this.filtroNombre = '';
+    this.filtroMarca = '';
+    this.filtroDisponibilidadId = null;
+    this.selectedDisponibilidad = null;
+    this.applyFiltersLocal();
   }
 
-  onSearchChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.searchTerm = target.value.toLowerCase();
-    this.currentPage = 1;
-    this.applyFilters();
-  }
+  // Aplicar filtros LOCALMENTE (sin ir al backend) - IGUAL QUE ESTADO
+  applyFiltersLocal(): void {
+    let filtered = this.herramientas.filter((h) => {
+      const codigo = h.codigo?.toLowerCase() ?? '';
+      const nombre = h.nombre?.toLowerCase() ?? '';
+      const marca = h.marca?.toLowerCase() ?? '';
 
-  private applyFilters(): void {
-    let filtered = [...this.herramientas];
+      const filtroCodigo = this.filtroCodigo.toLowerCase().trim();
+      const filtroNombre = this.filtroNombre.toLowerCase().trim();
+      const filtroMarca = this.filtroMarca.toLowerCase().trim();
+
+      // Filtro de disponibilidad: comparar por ID (más confiable)
+      let filtroDisponibilidadMatch = true;
+      if (this.filtroDisponibilidadId !== null) {
+        filtroDisponibilidadMatch =
+          h.idDisponibilidad === this.filtroDisponibilidadId;
+      }
+
+      const matchesCodigo = !filtroCodigo || codigo.includes(filtroCodigo);
+      const matchesNombre = !filtroNombre || nombre.includes(filtroNombre);
+      const matchesMarca = !filtroMarca || marca.includes(filtroMarca);
+
+      return (
+        matchesCodigo &&
+        matchesNombre &&
+        matchesMarca &&
+        filtroDisponibilidadMatch
+      );
+    });
 
     // Filtrar por rango de precio
     if (this.rangoPrecioSelect !== 'todos') {
-      const rango = this.rangosPrecio.find(r => r.value === this.rangoPrecioSelect);
-      if (rango) {
-        filtered = filtered.filter(h => {
-          const valor = h.valorActual || 0;
-          return valor >= rango.min && valor <= rango.max;
-        });
+      switch (this.rangoPrecioSelect) {
+        case 'bajo':
+          filtered = filtered.filter((h) => (h.valorActual || 0) < 500);
+          break;
+        case 'medio':
+          filtered = filtered.filter(
+            (h) => (h.valorActual || 0) >= 500 && (h.valorActual || 0) < 2000
+          );
+          break;
+        case 'alto':
+          filtered = filtered.filter(
+            (h) => (h.valorActual || 0) >= 2000 && (h.valorActual || 0) < 5000
+          );
+          break;
+        case 'premium':
+          filtered = filtered.filter((h) => (h.valorActual || 0) >= 5000);
+          break;
       }
-    }
-
-    // Filtrar por búsqueda
-    if (this.searchTerm) {
-      filtered = filtered.filter(h =>
-        h.nombre?.toLowerCase().includes(this.searchTerm) ||
-        h.codigo?.toLowerCase().includes(this.searchTerm) ||
-        h.marca?.toLowerCase().includes(this.searchTerm) ||
-        h.tipo?.toLowerCase().includes(this.searchTerm)
-      );
     }
 
     // Ordenar por valor descendente
     filtered.sort((a, b) => (b.valorActual || 0) - (a.valorActual || 0));
 
+    this.filteredHerramientas = filtered;
     this.totalItems = filtered.length;
+    this.currentPage = 1;
     this.calculatePagination();
-    this.updateFilteredData(filtered);
+    this.updatePaginatedData();
   }
 
-  private updateFilteredData(filtered: DisplayHerramienta[]): void {
+  // Cuando se selecciona disponibilidad en el combo - EJECUTAR FILTRADO INMEDIATAMENTE
+  onDisponibilidadSelected(disponibilidad: any): void {
+    console.log('Disponibilidad seleccionada (evento):', disponibilidad);
+
+    this.selectedDisponibilidad = disponibilidad;
+    // Usar idEstadoDisponibilidad como ID
+    this.filtroDisponibilidadId =
+      disponibilidad?.idEstadoDisponibilidad ?? null;
+
+    console.log('selectedDisponibilidad:', this.selectedDisponibilidad);
+    console.log('filtroDisponibilidadId:', this.filtroDisponibilidadId);
+
+    // IMPORTANTE: Aplicar filtros inmediatamente sin esperar a que el usuario haga clic en Buscar
+    this.currentPage = 1;
+    this.applyFiltersLocal();
+  }
+
+  private updatePaginatedData(): void {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.filteredHerramientas = filtered.slice(startIndex, endIndex);
+    this.paginatedHerramientas = this.filteredHerramientas.slice(
+      startIndex,
+      endIndex
+    );
   }
 
   calculatePagination(): void {
@@ -192,34 +287,71 @@ export class ValorizacionComponent implements OnInit {
     }
   }
 
-  onPageSizeChange(): void {
+  onSearch(): void {
     this.currentPage = 1;
-    this.applyFilters();
+    this.applyFiltersLocal();
   }
 
-  onPageEvent(event: { pageIndex: number, pageSize: number }): void {
+  hasActiveFilters(): boolean {
+    return !!(
+      this.filtroCodigo?.trim() ||
+      this.filtroNombre?.trim() ||
+      this.filtroMarca?.trim() ||
+      this.filtroDisponibilidadId !== null ||
+      this.rangoPrecioSelect !== 'todos'
+    );
+  }
+
+  onResetFilters(): void {
+    this.filtroCodigo = '';
+    this.filtroNombre = '';
+    this.filtroMarca = '';
+    this.filtroDisponibilidadId = null;
+    this.selectedDisponibilidad = null;
+    this.rangoPrecioSelect = 'todos';
+    this.currentPage = 1;
+    this.applyFiltersLocal();
+  }
+
+  // AGREGAR método que falta
+  onPageEvent(event: { pageIndex: number; pageSize: number }): void {
     this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
-    this.applyFilters();
+    this.calculatePagination();
+    this.updatePaginatedData();
   }
 
   getRangoPrecioStats(rango: RangoPrecio): number {
     switch (rango) {
-      case 'bajo': return this.herramientasBajas;
-      case 'medio': return this.herramientasMedias;
-      case 'alto': return this.herramientasAltas;
-      case 'premium': return this.herramientasPremium;
-      case 'todos': return this.herramientas.length;
-      default: return 0;
+      case 'bajo':
+        return this.herramientasBajas;
+      case 'medio':
+        return this.herramientasMedias;
+      case 'alto':
+        return this.herramientasAltas;
+      case 'premium':
+        return this.herramientasPremium;
+      case 'todos':
+        return this.herramientas.length;
+      default:
+        return 0;
     }
   }
 
-  private mapHerramientaToDisplayFormat(h: HerramientasRaw): DisplayHerramienta {
+  private mapHerramientaToDisplayFormat(
+    h: HerramientasRaw
+  ): DisplayHerramienta {
     const costoDolares = parseFloat(h['costoDolares']?.toString() || '0') || 0;
     const fechaIngreso = h['fechaDeIngreso'] || h['fechaIngreso'];
-
-    // No depreciación: valorActual = costoDolares
     const valorActual = costoDolares;
+
+    const estadoRaw =
+      h['activo'] ?? h['estado'] ?? h['active'] ?? h['isActive'] ?? null;
+    const activo =
+      typeof estadoRaw === 'boolean'
+        ? estadoRaw
+        : estadoRaw === 'Activo' || estadoRaw === true;
+    const estado = activo ? 'Activo' : 'Inactivo';
 
     return {
       id: h['id'] ?? h['idHerramienta'] ?? null,
@@ -231,12 +363,15 @@ export class ValorizacionComponent implements OnInit {
       estadoFisico: h['estadoFisico'] ?? '',
       disponibilidad: h['estadoDisponibilidad'] ?? h['disponibilidad'] ?? '',
       ubicacion: h['ubicacion'] ?? h['ubicacionFisica'] ?? '',
-      planta: h['nombrePlanta'] ?? h['planta'] ?? '',
       costoDolares: costoDolares,
       fechaDeIngreso: fechaIngreso,
       activo: h['activo'] !== false,
       valorActual: valorActual,
-      categoria: this.getCategoriaByValue(valorActual)
+      categoria: this.getCategoriaByValue(valorActual),
+      // AGREGAR la propiedad que falta
+      idDisponibilidad: h['idDisponibilidad'] ?? null,
+      // Nuevo: exponer estado consistente (Activo / Inactivo)
+      estado: estado,
     } as DisplayHerramienta;
   }
 
@@ -254,33 +389,27 @@ export class ValorizacionComponent implements OnInit {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(value);
   }
 
-  getCategoriaColor(categoria: string | undefined): string {
+  getCategoriaClass(categoria: string | undefined): string {
     switch (categoria) {
-      case 'Profesional': return 'danger';
-      case 'Premium': return 'warning';
-      case 'Estándar': return 'info';
-      case 'Económica': return 'success';
-      default: return 'secondary';
+      case 'Profesional':
+        return 'danger';
+      case 'Premium':
+        return 'warning';
+      case 'Estándar':
+        return 'info';
+      case 'Económica':
+        return 'success';
+      default:
+        return 'secondary';
     }
   }
 
-  getCategoriaIcon(categoria: string | undefined): string {
-    switch (categoria) {
-      case 'Profesional': return 'bi-star-fill';
-      case 'Premium': return 'bi-gem';
-      case 'Estándar': return 'bi-currency-dollar';
-      case 'Económica': return 'bi-cash-stack';
-      default: return 'bi-question-circle';
-    }
-  }
-
-  // Helpers para disponibilidad (usados en la plantilla)
-  getDisponibilidadColor(disponibilidad: string | undefined): string {
-    if (!disponibilidad) return 'primary';
+  getDisponibilidadClass(disponibilidad: string | undefined): string {
+    if (!disponibilidad) return 'secondary';
     const disp = disponibilidad.toLowerCase();
     if (disp.includes('disponible')) return 'success';
     if (disp.includes('prestada')) return 'primary';
@@ -289,61 +418,33 @@ export class ValorizacionComponent implements OnInit {
     return 'primary';
   }
 
-  getDisponibilidadIcon(disponibilidad: string | undefined): string {
-    if (!disponibilidad) return 'bi-question-circle';
-    const disp = disponibilidad.toLowerCase();
-    if (disp.includes('disponible')) return 'bi-check-circle';
-    if (disp.includes('prestada')) return 'bi-arrow-right-circle';
-    if (disp.includes('mantenimiento')) return 'bi-wrench';
-    if (disp.includes('extraviada')) return 'bi-exclamation-triangle';
-    return 'bi-question-circle';
+  // Nuevo: helper idéntico al usado en estado.component
+  getEstadoClass(estado: string | undefined): string {
+    if (!estado) return 'default';
+
+    const est = estado.toLowerCase();
+    if (est.includes('excelente')) return 'excelente';
+    if (est.includes('usada') || est.includes('usado')) return 'usada';
+    if (est.includes('desgastada') || est.includes('desgastado'))
+      return 'desgastada';
+    if (est.includes('dañada') || est.includes('dañado')) return 'danada';
+    if (est.includes('no apta') || est.includes('no apte')) return 'no-apta';
+    return 'default';
   }
 
-  // Devuelve el objeto del rango actualmente seleccionado (o undefined)
-  selectedRango() {
-    return this.rangosPrecio.find(r => r.value === this.rangoPrecioSelect);
-  }
-
-  // Color (class suffix) del rango seleccionado, fallback 'primary'
-  selectedRangoColor(): string {
-    return this.selectedRango()?.color ?? 'primary';
-  }
-
-  // Label del rango seleccionado, fallback
-  selectedRangoLabel(): string {
-    return this.selectedRango()?.label ?? 'Todas las Herramientas';
-  }
-
-  // Clase de badge para disponibilidad (ej. 'badge-success')
-  getDisponibilidadClass(disponibilidad?: string): string {
-    return 'badge-' + this.getDisponibilidadColor(disponibilidad);
-  }
-
-  // Clase de badge para estado físico (ej. 'badge-warning')
-  getEstadoFisicoClass(estadoFisico?: string): string {
-    if (!estadoFisico) return 'badge-secondary';
-
+  getEstadoFisicoClass(estadoFisico: string | undefined): string {
+    if (!estadoFisico) return 'secondary';
     const estado = estadoFisico.toLowerCase();
-    if (estado.includes('excelente')) return 'badge-success';
-    if (estado.includes('usada') || estado.includes('bueno')) return 'badge-primary';
-    if (estado.includes('desgastada') || estado.includes('regular')) return 'badge-warning';
-    if (estado.includes('dañada') || estado.includes('malo') || estado.includes('no apta')) return 'badge-danger';
-    return 'badge-secondary';
-  }
-
-  onResetFilters(): void {
-    this.rangoPrecioSelect = 'todos';
-    this.searchTerm = '';
-    this.currentPage = 1;
-    this.applyFilters();
-  }
-
-  hasActiveFilters(): boolean {
-    return this.rangoPrecioSelect !== 'todos' || this.searchTerm.length > 0;
-  }
-
-  // Track by function for performance
-  trackByHerramienta(index: number, herramienta: DisplayHerramienta): number {
-    return herramienta.id || index;
+    if (estado.includes('excelente')) return 'success';
+    if (estado.includes('usada') || estado.includes('bueno')) return 'primary';
+    if (estado.includes('desgastada') || estado.includes('regular'))
+      return 'warning';
+    if (
+      estado.includes('dañada') ||
+      estado.includes('malo') ||
+      estado.includes('no apta')
+    )
+      return 'danger';
+    return 'secondary';
   }
 }

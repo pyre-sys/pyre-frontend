@@ -60,6 +60,8 @@
   flex: 1 1 auto;
   min-width: 160px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: auto; /* Asegurar que la altura sea automática */
+  min-height: 56px; /* Altura mínima consistente */
 }
 
 .btn-estado::before {

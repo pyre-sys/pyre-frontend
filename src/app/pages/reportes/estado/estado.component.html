@@ -5,7 +5,7 @@
   </div>
 </div>
 
-<!-- Contenedor principal: Botones de estado + Filtros + Tabla (igual que visor-herramientas) -->
+<!-- Contenedor principal: Botones de estado + Tabla -->
 <div class="user-list-container container-fluid page-shell mt-2">
   <div class="pyre-table-shell">
     <!-- 🔧 BOTONES DE ESTADO FÍSICO (arriba dentro del contenedor) -->
@@ -26,98 +26,7 @@
       </button>
     </div>
 
-    <!-- 🔍 FILTROS (estilo visor-herramientas) -->
-    <div class="pyre-filter-bar container-fluid mb-3">
-      <div class="row g-3 align-items-end">
-        <!-- Código -->
-        <div class="col-lg-2 col-md-3 col-sm-6">
-          <div class="filter-item">
-            <div class="filter-input-group">
-              <input
-                type="text"
-                class="form-control"
-                [(ngModel)]="filtroCodigo"
-                placeholder="Código"
-                (keyup.enter)="onSearch()"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Nombre -->
-        <div class="col-lg-3 col-md-3 col-sm-6">
-          <div class="filter-item">
-            <div class="filter-input-group">
-              <input
-                type="text"
-                class="form-control"
-                [(ngModel)]="filtroNombre"
-                placeholder="Nombre"
-                (keyup.enter)="onSearch()"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Marca -->
-        <div class="col-lg-2 col-md-3 col-sm-6">
-          <div class="filter-item">
-            <div class="filter-input-group">
-              <input
-                type="text"
-                class="form-control"
-                [(ngModel)]="filtroMarca"
-                placeholder="Marca"
-                (keyup.enter)="onSearch()"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Disponibilidad -->
-        <div class="col-lg-3 col-md-3 col-sm-6">
-          <div class="filter-item">
-            <div class="filter-input-group">
-              <app-cbo-disponibilidad-herramienta
-                [isDisabled]="false"
-                [(ngModel)]="filtroDisponibilidadId"
-                (disponibilidadSelected)="onDisponibilidadSelected($event)"
-              ></app-cbo-disponibilidad-herramienta>
-            </div>
-          </div>
-        </div>
-
-        <!-- Reset + Buscar -->
-        <div class="col-lg-2 col-md-12 col-sm-12 d-flex justify-content-end">
-          <div class="filter-actions d-flex gap-2">
-            <button
-              type="button"
-              class="reset-button-inline"
-              (click)="onResetFilters()"
-              [disabled]="!hasActiveFilters()"
-              [ngbTooltip]="
-                hasActiveFilters()
-                  ? 'Limpiar filtros'
-                  : 'No hay filtros activos'
-              "
-            >
-              <i class="pi pi-filter-slash"></i>
-            </button>
-
-            <button
-              type="button"
-              class="btn btn-primary"
-              (click)="onSearch()"
-              ngbTooltip="Buscar"
-              placement="top"
-              container="body"
-            >
-              <i class="pi pi-search"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- FILTROS ELIMINADOS: Se quitaron los inputs de Código, Nombre, Marca, Disponibilidad y los botones Limpiar/Buscar -->
 
     <!-- Spinner global (overlay) -->
     <app-spinner [isLoading]="loading"></app-spinner>

@@ -1,646 +1,95 @@
-<!-- Header Section -->
-<div class="disponibilidad-header" fadeIn>
-  <div class="header-content">
-    <div class="title-section">
-      <h2 class="page-title">
-        <i class="bi bi-clipboard-data me-2"></i>
-        Estado de Disponibilidad
-      </h2>
-      <p class="page-subtitle">
-        Monitoreo de la disponibilidad de las herramientas
-      </p>
-    </div>
+<!-- Título y botones de disponibilidad -->
+<div class="container-fluid page-shell page-header-container">
+  <div class="d-flex justify-content-end align-items-center mb-3 gap-3">
+    <!-- Espacio reservado para acciones futuras -->
   </div>
 </div>
 
-<!-- Estadísticas por Estado de Disponibilidad -->
-<div class="stats-section">
-  <div class="stats-grid-compact">
-    <div
-      *ngFor="let estado of estadosDisponibilidad"
-      class="stat-card clickable compact"
-      [class.selected]="disponibilidadSelect?.id === estado.id"
-      [class]="'stat-' + estado.color"
-      (click)="onDisponibilidadCardClick(estado)"
-    >
-      <div class="stat-icon compact" [class]="estado.color">
-        <i [class]="estado.icon"></i>
-      </div>
-      <div class="stat-info compact">
-        <h3 class="stat-number compact">
-          {{ getDisponibilidadStats(estado.id) }}
-        </h3>
-        <p class="stat-label compact">{{ estado.nombre }}</p>
-      </div>
-      <div
-        class="selection-indicator"
-        *ngIf="disponibilidadSelect?.id === estado.id"
+<!-- Contenedor principal: Botones de disponibilidad + Tabla (filtros eliminados) -->
+<div class="user-list-container container-fluid page-shell mt-2">
+  <div class="pyre-table-shell">
+    <!-- 🔧 BOTONES DE DISPONIBILIDAD (arriba dentro del contenedor) -->
+    <div class="estado-filters-row mb-3">
+      <button
+        *ngFor="let estado of estadosDisponibilidad"
+        type="button"
+        class="btn-estado"
+        [class.active]="disponibilidadSelect?.id === estado.id"
+        [class]="'btn-estado-' + estado.color"
+        (click)="onEstadoCardClick(estado)"
+        [ngbTooltip]="'Filtrar por ' + estado.nombre"
+        container="body"
       >
-        <i class="bi bi-check-circle-fill"></i>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Filtros Section -->
-<div class="filters-section" *ngIf="disponibilidadSelect">
-  <div class="filters-container">
-    <div class="filter-header">
-      <h6 class="filter-title">
-        <i class="bi bi-funnel me-2"></i>
-        Filtros
-      </h6>
-      <div class="filter-actions">
-        <button
-          type="button"
-          class="btn btn-outline-secondary btn-sm"
-          (click)="onResetFilters()"
-          title="Limpiar filtros"
-        >
-          <i class="bi bi-x-circle me-1"></i>
-          Limpiar Filtros
-        </button>
-      </div>
+        <i [class]="estado.icon + ' me-2'"></i>
+        <span class="btn-text">{{ estado.nombre }}</span>
+        <span class="btn-count">{{ getDisponibilidadStats(estado.id) }}</span>
+      </button>
     </div>
 
-    <div class="filter-content">
-      <div class="selected-filter-badge">
-        <span class="badge" [class]="'bg-' + disponibilidadSelect.color">
-          <i [class]="disponibilidadSelect.icon + ' me-1'"></i>
-          Estado: {{ disponibilidadSelect.nombre }}
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
+    <!-- FILTROS ELIMINADOS: Se quitaron los inputs de Código, Nombre, Marca, Disponibilidad y los botones Limpiar/Buscar -->
 
-<!-- Loading State -->
-<div *ngIf="loading" class="loading-container">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Cargando herramientas...</span>
-  </div>
-  <p class="loading-text">Cargando herramientas...</p>
-</div>
+    <!-- Spinner global (overlay) -->
+    <app-spinner [isLoading]="loading"></app-spinner>
 
-<!-- Empty State -->
-<div *ngIf="!loading && !disponibilidadSelect" class="empty-state">
-  <div class="empty-icon">
-    <i class="bi bi-tools"></i>
-  </div>
-  <h3>Seleccione un Estado de Disponibilidad</h3>
-  <p>
-    Haga clic en una de las tarjetas de estado para ver las herramientas
-    correspondientes.
-  </p>
-</div>
+    <!-- Tabla de Herramientas -->
+    <div *ngIf="!loading" class="custom-table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Marca</th>
+            <th>Tipo</th>
+            <th>Estado Físico</th>
+            <th>Disponibilidad</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
 
-<!-- No Results State -->
-<div
-  *ngIf="!loading && disponibilidadSelect && totalItems === 0"
-  class="empty-state"
->
-  <div class="empty-icon">
-    <i class="bi bi-search"></i>
-  </div>
-  <h3>Sin Resultados</h3>
-  <p>
-    No se encontraron herramientas en estado
-    <strong>{{ disponibilidadSelect.nombre }}</strong
-    >.
-  </p>
-</div>
-
-<!-- Results Table -->
-<div *ngIf="!loading && totalItems > 0" class="results-section">
-  <!-- Results Header -->
-  <div class="results-header">
-    <div class="results-info">
-      <h6 class="results-title">
-        Herramientas con Estado:
-        <span class="badge ms-2" [class]="'bg-' + disponibilidadSelect.color">
-          {{ disponibilidadSelect.nombre }}
-        </span>
-      </h6>
-      <p class="results-count">
-        Mostrando {{ filteredHerramientas.length }} de
-        {{ totalItems }} herramientas
-      </p>
-    </div>
-
-    <div class="results-actions">
-      <div class="page-size-selector">
-        <label class="form-label small">Mostrar:</label>
-        <select
-          class="form-select form-select-sm"
-          [(ngModel)]="pageSize"
-          (ngModelChange)="onPageSizeChange()"
-        >
-          <option value="6">6 por página</option>
-          <option value="12">12 por página</option>
-          <option value="24">24 por página</option>
-          <option value="48">48 por página</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- Custom Table -->
-  <div class="table-container">
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th>
-            <i class="bi bi-hash me-1"></i>
-            Código
-          </th>
-          <th>
-            <i class="bi bi-tools me-1"></i>
-            Nombre
-          </th>
-          <th>
-            <i class="bi bi-tag me-1"></i>
-            Marca
-          </th>
-          <th>
-            <i class="bi bi-gear me-1"></i>
-            Tipo
-          </th>
-          <th>
-            <i class="bi bi-clipboard-check me-1"></i>
-            Estado Físico
-          </th>
-          <th>
-            <i class="bi bi-geo-alt me-1"></i>
-            Ubicación
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let herramienta of filteredHerramientas; let i = index"
-          class="table-row"
-          [class.row-even]="i % 2 === 0"
-        >
-          <td>
-            <span class="codigo-badge">{{ herramienta.codigo }}</span>
-          </td>
-          <td class="nombre-cell">
-            <div class="nombre-content">
-              <span class="nombre-text">{{ herramienta.nombre }}</span>
-            </div>
-          </td>
-          <td>{{ herramienta.marca || "N/A" }}</td>
-          <td>{{ herramienta.tipo || "N/A" }}</td>
-          <td>
-            <span
-              class="estado-badge"
-              [class]="
-                'badge-' + getEstadoFisicoColor(herramienta.estadoFisico)
-              "
-            >
-              <i
-                [class]="
-                  getEstadoFisicoIcon(herramienta.estadoFisico) + ' me-1'
+        <tbody>
+          <tr *ngFor="let herramienta of paginatedHerramientas; let i = index">
+            <td>
+              <span class="codigo-badge">{{ herramienta.codigo }}</span>
+            </td>
+            <td>{{ herramienta.nombre || "-" }}</td>
+            <td>{{ herramienta.marca || "-" }}</td>
+            <td>{{ herramienta.tipo || "-" }}</td>
+            <td>
+              <span
+                class="estado-badge"
+                [ngClass]="
+                  'estado-' +
+                  getEstadoClass(herramienta.estadoFisico || herramienta.estado)
                 "
-              ></i>
-              {{ herramienta.estadoFisico || "N/A" }}
-            </span>
-          </td>
-          <td>{{ herramienta.ubicacion || "N/A" }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+              >
+                {{ herramienta.estadoFisico || herramienta.estado || "-" }}
+              </span>
+            </td>
+            <td>
+              {{ herramienta.disponibilidad || "-" }}
+            </td>
+            <td>
+              {{ herramienta.activo ? "Activo" : "Inactivo" }}
+            </td>
+          </tr>
 
-  <!-- Pagination -->
-  <div class="pagination-container" *ngIf="totalPages > 1">
-    <app-paginator
-      [length]="totalItems"
-      [pageSize]="pageSize"
-      [pageIndex]="currentPage - 1"
-      (pageChange)="onPageEvent($event)"
-    >
-    </app-paginator>
+          <tr *ngIf="paginatedHerramientas.length === 0">
+            <td colspan="7" class="empty-message">
+              No se encontraron herramientas.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginador -->
+    <div *ngIf="!loading && totalItems > 0" class="paginator-container">
+      <app-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage - 1"
+        (pageChange)="onPageEvent($event)"
+      ></app-paginator>
+    </div>
   </div>
 </div>
-
-<style>
-  /* Header Section */
-  .disponibilidad-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 1rem;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border: 1px solid #dee2e6;
-  }
-
-  .header-content {
-    text-align: center;
-  }
-
-  .page-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #212529;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .page-subtitle {
-    color: #6c757d;
-    margin: 0.5rem 0 0 0;
-    font-size: 1.1rem;
-  }
-
-  /* Stats Section - Compact Version */
-  .stats-section {
-    margin-bottom: 2rem;
-  }
-
-  .stats-grid-compact {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .stat-card.compact {
-    padding: 1rem 1.25rem;
-  }
-
-  .stat-card {
-    background: white;
-    border: 2px solid #e9ecef;
-    border-radius: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .stat-card.clickable {
-    cursor: pointer;
-  }
-
-  .stat-card.clickable:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    border-color: var(--stat-color);
-  }
-
-  .stat-card.selected {
-    border-color: var(--stat-color);
-    background: var(--stat-bg);
-    box-shadow: 0 0 0 0.2rem var(--stat-shadow);
-  }
-
-  .stat-card.stat-success {
-    --stat-color: #28a745;
-    --stat-bg: #f8fff9;
-    --stat-shadow: rgba(40, 167, 69, 0.25);
-  }
-
-  .stat-card.stat-primary {
-    --stat-color: #007bff;
-    --stat-bg: #f8fcff;
-    --stat-shadow: rgba(0, 123, 255, 0.25);
-  }
-
-  .stat-card.stat-warning {
-    --stat-color: #ffc107;
-    --stat-bg: #fffcf0;
-    --stat-shadow: rgba(255, 193, 7, 0.25);
-  }
-
-  .stat-card.stat-danger {
-    --stat-color: #dc3545;
-    --stat-bg: #fff5f5;
-    --stat-shadow: rgba(220, 53, 69, 0.25);
-  }
-
-  .stat-icon.compact {
-    width: 3rem;
-    height: 3rem;
-    font-size: 1.25rem;
-  }
-
-  .stat-icon {
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    flex-shrink: 0;
-  }
-
-  .stat-icon.success {
-    background: #28a745;
-  }
-  .stat-icon.primary {
-    background: #007bff;
-  }
-  .stat-icon.warning {
-    background: #ffc107;
-    color: #212529;
-  }
-  .stat-icon.danger {
-    background: #dc3545;
-  }
-
-  .stat-number.compact {
-    font-size: 2rem;
-  }
-
-  .stat-number {
-    font-weight: 700;
-    margin: 0;
-    color: #212529;
-  }
-
-  .stat-label.compact {
-    font-size: 0.9rem;
-  }
-
-  .stat-label {
-    margin: 0;
-    color: #6c757d;
-    font-weight: 500;
-  }
-
-  .selection-indicator {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    color: var(--stat-color);
-    font-size: 1rem;
-  }
-
-  /* Filters Section */
-  .filters-section {
-    margin-bottom: 2rem;
-  }
-
-  .filters-container {
-    background: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e9ecef;
-  }
-
-  .filter-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-
-  .filter-title {
-    margin: 0;
-    color: #495057;
-    font-weight: 600;
-  }
-
-  .selected-filter-badge {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .selected-filter-badge .badge {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-  }
-
-  /* Loading and Empty States */
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 2rem;
-    text-align: center;
-  }
-
-  .loading-text {
-    margin-top: 1rem;
-    color: #6c757d;
-    font-size: 1.1rem;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #6c757d;
-  }
-
-  .empty-icon {
-    font-size: 4rem;
-    color: #dee2e6;
-    margin-bottom: 1.5rem;
-  }
-
-  .empty-state h3 {
-    color: #495057;
-    margin-bottom: 1rem;
-  }
-
-  .empty-state p {
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-  }
-
-  /* Results Section */
-  .results-section {
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e9ecef;
-    overflow: hidden;
-  }
-
-  .results-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    background: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .results-title {
-    margin: 0;
-    color: #495057;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-  }
-
-  .results-count {
-    margin: 0;
-    color: #6c757d;
-    font-size: 0.9rem;
-  }
-
-  .results-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .page-size-selector {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .page-size-selector .form-label {
-    margin: 0;
-    color: #6c757d;
-    white-space: nowrap;
-  }
-
-  /* Table Styles */
-  .table-container {
-    overflow-x: auto;
-  }
-
-  .custom-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-  }
-
-  .custom-table th {
-    background: #f8f9fa;
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 600;
-    color: #495057;
-    white-space: nowrap;
-  }
-
-  .custom-table td {
-    padding: 1rem;
-    border-bottom: 1px solid #f1f3f4;
-    color: #495057;
-  }
-
-  .table-row:hover {
-    background: #f8f9fa;
-  }
-
-  .row-even {
-    background: #fdfdfd;
-  }
-
-  .codigo-badge {
-    background: #e3f2fd;
-    color: #1976d2;
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-family: "Courier New", monospace;
-    font-weight: 600;
-    font-size: 0.875rem;
-  }
-
-  .nombre-cell {
-    min-width: 200px;
-  }
-
-  .nombre-content {
-    display: flex;
-    align-items: center;
-  }
-
-  .nombre-text {
-    font-weight: 500;
-    color: #495057;
-  }
-
-  .estado-badge {
-    padding: 0.375rem 0.75rem;
-    border-radius: 0.5rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .estado-badge.badge-success {
-    background: #e8f5e8;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
-  }
-
-  .estado-badge.badge-warning {
-    background: #fff3e0;
-    color: #f57f17;
-    border: 1px solid #ffcc80;
-  }
-
-  .estado-badge.badge-danger {
-    background: #ffebee;
-    color: #c62828;
-    border: 1px solid #ffcdd2;
-  }
-
-  .estado-badge.badge-primary {
-    background: #e3f2fd;
-    color: #1976d2;
-    border: 1px solid #bbdefb;
-  }
-
-  /* Pagination */
-  .pagination-container {
-    padding: 1.5rem;
-    border-top: 1px solid #dee2e6;
-    background: #f8f9fa;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .stats-grid-compact {
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 0.75rem;
-    }
-
-    .results-header {
-      flex-direction: column;
-      align-items: stretch;
-      text-align: center;
-    }
-
-    .stat-card.compact {
-      padding: 0.75rem 1rem;
-    }
-
-    .stat-number.compact {
-      font-size: 1.75rem;
-    }
-
-    .page-title {
-      font-size: 1.5rem;
-    }
-
-    .stat-icon.compact {
-      width: 2.5rem;
-      height: 2.5rem;
-      font-size: 1rem;
-    }
-  }
-
-  @media (max-width: 576px) {
-    .stats-grid-compact {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-</style>

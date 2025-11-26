@@ -5,26 +5,49 @@ export const reportesRoutes: Routes = [
   {
     path: '',
     redirectTo: 'estado',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'estado',
-    loadComponent: () => import('./estado/estado.component').then(m => m.EstadoComponent),
-    data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
+    loadComponent: () =>
+      import('./estado/estado.component').then((m) => m.EstadoComponent),
+    data: {
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
+    },
   },
   {
     path: 'valorizacion',
-    loadComponent: () => import('./valorizacion/valorizacion.component').then(m => m.ValorizacionComponent),
-    data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
-  },
-  {
-    path: 'operario',
-    loadComponent: () => import('./operario/operario.component').then(m => m.OperarioComponent),
-    data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
+    loadComponent: () =>
+      import('./valorizacion/valorizacion.component').then(
+        (m) => m.ValorizacionComponent
+      ),
+    data: {
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
+    },
   },
   {
     path: 'disponibilidad',
-    loadComponent: () => import('./disponibilidad/disponibilidad.component').then(m => m.DisponibilidadComponent),
-    data: { requiredAccess: [Roles.SuperAdmin, Roles.Operario, Roles.Supervisor, Roles.Administrativo] }
-  }
+    loadComponent: () =>
+      import('./disponibilidad/disponibilidad.component').then(
+        (m) => m.DisponibilidadComponent
+      ),
+    data: {
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
+    },
+  },
 ];

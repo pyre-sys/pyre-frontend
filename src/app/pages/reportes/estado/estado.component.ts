@@ -7,7 +7,6 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
 import { AlertaService } from '../../../services/alerta.service';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
-import { CboDisponibilidadHerramientaComponent } from '../../../shared/components/Cbo/cbo-disponibilidad-herramienta/cbo-disponibilidad-herramienta.component';
 
 interface HerramientasRaw {
   [key: string]: any;
@@ -38,7 +37,6 @@ interface DisplayHerramienta {
     PaginatorComponent,
     NgbTooltipModule,
     SpinnerComponent,
-    CboDisponibilidadHerramientaComponent,
   ],
   templateUrl: './estado.component.html',
   styleUrls: ['../../../../styles/reportes-style.css'],
