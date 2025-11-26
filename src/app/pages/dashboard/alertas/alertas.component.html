@@ -51,6 +51,7 @@
           <tr>
             <th>Herramienta</th>
             <th>Responsable</th>
+            <th>Codigo</th>
             <th>Fecha Entrega</th>
             <th>Fecha Vencimiento</th>
             <th>DIAS VENCIDO</th>
@@ -70,6 +71,7 @@
           >
             <td>{{ alerta?.herramientaNombre || "-" }}</td>
             <td>{{ alerta?.responsableNombre || "-" }}</td>
+            <td>{{ alerta?.herramientaCodigo || "-" }}</td>
             <td>
               <ng-container *ngIf="alerta?.fechaGeneracion; else noFechaEnt">
                 <div class="fecha-inline">
