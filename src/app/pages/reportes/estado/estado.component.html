@@ -1,224 +1,185 @@
-<!-- Header Section -->
-<div class="estado-header" fadeIn>
-  <div class="header-content">
-    <div class="title-section">
-      <h2 class="page-title">
-        <i class="bi bi-clipboard-data me-2"></i>
-        Estado de Herramientas
-      </h2>
-      <p class="page-subtitle">
-        Monitoreo del estado físico de las herramientas
-      </p>
-    </div>
+<!-- Título y botones de estado -->
+<div class="container-fluid page-shell page-header-container">
+  <div class="d-flex justify-content-end align-items-center mb-3 gap-3">
+    <!-- Espacio reservado para acciones futuras -->
   </div>
 </div>
 
-<!-- Estadísticas por Estado Físico -->
-<div class="stats-section">
-  <div class="stats-grid-compact">
-    <div
-      *ngFor="let estado of estadosFisicos"
-      class="stat-card clickable compact"
-      [class.selected]="estadoFisicoSelect?.id === estado.id"
-      [class]="'stat-' + estado.color"
-      (click)="onEstadoCardClick(estado)"
-    >
-      <div class="stat-icon compact" [class]="estado.color">
-        <i [class]="estado.icon"></i>
-      </div>
-      <div class="stat-info compact">
-        <h3 class="stat-number compact">{{ getEstadoStats(estado.id) }}</h3>
-        <p class="stat-label">{{ estado.nombre }}</p>
-      </div>
-      <div
-        class="selection-indicator"
-        *ngIf="estadoFisicoSelect?.id === estado.id"
+<!-- Contenedor principal: Botones de estado + Filtros + Tabla (igual que visor-herramientas) -->
+<div class="user-list-container container-fluid page-shell mt-2">
+  <div class="pyre-table-shell">
+    <!-- 🔧 BOTONES DE ESTADO FÍSICO (arriba dentro del contenedor) -->
+    <div class="estado-filters-row mb-3">
+      <button
+        *ngFor="let estado of estadosFisicos"
+        type="button"
+        class="btn-estado"
+        [class.active]="estadoFisicoSelect?.id === estado.id"
+        [class]="'btn-estado-' + estado.color"
+        (click)="onEstadoCardClick(estado)"
+        [ngbTooltip]="'Filtrar por ' + estado.nombre"
+        container="body"
       >
-        <i class="bi bi-check-circle-fill"></i>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Filtros Section -->
-<div class="filters-section" *ngIf="estadoFisicoSelect">
-  <div class="filters-container">
-    <div class="filter-header">
-      <h6 class="filter-title">
-        <i class="bi bi-funnel me-2"></i>
-        Filtros
-      </h6>
-      <div class="filter-actions">
-        <button
-          type="button"
-          class="btn btn-outline-secondary btn-sm"
-          (click)="onResetFilters()"
-          title="Limpiar filtros"
-        >
-          <i class="bi bi-x-circle me-1"></i>
-          Limpiar Filtros
-        </button>
-      </div>
+        <i [class]="estado.icon + ' me-2'"></i>
+        <span class="btn-text">{{ estado.nombre }}</span>
+        <span class="btn-count">{{ getEstadoStats(estado.id) }}</span>
+      </button>
     </div>
 
-    <div class="filter-content">
-      <div class="selected-filter-badge">
-        <span class="badge" [class]="'bg-' + estadoFisicoSelect.color">
-          <i [class]="estadoFisicoSelect.icon + ' me-1'"></i>
-          Estado: {{ estadoFisicoSelect.nombre }}
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Loading State -->
-<div *ngIf="loading" class="loading-container">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Cargando herramientas...</span>
-  </div>
-  <p class="loading-text">Cargando herramientas...</p>
-</div>
-
-<!-- Empty State -->
-<div *ngIf="!loading && !estadoFisicoSelect" class="empty-state">
-  <div class="empty-icon">
-    <i class="bi bi-tools"></i>
-  </div>
-  <h3>Seleccione un Estado Físico</h3>
-  <p>
-    Haga clic en una de las tarjetas de estado para ver las herramientas
-    correspondientes.
-  </p>
-</div>
-
-<!-- No Results State -->
-<div
-  *ngIf="!loading && estadoFisicoSelect && totalItems === 0"
-  class="empty-state"
->
-  <div class="empty-icon">
-    <i class="bi bi-search"></i>
-  </div>
-  <h3>Sin Resultados</h3>
-  <p>
-    No se encontraron herramientas en estado
-    <strong>{{ estadoFisicoSelect.nombre }}</strong
-    >.
-  </p>
-</div>
-
-<!-- Results Table -->
-<div *ngIf="!loading && totalItems > 0" class="results-section">
-  <!-- Results Header -->
-  <div class="results-header">
-    <div class="results-info">
-      <h6 class="results-title">
-        Herramientas en Estado:
-        <span class="badge ms-2" [class]="'bg-' + estadoFisicoSelect.color">
-          {{ estadoFisicoSelect.nombre }}
-        </span>
-      </h6>
-      <p class="results-count">
-        Mostrando {{ filteredHerramientas.length }} de
-        {{ totalItems }} herramientas
-      </p>
-    </div>
-
-    <div class="results-actions">
-      <div class="page-size-selector">
-        <label class="form-label small">Mostrar:</label>
-        <select
-          class="form-select form-select-sm"
-          [(ngModel)]="pageSize"
-          (ngModelChange)="onPageSizeChange()"
-        >
-          <option value="6">6 por página</option>
-          <option value="12">12 por página</option>
-          <option value="24">24 por página</option>
-          <option value="48">48 por página</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- Custom Table -->
-  <div class="table-container">
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th>
-            <i class="bi bi-hash me-1"></i>
-            Código
-          </th>
-          <th>
-            <i class="bi bi-tools me-1"></i>
-            Nombre
-          </th>
-          <th>
-            <i class="bi bi-tag me-1"></i>
-            Marca
-          </th>
-          <th>
-            <i class="bi bi-gear me-1"></i>
-            Tipo
-          </th>
-          <th>
-            <i class="bi bi-check-circle me-1"></i>
-            Disponibilidad
-          </th>
-          <th>
-            <i class="bi bi-geo-alt me-1"></i>
-            Ubicación
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let herramienta of filteredHerramientas; let i = index"
-          class="table-row"
-          [class.row-even]="i % 2 === 0"
-        >
-          <td>
-            <span class="codigo-badge">{{ herramienta.codigo }}</span>
-          </td>
-          <td class="nombre-cell">
-            <div class="nombre-content">
-              <span class="nombre-text">{{ herramienta.nombre }}</span>
+    <!-- 🔍 FILTROS (estilo visor-herramientas) -->
+    <div class="pyre-filter-bar container-fluid mb-3">
+      <div class="row g-3 align-items-end">
+        <!-- Código -->
+        <div class="col-lg-2 col-md-3 col-sm-6">
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="filtroCodigo"
+                placeholder="Código"
+                (keyup.enter)="onSearch()"
+              />
             </div>
-          </td>
-          <td>{{ herramienta.marca || "N/A" }}</td>
-          <td>{{ herramienta.tipo || "N/A" }}</td>
-          <td>
-            <span
-              class="disponibilidad-badge"
-              [class]="
-                'badge-' + getDisponibilidadColor(herramienta.disponibilidad)
+          </div>
+        </div>
+
+        <!-- Nombre -->
+        <div class="col-lg-3 col-md-3 col-sm-6">
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="filtroNombre"
+                placeholder="Nombre"
+                (keyup.enter)="onSearch()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Marca -->
+        <div class="col-lg-2 col-md-3 col-sm-6">
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="filtroMarca"
+                placeholder="Marca"
+                (keyup.enter)="onSearch()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Disponibilidad -->
+        <div class="col-lg-3 col-md-3 col-sm-6">
+          <div class="filter-item">
+            <div class="filter-input-group">
+              <app-cbo-disponibilidad-herramienta
+                [isDisabled]="false"
+                [(ngModel)]="filtroDisponibilidadId"
+                (disponibilidadSelected)="onDisponibilidadSelected($event)"
+              ></app-cbo-disponibilidad-herramienta>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reset + Buscar -->
+        <div class="col-lg-2 col-md-12 col-sm-12 d-flex justify-content-end">
+          <div class="filter-actions d-flex gap-2">
+            <button
+              type="button"
+              class="reset-button-inline"
+              (click)="onResetFilters()"
+              [disabled]="!hasActiveFilters()"
+              [ngbTooltip]="
+                hasActiveFilters()
+                  ? 'Limpiar filtros'
+                  : 'No hay filtros activos'
               "
             >
-              <i
-                [class]="
-                  getDisponibilidadIcon(herramienta.disponibilidad) + ' me-1'
-                "
-              ></i>
-              {{ herramienta.disponibilidad }}
-            </span>
-          </td>
-          <td>{{ herramienta.ubicacion || "N/A" }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+              <i class="pi pi-filter-slash"></i>
+            </button>
 
-  <!-- Pagination -->
-  <div class="pagination-container" *ngIf="totalPages > 1">
-    <app-paginator
-      [length]="totalItems"
-      [pageSize]="pageSize"
-      [pageIndex]="currentPage - 1"
-      (pageChange)="onPageEvent($event)"
-    >
-    </app-paginator>
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="onSearch()"
+              ngbTooltip="Buscar"
+              placement="top"
+              container="body"
+            >
+              <i class="pi pi-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spinner global (overlay) -->
+    <app-spinner [isLoading]="loading"></app-spinner>
+
+    <!-- Tabla de Herramientas -->
+    <div *ngIf="!loading" class="custom-table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Marca</th>
+            <th>Estado Físico</th>
+            <th>Disponibilidad</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let herramienta of paginatedHerramientas; let i = index">
+            <td>
+              <span class="codigo-badge">{{ herramienta.codigo }}</span>
+            </td>
+            <td>{{ herramienta.nombre || "-" }}</td>
+            <td>{{ herramienta.marca || "-" }}</td>
+            <td>
+              <span
+                class="estado-badge"
+                [ngClass]="
+                  'estado-' +
+                  getEstadoClass(herramienta.estadoFisico || herramienta.estado)
+                "
+              >
+                {{ herramienta.estadoFisico || herramienta.estado || "-" }}
+              </span>
+            </td>
+            <td>
+              {{ herramienta.disponibilidad || "-" }}
+            </td>
+            <td>
+              {{ herramienta.activo ? "Activo" : "Inactivo" }}
+            </td>
+          </tr>
+
+          <tr *ngIf="paginatedHerramientas.length === 0">
+            <td colspan="6" class="empty-message">
+              No se encontraron herramientas.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginador -->
+    <div *ngIf="!loading && totalItems > 0" class="paginator-container">
+      <app-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage - 1"
+        (pageChange)="onPageEvent($event)"
+      ></app-paginator>
+    </div>
   </div>
 </div>
 

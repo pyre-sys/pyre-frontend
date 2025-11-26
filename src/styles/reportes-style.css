@@ -1,0 +1,627 @@
+/* ============================================
+   ESTILOS GLOBALES PARA REPORTES
+   ============================================ */
+
+/* Contenedor principal */
+.user-list-container {
+  margin-bottom: 2rem;
+  width: 100%;
+  overflow: hidden;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+.pyre-table-shell {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(18, 38, 63, 0.06);
+  padding: 1.75rem;
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ============================================
+   BOTONES DE FILTROS RÁPIDOS (Estado Físico)
+   HARMONIZADO CON TARJETAS DE DASHBOARD
+   ============================================ */
+
+.estado-filters-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0 !important;
+}
+
+/* Botones de Estado Físico - Estilo Tarjeta Harmonizado */
+.btn-estado {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 160px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.btn-estado::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  opacity: 0.03;
+  transition: all 0.3s ease;
+}
+
+.btn-estado:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.btn-estado:hover::before {
+  transform: translate(20%, 20%);
+  opacity: 0.07;
+}
+
+.btn-estado i {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.btn-text {
+  display: inline-block;
+  flex: 1;
+  text-align: left;
+}
+
+.btn-count {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 0.35rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a2332;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Variantes de color para botones */
+.btn-estado-success {
+  color: #28a745;
+}
+
+.btn-estado-success i {
+  color: #28a745;
+}
+
+.btn-estado-primary {
+  color: #007bff;
+}
+
+.btn-estado-primary i {
+  color: #007bff;
+}
+
+.btn-estado-warning {
+  color: #ffc107;
+}
+
+.btn-estado-warning i {
+  color: #ffc107;
+}
+
+.btn-estado-danger {
+  color: #dc3545;
+}
+
+.btn-estado-danger i {
+  color: #dc3545;
+}
+
+.btn-estado-dark {
+  color: #6c757d;
+}
+
+.btn-estado-dark i {
+  color: #6c757d;
+}
+
+/* Estado activo del botón */
+.btn-estado.active {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f1f3 100%);
+  border-color: currentColor;
+  border-width: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+}
+
+.btn-estado.active .btn-count {
+  background: currentColor;
+  color: white;
+  font-weight: 800;
+}
+
+.btn-estado.active.btn-estado-success .btn-count {
+  background: #28a745;
+  color: white;
+}
+
+.btn-estado.active.btn-estado-primary .btn-count {
+  background: #007bff;
+  color: white;
+}
+
+.btn-estado.active.btn-estado-warning .btn-count {
+  background: #ffc107;
+  color: #212529;
+  font-weight: 800;
+}
+
+.btn-estado.active.btn-estado-danger .btn-count {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-estado.active.btn-estado-dark .btn-count {
+  background: #6c757d;
+  color: white;
+}
+
+/* ============================================
+   FILTROS (Estilo visor-herramientas)
+   ============================================ */
+
+.pyre-filter-bar {
+  background: var(--color-bg-alt, #f8f9fa);
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: visible;
+  margin-bottom: 0 !important;
+}
+
+.pyre-filter-bar .filter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.filter-item {
+  display: block;
+  width: 100%;
+}
+
+.filter-item-with-reset {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.filter-item > * {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filter-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.filter-input-group select,
+.filter-item input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: all 0.2s ease;
+  min-width: 0;
+}
+
+.filter-input-group select:focus,
+.filter-item input:focus {
+  outline: none;
+  border-color: var(--color-primary, #0d6efd);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.filter-actions {
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-button {
+  background: #3b82f6;
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  min-width: 44px;
+  max-width: 44px;
+  height: 44px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-button:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.search-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.reset-button-inline {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  padding: 6px;
+  border-radius: 50%;
+  min-width: 32px;
+  max-width: 32px;
+  height: 32px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.reset-button-inline:hover {
+  background: #f3f4f6;
+  color: #6b7280;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* ============================================
+   TABLA (Igual a visor-herramientas)
+   ============================================ */
+
+.custom-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.custom-table thead th {
+  background: linear-gradient(180deg, #3f3d3d 0%, #474646 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 16px;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+}
+
+.custom-table tbody td {
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--color-border-light, #e0e0e0);
+  text-align: left;
+  color: #4b5563;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+.custom-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.custom-table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.02);
+}
+
+/* ============================================
+   BADGES - ESPECIFICIDAD ALTA
+   ============================================ */
+
+/* CÓDIGO BADGE - Aplicar !important para forzar */
+.codigo-badge {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
+  padding: 0.35rem 0.85rem !important;
+  border-radius: 6px !important;
+  font-family: "Courier New", monospace !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  display: inline-block !important;
+  border: none !important;
+}
+
+/* ESTADO BADGE */
+.estado-badge {
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.estado-badge.estado-excelente {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.estado-badge.estado-usada {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.estado-badge.estado-desgastada {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.estado-badge.estado-danada {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.estado-badge.estado-no-apta {
+  background: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+/* ============================================
+   MENSAJES VACÍOS Y PAGINACIÓN
+   ============================================ */
+
+.empty-message {
+  padding: 40px;
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.paginator-container {
+  padding: 0.75rem;
+  border-top: none;
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN (ACTUALIZADO)
+   ============================================ */
+
+@media (max-width: 1400px) {
+  .estado-filters-row {
+    gap: 0.9rem;
+  }
+
+  .btn-estado {
+    padding: 0.9rem 1.3rem;
+    font-size: 0.9rem;
+    min-width: 150px;
+  }
+
+  .btn-estado i {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .estado-filters-row {
+    gap: 0.8rem;
+  }
+
+  .btn-estado {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.9rem;
+    min-width: 140px;
+  }
+
+  .btn-estado i {
+    font-size: 1.2rem;
+  }
+
+  .pyre-filter-bar .filter-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .pyre-table-shell {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .estado-filters-row {
+    gap: 0.6rem;
+  }
+
+  .btn-estado {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    flex: 1 1 calc(50% - 0.3rem);
+    min-width: unset;
+  }
+
+  .btn-count {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  .pyre-filter-bar .filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-right: 0;
+    padding-bottom: 70px;
+    width: 100%;
+  }
+
+  .filter-item,
+  .filter-item-with-reset {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .filter-actions {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 10px;
+    top: auto;
+    transform: none;
+    width: 100%;
+    justify-content: flex-end;
+    padding: 0 16px;
+  }
+
+  .custom-table th,
+  .custom-table td {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .pyre-table-shell {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .estado-filters-row {
+    gap: 0.4rem;
+  }
+
+  .btn-estado {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.8rem;
+    flex: 1 1 calc(50% - 0.15rem);
+    min-width: unset;
+    gap: 0.4rem;
+  }
+
+  .btn-estado i {
+    font-size: 1rem;
+  }
+
+  .btn-text {
+    flex: 1;
+  }
+
+  .btn-count {
+    display: none;
+  }
+
+  .custom-table th,
+  .custom-table td {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .codigo-badge {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .disponibilidad-badge {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .estado-badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pyre-table-shell {
+    padding: 0.75rem;
+    gap: 0.6rem;
+  }
+
+  .estado-filters-row {
+    gap: 0.3rem;
+  }
+
+  .btn-estado {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.75rem;
+    flex: 1 1 calc(50% - 0.15rem);
+    min-width: unset;
+    gap: 0.25rem;
+  }
+
+  .btn-estado i {
+    font-size: 0.95rem;
+  }
+
+  .btn-text {
+    display: none;
+  }
+
+  .btn-count {
+    display: none;
+  }
+
+  .custom-table th,
+  .custom-table td {
+    padding: 0.4rem;
+    font-size: 0.75rem;
+  }
+}
