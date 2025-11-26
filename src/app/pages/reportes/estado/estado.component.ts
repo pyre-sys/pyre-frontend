@@ -86,7 +86,7 @@ export class EstadoComponent implements OnInit {
     private pageTitleService: PageTitleService,
     private srvHerramienta: HerramientaService,
     private srvAlerta: AlertaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Estado de Herramientas');
