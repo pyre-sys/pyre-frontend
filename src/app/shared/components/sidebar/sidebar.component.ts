@@ -287,22 +287,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ],
     },
     {
-      id: 63,
-      descripcion: 'Uso por Operario',
-      icono: 'bi bi-person-check',
-      link: '/reportes/operario',
-      grupo: 'GM06',
-      principal: false,
-      orden: 3,
-      estado: true,
-      requiredAccess: [
-        Roles.SuperAdmin,
-        Roles.Operario,
-        Roles.Supervisor,
-        Roles.Administrador,
-      ],
-    },
-    {
       id: 64,
       descripcion: 'Disponibilidad de Herramientas',
       icono: 'bi bi-calendar-range',
@@ -458,9 +442,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
               case 'valorizacion':
               case 'valorización':
                 this.pageTitle = 'Stock Valorizado';
-                break;
-              case 'operario':
-                this.pageTitle = 'Uso por Operario';
                 break;
               case 'disponibilidad':
                 this.pageTitle = 'Disponibilidad de Herramientas';
