@@ -768,11 +768,13 @@ input:checked + .toggle-slider::before {
 }
 
 /* ============================================
-   BADGES - CÓDIGO Y ESTADO (COPIADO EXACTO DE REPORTES-STYLE.CSS)
+   BADGES - UNIFICADO A ESTILO AZUL
    ============================================ */
 
-/* CÓDIGO BADGE - Aplicar !important para forzar */
-.codigo-badge {
+/* CÓDIGO BADGE - Estilo azul unificado para: código, legajo, cuit */
+.codigo-badge,
+.legajo-badge,
+.cuit-badge {
   background: #e3f2fd !important;
   color: #1976d2 !important;
   padding: 0.35rem 0.85rem !important;
@@ -784,10 +786,36 @@ input:checked + .toggle-slider::before {
   border: none !important;
 }
 
-/* LEGAJO BADGE - Similar al código pero con color diferente */
+/* Forzar LEGAJO específicamente - sobrescribir cualquier herencia anterior */
 .legajo-badge {
-  background: #f3e8ff !important;
-  color: #7c3aed !important;
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
+  padding: 0.35rem 0.85rem !important;
+  border-radius: 6px !important;
+  font-family: "Courier New", monospace !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  display: inline-block !important;
+  border: none !important;
+}
+
+/* Forzar CUIT específicamente */
+.cuit-badge {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
+  padding: 0.35rem 0.85rem !important;
+  border-radius: 6px !important;
+  font-family: "Courier New", monospace !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  display: inline-block !important;
+  border: none !important;
+}
+
+/* Forzar CÓDIGO específicamente */
+.codigo-badge {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
   padding: 0.35rem 0.85rem !important;
   border-radius: 6px !important;
   font-family: "Courier New", monospace !important;
@@ -837,16 +865,13 @@ input:checked + .toggle-slider::before {
 }
 
 /* ============================================
-   RESPONSIVE PARA BADGES (COPIADO DE REPORTES)
+   RESPONSIVE PARA BADGES
    ============================================ */
 
 @media (max-width: 600px) {
-  .codigo-badge {
-    padding: 0.25rem 0.6rem;
-    font-size: 0.75rem;
-  }
-
-  .legajo-badge {
+  .codigo-badge,
+  .legajo-badge,
+  .cuit-badge {
     padding: 0.25rem 0.6rem;
     font-size: 0.75rem;
   }

@@ -106,7 +106,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let user of getPaginatedUsers(); let i = index">
-            <td>{{ user.cuit }}</td>
+            <td>
+              <span class="cuit-badge">{{ user.cuit }}</span>
+            </td>
             <td>{{ user.nombre }}</td>
             <td>{{ user.telefono }}</td>
             <td>

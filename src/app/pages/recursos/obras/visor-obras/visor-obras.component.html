@@ -102,7 +102,6 @@
             <td>{{ obra.descripcion }}</td>
             <td>{{ obra.fechaInicio | date : "dd/MM/yyyy" }}</td>
             <td>{{ obra.fechaFin | date : "dd/MM/yyyy" }}</td>
-            <!-- <td>{{ obra.activa ? "Activo" : "Inactivo" }}</td> -->
             <td>
               <div class="action-buttons">
                 <button
@@ -129,7 +128,7 @@
             </td>
           </tr>
           <tr *ngIf="getPaginatedObras().length === 0">
-            <td colspan="7" class="empty-message">No se encontraron obras.</td>
+            <td colspan="6" class="empty-message">No se encontraron obras.</td>
           </tr>
         </tbody>
       </table>
