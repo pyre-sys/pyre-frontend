@@ -1,2 +1,32 @@
 /* Import generic combo styles */
 @import "../cbo.component.css";
+
+/* Forzar que el componente ocupe todo el ancho del contenedor padre */
+:host {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Asegurar que el wrapper interno use 100% y que el input no quede restringido */
+.cbo-wrapper,
+.search-container {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* El input principal debe ocupar todo el ancho disponible */
+.search-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-width: 0; /* evitar que un min-width heredado lo expanda */
+}
+
+/* Asegurar que el panel desplegable no exceda el ancho del host */
+.dropdown-panel {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}

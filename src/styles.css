@@ -1000,3 +1000,44 @@ a:hover {
   display: flex;
   align-items: center;
 }
+
+/* MÓVIL: topbar siempre encima, sidebar DETRÁS y estirado hasta el tope */
+@media (max-width: 991.98px) {
+  /* Topbar por encima */
+  app-topbar,
+  .topbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--topbar-height, 70px);
+    z-index: 1600; /* topbar encima */
+    background: var(--topbar-bg, #ffffff);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Sidebar estirado hasta arriba, pero DETRÁS del topbar */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important; /* ocupa desde el tope del viewport */
+    left: 0 !important;
+    height: 100vh !important;
+    width: var(--sidebar-width, 260px) !important;
+    transform: translateX(-110%) !important;
+    z-index: 1200 !important; /* menor que el topbar para quedar detrás */
+    box-shadow: 0 8px 40px rgba(6, 21, 37, 0.18);
+    /* desplazar contenido interno para no quedar oculto bajo el topbar */
+    padding-top: var(--topbar-height, 70px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar.visible {
+    transform: translateX(0) !important;
+  }
+
+  /* Asegurar que la transición se mantenga suave */
+  .sidebar {
+    transition: transform 240ms var(--transition-fast), opacity 180ms linear;
+  }
+}
