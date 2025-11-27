@@ -23,6 +23,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../services/alerta.service';
 import { CboFamiliaHerramientaComponent } from '../../../shared/components/Cbo/cbo-familia-herramienta/cbo-familia-herramienta.component';
 import { CboEstadoFisicoHerramientaComponent } from '../../../shared/components/Cbo/cbo-estado-fisico-herramienta/cbo-estado-fisico-herramienta.component';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-herramientas-modal',
@@ -57,6 +58,7 @@ export class HerramientasModalComponent
   serverErrors: { [key: string]: string } = {};
   private subscriptions: Subscription[] = [];
   editingEnabled: boolean = true;
+  isEditorRole: boolean = false;
   private toolId: number | null = null;
 
   @ViewChild('firstInput') firstInput!: ElementRef;
@@ -64,7 +66,8 @@ export class HerramientasModalComponent
   constructor(
     private fb: FormBuilder,
     private elementRef: ElementRef,
-    private srvAlerta: AlertaService
+    private srvAlerta: AlertaService,
+    private authService: AuthService
   ) {}
 
   @HostListener('document:keydown.escape', ['$event'])
@@ -74,6 +77,13 @@ export class HerramientasModalComponent
 
   ngOnInit(): void {
     this.buildForm();
+
+    // Determinar si el usuario puede editar (roles 1 o 2)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(
+      user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? user?.roleId ?? 0
+    );
+    this.isEditorRole = roleId === 1 || roleId === 2;
 
     // Si hay datos iniciales, aplicarlos inmediatamente
     if (this.initialData) {
@@ -131,6 +141,9 @@ export class HerramientasModalComponent
   }
 
   toggleEditing(): void {
+    // Protección adicional en cliente: solo roles 1 y 2 pueden activar/desactivar edición
+    if (!this.isEditorRole) return;
+
     this.editingEnabled = !this.editingEnabled;
     this.setControlsDisabled(!this.editingEnabled);
     if (this.editingEnabled) {

@@ -10,6 +10,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PageTitleService } from '../../../services/page-title.service';
 import { CboDisponibilidadHerramientaComponent } from '../../../shared/components/Cbo/cbo-disponibilidad-herramienta/cbo-disponibilidad-herramienta.component';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
+import { AuthService } from '../../../services/auth.service';
 
 interface DisplayHerramienta {
   id?: number;
@@ -50,6 +51,7 @@ export class VisorHerramientasComponent implements OnInit {
   totalItems = 0;
   totalPages = 1;
   isLoading = false;
+  isSuperAdmin = false;
 
   filtroCodigo = '';
   filtroNombre = '';
@@ -64,11 +66,20 @@ export class VisorHerramientasComponent implements OnInit {
   constructor(
     private srvHerramienta: HerramientaService,
     private srvAlerta: AlertaService,
-    private pageTitleService: PageTitleService
-  ) { }
+    private pageTitleService: PageTitleService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Listado de Herramientas');
+
+    // Determinar si el usuario es SuperAdmin (id_rol === 1)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(
+      user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? user?.roleId ?? 0
+    );
+    this.isSuperAdmin = roleId === 1;
+
     this.fetchHerramientas();
   }
 
@@ -298,7 +309,8 @@ export class VisorHerramientasComponent implements OnInit {
     this.srvAlerta
       .confirm(
         `¿Estás seguro de que deseas ${actionText} esta herramienta?`,
-        `${actionText.charAt(0).toUpperCase() + actionText.slice(1)
+        `${
+          actionText.charAt(0).toUpperCase() + actionText.slice(1)
         } Herramienta`
       )
       .then((result: any) => {
@@ -402,8 +414,8 @@ export class VisorHerramientasComponent implements OnInit {
     } else {
       const id = Number(
         this.modalInitialData?.id ??
-        this.modalInitialData?.idHerramienta ??
-        null
+          this.modalInitialData?.idHerramienta ??
+          null
       );
       if (!id) {
         const error = {
