@@ -1,0 +1,332 @@
+/* CONTENEDOR GENERAL */
+.perfil-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 0 16px;
+}
+
+/* CARD PRINCIPAL - Rediseño profesional */
+.perfil-card {
+  width: 100%;
+  max-width: 680px;
+  padding: 0;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.perfil-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* HEADER DE LA CARD - Más elegante */
+.perfil-card-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 40px 32px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.perfil-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  box-shadow: 0 8px 24px rgba(13, 110, 253, 0.15);
+}
+
+.perfil-header-info {
+  flex: 1;
+}
+
+.perfil-user-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.perfil-user-rol {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* BODY DE LA CARD - Mejor espaciado */
+.perfil-card-body {
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* SECCIÓN DE CAMPOS - Grid mejorado */
+.perfil-fields-section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+/* CAMPO INDIVIDUAL - Rediseño */
+.perfil-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.perfil-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.perfil-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.5;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #0d6efd;
+  transition: all 0.2s ease;
+}
+
+.perfil-value:hover {
+  background: #f1f5f9;
+  border-left-color: #0056b3;
+}
+
+/* CAMPO ESTADO CON BADGE */
+.perfil-field.estado-field {
+  grid-column: 1 / -1;
+}
+
+.perfil-value.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  width: fit-content;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  border-left: none;
+  transition: all 0.2s ease;
+}
+
+.perfil-value.estado-badge.activo {
+  background: linear-gradient(135deg, #d1fae5 0%, #c6f6d5 100%);
+  color: #065f46;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+}
+
+.perfil-value.estado-badge.activo:hover {
+  background: linear-gradient(135deg, #c6f6d5 0%, #a7f3d0 100%);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.15);
+}
+
+.perfil-value.estado-badge.inactivo {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #7f1d1d;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.12);
+}
+
+.perfil-value.estado-badge.inactivo:hover {
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.15);
+}
+
+.perfil-value.estado-badge i {
+  font-size: 1.3rem;
+}
+
+/* FOOTER DE LA CARD */
+.perfil-card-footer {
+  padding: 24px 32px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+/* BOTÓN DE ACCIÓN - Profesional */
+.perfil-card-footer .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: white !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none !important;
+  background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%) !important;
+  padding: 12px 28px !important;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: auto !important;
+  max-width: none !important;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+  letter-spacing: 0.3px;
+}
+
+.perfil-card-footer .btn-icon:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #003d82 100%) !important;
+  box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+  transform: translateY(-3px);
+}
+
+.perfil-card-footer .btn-icon:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+}
+
+.perfil-card-footer .btn-icon i {
+  font-size: 1.1rem;
+  color: inherit;
+}
+
+/* RESPONSIVE - Tablet */
+@media (max-width: 768px) {
+  .perfil-card {
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .perfil-card-header {
+    padding: 32px 24px;
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .perfil-avatar {
+    width: 88px;
+    height: 88px;
+    font-size: 2.2rem;
+  }
+
+  .perfil-user-name {
+    font-size: 1.5rem;
+  }
+
+  .perfil-fields-section {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .perfil-card-body {
+    padding: 28px 24px;
+    gap: 20px;
+  }
+
+  .perfil-card-footer {
+    padding: 16px 24px;
+    justify-content: center;
+  }
+
+  .perfil-card-footer .btn-icon {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .perfil-value {
+    font-size: 1.1rem;
+  }
+}
+
+/* RESPONSIVE - Mobile */
+@media (max-width: 576px) {
+  .perfil-container {
+    padding: 0 12px;
+  }
+
+  .perfil-card {
+    border-radius: 12px;
+  }
+
+  .perfil-card-header {
+    padding: 24px 16px;
+  }
+
+  .perfil-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+  }
+
+  .perfil-user-name {
+    font-size: 1.35rem;
+  }
+
+  .perfil-user-rol {
+    font-size: 0.85rem;
+  }
+
+  .perfil-card-body {
+    padding: 20px 16px;
+  }
+
+  .perfil-fields-section {
+    gap: 16px;
+  }
+
+  .perfil-label {
+    font-size: 0.75rem;
+  }
+
+  .perfil-value {
+    font-size: 1rem;
+    padding: 10px 12px;
+  }
+
+  .perfil-card-footer {
+    padding: 12px 16px;
+  }
+
+  .perfil-card-footer .btn-icon {
+    padding: 10px 20px !important;
+    font-size: 0.9rem;
+  }
+}
+
+/* Animaciones suaves */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.perfil-card {
+  animation: slideIn 0.4s ease-out;
+}

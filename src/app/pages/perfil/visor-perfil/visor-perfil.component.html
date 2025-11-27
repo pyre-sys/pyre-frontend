@@ -1,72 +1,90 @@
 <div class="container-fluid page-shell page-header-container">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <!-- Título movido al topbar -->
     <div></div>
     <div></div>
   </div>
 </div>
 
 <div class="user-list-container container-fluid page-shell mt-2">
-  <div class="pyre-table-shell">
-    <!-- Indicador de carga simple (reemplaza app-spinner) -->
-    <div *ngIf="isLoading" class="loading-center">
-      <!-- Puedes estilizar .loading-center en el css del componente -->
-      Cargando...
-    </div>
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-center">Cargando...</div>
 
-    <div *ngIf="!isLoading" class="custom-table-container">
-      <table class="custom-table">
-        <thead>
-          <tr>
-            <th>Legajo</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-            <!-- Nueva columna -->
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngIf="user">
-            <td>{{ user.legajo }}</td>
-            <td>{{ user.nombre }}</td>
-            <td>{{ user.apellido }}</td>
-            <td>{{ user.rolNombre || user.rol }}</td>
-            <td>
-              <span
-                [class.text-success]="user.activo"
-                [class.text-muted]="!user.activo"
-              >
-                {{ user.activo ? "Activo" : "Inactivo" }}
-              </span>
-            </td>
-            <td>
-              <!-- Botón que abre modal para cambiar contraseña -->
-              <button
-                type="button"
-                class="btn-icon btn-action"
-                ngbTooltip="Cambiar contraseña"
-                placement="top"
-                container="body"
-                (click)="openChangePasswordModal()"
-              >
-                <i class="pi pi-key" aria-hidden="true"></i>
-              </button>
-            </td>
-          </tr>
+  <!-- Card de perfil -->
+  <div *ngIf="!isLoading && user" class="perfil-container">
+    <div class="perfil-card">
+      <!-- Header con avatar y datos principales -->
+      <div class="perfil-card-header">
+        <div class="perfil-avatar">
+          <i class="pi pi-user"></i>
+        </div>
+        <div class="perfil-header-info">
+          <h2 class="perfil-user-name">
+            {{ user.nombre }} {{ user.apellido }}
+          </h2>
+          <p class="perfil-user-rol">{{ user.rolNombre || user.rol }}</p>
+        </div>
+      </div>
 
-          <tr *ngIf="!user">
-            <td colspan="6" class="empty-message">
-              No se encontraron datos del perfil.
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- Body con campos -->
+      <div class="perfil-card-body">
+        <div class="perfil-fields-section">
+          <div class="perfil-field">
+            <span class="perfil-label">Legajo</span>
+            <span class="perfil-value">{{ user.legajo }}</span>
+          </div>
+
+          <div class="perfil-field">
+            <span class="perfil-label">Nombre</span>
+            <span class="perfil-value">{{ user.nombre }}</span>
+          </div>
+
+          <div class="perfil-field">
+            <span class="perfil-label">Apellido</span>
+            <span class="perfil-value">{{ user.apellido }}</span>
+          </div>
+
+          <div class="perfil-field">
+            <span class="perfil-label">Rol</span>
+            <span class="perfil-value">{{ user.rolNombre || user.rol }}</span>
+          </div>
+
+          <!-- Campo Estado completo -->
+          <div class="perfil-field estado-field">
+            <span class="perfil-label">Estado</span>
+            <span
+              class="perfil-value estado-badge"
+              [ngClass]="user.activo ? 'activo' : 'inactivo'"
+            >
+              <i [class]="user.activo ? 'pi pi-check-circle' : 'pi pi-ban'"></i>
+              {{ user.activo ? "Activo" : "Inactivo" }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer con acciones -->
+      <div class="perfil-card-footer">
+        <button
+          type="button"
+          class="btn-icon btn-action"
+          ngbTooltip="Cambiar contraseña"
+          placement="top"
+          container="body"
+          (click)="openChangePasswordModal()"
+        >
+          <i class="pi pi-key"></i>
+          <span>Cambiar contraseña</span>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Modal: abierto cuando showChangePasswordModal === true -->
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && !user" class="empty-message">
+    No se encontraron datos del perfil.
+  </div>
+
+  <!-- Modal -->
   <app-modal-perfil
     *ngIf="showChangePasswordModal"
     [user]="user"
