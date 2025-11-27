@@ -3,7 +3,10 @@
     <div class="modal-content" [class.open]="visible">
       <div class="modal-header">
         <div class="header-controls">
-          <div *ngIf="mode === 'edit'" class="mode-switch-wrapper">
+          <div
+            *ngIf="mode === 'edit' && isEditorRole"
+            class="mode-switch-wrapper"
+          >
             <button
               type="button"
               class="mode-switch"

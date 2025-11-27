@@ -22,6 +22,7 @@ import {
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../../services/alerta.service';
 import { CboClienteComponent } from '../../../../shared/components/Cbo/cbo-cliente/cbo-cliente.component';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-obra-edit-modal',
@@ -31,9 +32,9 @@ import { CboClienteComponent } from '../../../../shared/components/Cbo/cbo-clien
     ReactiveFormsModule,
     NgbTooltipModule,
     CboClienteComponent,
-  ], // Asegurarnos de incluir CboClienteComponent
+  ],
   templateUrl: './modal-obras.component.html',
-  styleUrls: ['../../../../../styles/modal-style.css'], // Corregir la ruta relativa
+  styleUrls: ['../../../../../styles/modal-style.css'],
 })
 export class ObraEditModalComponent implements OnInit, OnChanges {
   @Output() submit = new EventEmitter<{
@@ -61,10 +62,14 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
   @ViewChild('firstInput') firstInput!: ElementRef;
 
+  // Nueva flag para roles con permiso de edición
+  isEditorRole: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private elementRef: ElementRef,
-    private alertService: AlertaService
+    private alertService: AlertaService,
+    private authService: AuthService // Inyectar AuthService
   ) {}
 
   @HostListener('document:keydown.escape')
@@ -75,6 +80,11 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.buildForm();
     if (this.initialData) this.patchForm(this.initialData);
+
+    // Determinar si el usuario puede editar (roles 1 o 2)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? 0);
+    this.isEditorRole = roleId === 1 || roleId === 2;
 
     // Inicializar estado de edición: en modo 'edit' comienza deshabilitado, en 'create' habilitado
     this.editingEnabled = this.mode !== 'edit';
@@ -115,6 +125,9 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
 
   // Alterna entre modo lectura y edición desde el header
   toggleEditing(): void {
+    // Protección cliente: solo roles 1 y 2 pueden alternar edición
+    if (!this.isEditorRole) return;
+
     this.editingEnabled = !this.editingEnabled;
     this.setControlsDisabled(!this.editingEnabled);
     if (this.editingEnabled) {

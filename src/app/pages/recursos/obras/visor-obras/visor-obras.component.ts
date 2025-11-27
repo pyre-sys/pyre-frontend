@@ -8,6 +8,7 @@ import { PaginatorComponent } from '../../../../shared/components/paginator/pagi
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 import { PageTitleService } from '../../../../services/page-title.service';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-visor-obras',
@@ -55,14 +56,23 @@ export class VisorObrasComponent implements OnInit {
   showDetailsModal = false;
   detailsData: any = null;
 
+  isSuperAdmin: boolean = false; // Nueva propiedad para controlar el rol
+
   constructor(
     private obrasService: ObrasService,
     private alertService: AlertaService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private authService: AuthService // Inyectar AuthService
   ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Obras');
+
+    // Determinar si el usuario es SuperAdmin (id_rol === 1)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? 0);
+    this.isSuperAdmin = roleId === 1;
+
     this.fetchObras();
   }
 
