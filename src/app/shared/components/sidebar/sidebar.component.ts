@@ -237,15 +237,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ],
     },
 
-    // 6. Reportes (principal con submenús)
+    // 7. Reportes (principal con submenús)
     {
-      id: 6,
+      id: 8, // cambiado de 6 a 8 para evitar duplicado con Movimientos
       descripcion: 'Reportes',
       icono: 'bi bi-bar-chart',
       link: '/reportes',
       grupo: 'GM06',
       principal: true,
-      orden: 6,
+      orden: 7, // ajustado para mantener orden único entre principales
       estado: true,
       requiredAccess: [
         Roles.SuperAdmin,
@@ -303,7 +303,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ],
     },
 
-    // 7. Configuración (solo SuperAdmin, con submenús)
+    // 8. Configuración (solo SuperAdmin, con submenús)
     {
       id: 7,
       descripcion: 'Configuración',
@@ -311,7 +311,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       link: '/configuracion',
       grupo: 'GM07',
       principal: true,
-      orden: 7,
+      orden: 8, // cambiado de 7 a 8 para evitar duplicidad con Reportes/Movimientos
       estado: false,
       requiredAccess: [Roles.SuperAdmin],
     },
@@ -639,6 +639,25 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   navigateToHome() {
     this.router.navigate(['/inicio']);
+  }
+
+  // Nuevo: cuando se hace click en el logo en pantallas chicas, ocultar sidebar y navegar
+  onLogoClick(): void {
+    if (this.isSmallScreen) {
+      // ocultar inmediatamente para que no quede tapando la vista después de la navegación
+      this.sidebarService.hide();
+      this.isSidebarVisible = false;
+    }
+    // navegar (la navegación puede ocurrir inmediatamente)
+    this.navigateToHome();
+  }
+
+  // Nuevo: manejar click en el enlace "Perfil" desde la plantilla
+  onPerfilLinkClick(): void {
+    if (this.isSmallScreen) {
+      this.sidebarService.hide();
+    }
+    // La navegación la realiza el routerLink en el template
   }
 
   getNombreCompleto(): string {
