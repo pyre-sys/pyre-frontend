@@ -12,6 +12,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PageTitleService } from '../../../../services/page-title.service';
 import { CboEstadoComponent } from '../../../../shared/components/Cbo/cbo-estado/cbo-estado.component';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
+import { AuthService } from '../../../../services/auth.service';
 
 interface UserRaw {
   [key: string]: any;
@@ -84,6 +85,7 @@ export class VisorClientesComponent implements OnInit {
   isLoading = false;
   totalItems = 0;
   totalPages = 0;
+  isSuperAdmin: boolean = false;
 
   // Expose Math to template
   Math = Math;
@@ -105,11 +107,18 @@ export class VisorClientesComponent implements OnInit {
     private clienteService: ClienteService,
     private router: Router,
     private alertService: AlertaService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private authService: AuthService // Inyectar AuthService
   ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Listado de Clientes');
+
+    // Determinar si el usuario es SuperAdmin (id_rol === 1)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? 0);
+    this.isSuperAdmin = roleId === 1;
+
     this.fetchUsers();
   }
 

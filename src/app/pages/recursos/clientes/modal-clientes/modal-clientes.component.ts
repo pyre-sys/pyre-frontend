@@ -21,6 +21,7 @@ import {
 } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../../services/alerta.service';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-modal-clientes',
@@ -48,13 +49,15 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
 
   // Nueva flag para controlar si los inputs están en modo edición o solo lectura
   editingEnabled: boolean = true;
+  isEditorRole: boolean = false; // Nueva flag para roles con permiso de edición
 
   @ViewChild('firstInput') firstInput!: ElementRef;
 
   constructor(
     private fb: FormBuilder,
     private elementRef: ElementRef,
-    private alertService: AlertaService
+    private alertService: AlertaService,
+    private authService: AuthService // Inyectar AuthService
   ) {}
 
   @HostListener('document:keydown.escape')
@@ -65,9 +68,13 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     this.buildForm();
     if (this.initialData) this.patchForm(this.initialData);
-    // inicializar estado de edición según el modo: en 'edit' empezar en modo lectura
     this.editingEnabled = this.mode !== 'edit';
     this.setControlsDisabled(!this.editingEnabled);
+
+    // Determinar si el usuario puede editar (roles 1 o 2)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? 0);
+    this.isEditorRole = roleId === 1 || roleId === 2;
 
     setTimeout(() => {
       const firstInput = this.elementRef.nativeElement.querySelector(
@@ -258,6 +265,9 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
 
   // Toggle desde el header para pasar entre lectura/edición
   toggleEditing(): void {
+    // Protección cliente: solo roles 1 y 2 pueden alternar edición
+    if (!this.isEditorRole) return;
+
     this.editingEnabled = !this.editingEnabled;
     this.setControlsDisabled(!this.editingEnabled);
     if (this.editingEnabled) {
@@ -265,7 +275,7 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
         const firstInput = this.elementRef.nativeElement.querySelector(
           'input:not([disabled])'
         );
-        if (firstInput) (firstInput as HTMLElement).focus();
+        if (firstInput) firstInput.focus();
       }, 50);
     }
   }
