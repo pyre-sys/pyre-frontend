@@ -13,6 +13,7 @@ import { PageTitleService } from '../../../services/page-title.service';
 import { CboRolUsuarioComponent } from '../../../shared/components/Cbo/cbo-rol-usuario/cbo-rol-usuario.component';
 import { CboEstadoComponent } from '../../../shared/components/Cbo/cbo-estado/cbo-estado.component';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
+import { AuthService } from '../../../services/auth.service';
 
 interface UserRaw {
   [key: string]: any;
@@ -85,6 +86,7 @@ export class VisorUsuariosComponent implements OnInit {
   isLoading = false;
   totalItems = 0;
   totalPages = 0;
+  isSuperAdmin: boolean = false;
 
   // Expose Math to template
   Math = Math;
@@ -108,11 +110,18 @@ export class VisorUsuariosComponent implements OnInit {
     private userService: UsuarioService,
     private router: Router,
     private alertService: AlertaService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Listado de Usuarios');
+
+    // Determinar si el usuario es SuperAdmin (id_rol === 1)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? 0);
+    this.isSuperAdmin = roleId === 1;
+
     this.fetchUsers();
   }
 
@@ -376,6 +385,12 @@ export class VisorUsuariosComponent implements OnInit {
   }
 
   deleteUser(item: DisplayUser): void {
+    // Protección cliente: solo SuperAdmin puede eliminar
+    if (!this.isSuperAdmin) {
+      this.alertService.error('No tienes permisos para eliminar usuarios.');
+      return;
+    }
+
     const id = item?.id ?? null;
     if (id == null) return;
 
@@ -384,20 +399,16 @@ export class VisorUsuariosComponent implements OnInit {
         '¿Estás seguro de que deseas eliminar este usuario?',
         'Eliminar Usuario'
       )
-      .then((result: any) => {
-        if (result && result.isConfirmed) {
+      .then((res: any) => {
+        if (res?.isConfirmed) {
           this.userService.deleteUser(Number(id)).subscribe({
             next: () => {
-              this.alertService.success(
-                'El usuario ha sido eliminado correctamente.',
-                '¡Eliminado!'
-              );
+              this.alertService.success('Usuario eliminado correctamente.');
               this.fetchUsers();
             },
             error: (err) => {
-              console.error('[UserList] deleteUser error', err);
               this.alertService.error(
-                'No se pudo eliminar el usuario. Intente nuevamente.'
+                err?.error?.message || 'Error al eliminar usuario.'
               );
             },
           });

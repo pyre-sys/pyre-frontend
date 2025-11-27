@@ -22,6 +22,7 @@ import {
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Roles } from '../../../shared/enums/roles';
 import { AlertaService } from '../../../services/alerta.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-usuarios-modal',
@@ -58,6 +59,8 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
   private subscriptions: Subscription[] = [];
   // Controla si los campos están habilitados para edición en modo 'edit'
   editingEnabled: boolean = true;
+  // Nueva flag para roles con permiso de edición
+  isEditorRole: boolean = false;
 
   // ✅ Guardar el ID del usuario para edición
   private userId: number | null = null;
@@ -67,7 +70,8 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
   constructor(
     private fb: FormBuilder,
     private elementRef: ElementRef,
-    private alertService: AlertaService
+    private alertService: AlertaService,
+    private authService: AuthService
   ) {}
 
   @HostListener('document:keydown.escape')
@@ -77,9 +81,14 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.buildForm();
-    this.updatePasswordValidators(); // ✅ Configurar validaciones iniciales
+    this.updatePasswordValidators();
     if (this.initialData) this.patchForm(this.initialData);
     this.initRoles();
+
+    // Determinar si el usuario puede editar (roles 1 o 2)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? 0);
+    this.isEditorRole = roleId === 1 || roleId === 2;
 
     // Inicializar estado de edición según modo
     this.editingEnabled = this.mode !== 'edit';
@@ -110,8 +119,12 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
 
   // Activa la edición de los campos en modo 'edit'
   enableEditing(): void {
+    // Protección cliente: solo roles 1 y 2 pueden activar edición
+    if (!this.isEditorRole) return;
+
     this.editingEnabled = true;
     this.setControlsDisabled(false);
+
     // poner foco en el primer input editable
     setTimeout(() => {
       const firstInput = this.elementRef.nativeElement.querySelector(
@@ -123,10 +136,12 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
 
   // Alterna entre modo lectura y edición desde el header
   toggleEditing(): void {
+    // Protección cliente: solo roles 1 y 2 pueden alternar edición
+    if (!this.isEditorRole) return;
+
     this.editingEnabled = !this.editingEnabled;
     this.setControlsDisabled(!this.editingEnabled);
     if (this.editingEnabled) {
-      // focus al primer input editable
       setTimeout(() => {
         const firstInput = this.elementRef.nativeElement.querySelector(
           'input:not([disabled])'

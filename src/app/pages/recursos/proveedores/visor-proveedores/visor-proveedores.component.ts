@@ -8,6 +8,7 @@ import { PageTitleService } from '../../../../services/page-title.service';
 import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
+import { AuthService } from '../../../../services/auth.service';
 
 export interface ProveedorDto {
   idProveedor: number;
@@ -52,6 +53,7 @@ export class VisorProveedoresComponent implements OnInit {
   currentPage = 1;
   pageSize = 10;
   isLoading = false;
+  isSuperAdmin: boolean = false;
   totalItems = 0;
   totalPages = 0;
 
@@ -72,11 +74,17 @@ export class VisorProveedoresComponent implements OnInit {
   constructor(
     private proveedoresService: ProveedoresService,
     private alertService: AlertaService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Proveedores');
+    // Determinar rol del usuario (id_rol === 1 => SuperAdmin)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? 0);
+    this.isSuperAdmin = roleId === 1;
+
     this.fetchProveedores();
   }
 
@@ -242,6 +250,14 @@ export class VisorProveedoresComponent implements OnInit {
   }
 
   deleteProveedor(item: ProveedorDto): void {
+    // Protección adicional en cliente: solo SuperAdmin puede eliminar
+    if (!this.isSuperAdmin) {
+      this.alertService.error(
+        'No tienes permisos para eliminar este proveedor.'
+      );
+      return;
+    }
+
     const id = item?.idProveedor ?? null;
     if (id == null) return;
     this.alertService

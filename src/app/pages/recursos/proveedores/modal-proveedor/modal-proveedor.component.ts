@@ -19,6 +19,7 @@ import {
 } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertaService } from '../../../../services/alerta.service';
+import { AuthService } from '../../../../services/auth.service';
 
 export interface ProveedorDto {
   idProveedor: number;
@@ -56,13 +57,15 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
   editingEnabled: boolean = true;
   serverErrors: { [key: string]: string } = {};
   private proveedorId: number | null = null;
+  isEditorRole: boolean = false;
 
   @ViewChild('firstInput') firstInput!: ElementRef;
 
   constructor(
     private fb: FormBuilder,
     private elementRef: ElementRef,
-    private alertService: AlertaService
+    private alertService: AlertaService,
+    private authService: AuthService
   ) {}
 
   @HostListener('document:keydown.escape')
@@ -74,7 +77,13 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     this.buildForm();
     if (this.initialData) this.patchForm(this.initialData);
 
+    // Determinar si el usuario puede editar (roles 1 o 2)
+    const user = this.authService.getUser?.() ?? null;
+    const roleId = Number(user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? 0);
+    this.isEditorRole = roleId === 1 || roleId === 2;
+
     // Inicializar estado de edición: en modo 'edit' comienza deshabilitado, en 'create' habilitado
+    // Si el usuario no es editor, mantener disabled en modo edit (no puede activar edición)
     this.editingEnabled = this.mode !== 'edit';
     this.setControlsDisabled(!this.editingEnabled);
 
@@ -100,6 +109,9 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
   }
 
   toggleEditing(): void {
+    // Protección cliente: solo SuperAdmin (1) o Administrador (2) pueden cambiar estado
+    if (!this.isEditorRole) return;
+
     this.editingEnabled = !this.editingEnabled;
     this.setControlsDisabled(!this.editingEnabled);
     if (this.editingEnabled) {

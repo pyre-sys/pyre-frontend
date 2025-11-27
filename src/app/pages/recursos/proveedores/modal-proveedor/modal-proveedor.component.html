@@ -3,7 +3,11 @@
     <div class="modal-content" [class.open]="visible">
       <div class="modal-header">
         <div class="header-controls">
-          <div *ngIf="mode === 'edit'" class="mode-switch-wrapper">
+          <!-- Mostrar toggle SOLO para modo edit y roles con permiso -->
+          <div
+            *ngIf="mode === 'edit' && isEditorRole"
+            class="mode-switch-wrapper"
+          >
             <button
               type="button"
               class="mode-switch"
