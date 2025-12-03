@@ -22,7 +22,7 @@
 }
 
 .dropdown-option.selected .option-nombre {
-    color: var(--color-white, #ffffff);
+    color: var(--color-text, #374151);
 }
 
 .option-descripcion {
@@ -200,5 +200,3 @@
 .dropdown-option:has(.option-nombre:contains("Supervisor")) {
     background: linear-gradient(45deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
 }
-
-

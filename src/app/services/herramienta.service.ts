@@ -452,8 +452,17 @@ export class HerramientaService {
 
   // [HttpGet("disponibilidad/{disponibilidadId}")]
   getHerramientasPorDisponibilidad(disponibilidadId: number): Observable<any> {
+    console.debug('[HerramientaService] getHerramientasPorDisponibilidad:', disponibilidadId);
     return this.http.get<any>(
       `${this.baseUrl}/disponibilidad/${disponibilidadId}`
+    ).pipe(
+      tap((response) =>
+        console.debug('[HerramientaService] getHerramientasPorDisponibilidad response:', response)
+      ),
+      catchError((error) => {
+        console.error('[HerramientaService] getHerramientasPorDisponibilidad error:', error);
+        throw error;
+      })
     );
   }
   // Overload to accept multiple disponibilidad IDs
@@ -488,7 +497,7 @@ export class HerramientaService {
   }
 
   // [HttpGet("estado-fisico/{estadoFisicoId}")]
-  getHerramientasPorEstadoFisico(estadoFisicoId: number): Observable<any> {
+  getHerramientasPorEstadoFisico(estadoFisicoId: number = 0): Observable<any> {
     return this.http.get<any>(
       `${this.baseUrl}/estado-fisico/${estadoFisicoId}`
     );

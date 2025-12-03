@@ -4,10 +4,7 @@
       <div class="modal-header">
         <!-- Header: switch colocado donde estaba el título; el texto 'Modo ...' actúa como título en modo edit -->
         <div class="header-controls">
-          <div
-            *ngIf="mode === 'edit' && isEditorRole"
-            class="mode-switch-wrapper"
-          >
+          <div *ngIf="mode === 'edit'" class="mode-switch-wrapper">
             <button
               type="button"
               class="mode-switch"
@@ -145,7 +142,7 @@
               "
               class="error-text"
             >
-              El DNI es requerido y debe tener máximo 20 caracteres
+              El DNI es requerido y debe tener máximo 8 caracteres numericos
             </div>
           </div>
 
@@ -156,7 +153,7 @@
               form.get('Email')?.invalid && form.get('Email')?.touched
             "
           >
-            <label>Email <span class="optional-text">(opcional)</span></label>
+            <label>Email <span class="optional-text">(requerido)</span></label>
             <input
               formControlName="Email"
               type="email"

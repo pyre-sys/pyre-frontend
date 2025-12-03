@@ -22,6 +22,7 @@ interface Alerta {
   activo: boolean;
   diasVencido?: number;
   responsableNombre?: string;
+  herramientaCodigo?: string;
   tipoMovimiento?: string;
 }
 
@@ -68,7 +69,7 @@ export class AlertasComponent implements OnInit {
     private pageTitleService: PageTitleService,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Gestión de Alertas');

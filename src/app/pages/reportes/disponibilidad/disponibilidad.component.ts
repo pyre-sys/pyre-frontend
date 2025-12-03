@@ -97,7 +97,7 @@ export class DisponibilidadComponent implements OnInit {
     private pageTitleService: PageTitleService,
     private srvHerramienta: HerramientaService,
     private srvAlerta: AlertaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.pageTitleService.setTitle('Estado de Disponibilidad');
@@ -168,7 +168,7 @@ export class DisponibilidadComponent implements OnInit {
     this.loading = true;
 
     this.srvHerramienta
-      .getHerramientasPorDisponibilidadArray([this.disponibilidadSelect.id])
+      .getHerramientasPorDisponibilidad(this.disponibilidadSelect.id)
       .subscribe({
         next: (response: any) => {
           this.loading = false;
