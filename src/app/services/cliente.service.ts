@@ -10,7 +10,7 @@ import { environment } from '../../environments/environment';
 export class ClienteService {
   // Use environment.apiUrl for dev/prod y apuntar al endpoint real '/cliente' (lowercase según backend)
   private baseUrl =
-    (environment?.apiUrl ? environment.apiUrl : '') + '/cliente';
+    (environment?.apiUrl ? environment.apiUrl : '') + '/Cliente';
 
   constructor(private http: HttpClient) {}
 
