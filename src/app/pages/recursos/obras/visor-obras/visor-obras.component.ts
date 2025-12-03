@@ -78,7 +78,6 @@ export class VisorObrasComponent implements OnInit {
 
   fetchObras(): void {
     this.isLoading = true;
-    // Enviar filtros de nombre y codigo al backend para que realice la búsqueda concatenada
     const filters: any = {
       nombre: this.filtroNombre?.trim() || undefined,
       codigo: this.filtroCodigo?.trim() || undefined,
@@ -100,9 +99,14 @@ export class VisorObrasComponent implements OnInit {
             descripcion: o.descripcion,
             fechaInicio: o.fechaInicio,
             fechaFin: o.fechaFin,
-            estado: o.estado || 'Activo',
+            // Normalizar estado booleano para uso en el toggle
+            activo:
+              o.activo ??
+              o.activa ??
+              String(o.estado || 'Activo').toLowerCase() === 'activo',
+            // mantener también cadena legible si se necesita
+            estado: o.estado ?? (o.activo || o.activa ? 'Activo' : 'Inactivo'),
           }));
-          // No filtrar localmente; confiamos en backend
           this.filteredObras = [...this.obras];
           this.calculatePagination();
           this.isLoading = false;
@@ -330,6 +334,36 @@ export class VisorObrasComponent implements OnInit {
     this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.fetchObras();
+  }
+
+  // Nuevo: toggle activo/inactivo de obra desde la UI
+  toggleObraActive(event: Event, obra: any): void {
+    event.stopPropagation();
+    if (!this.isSuperAdmin) return; // controlar permisos en UI (endpoint requiere SuperAdmin)
+    const id = obra?.idObra ?? null;
+    if (!id) return;
+    // indicar operación en progreso para deshabilitar controles
+    obra._pending = true;
+    this.obrasService.toggleObraActivo(Number(id)).subscribe({
+      next: (resp: any) => {
+        obra.activo = !!resp?.data;
+        obra.estado = obra.activo ? 'Activo' : 'Inactivo';
+        obra._pending = false;
+        this.alertService.success(
+          `La obra ha sido ${
+            obra.activo ? 'activada' : 'desactivada'
+          } correctamente.`
+        );
+      },
+      error: (err: any) => {
+        obra._pending = false;
+        const msg =
+          err?.error?.message ||
+          err?.message ||
+          'No se pudo cambiar el estado de la obra';
+        this.alertService.error(msg);
+      },
+    });
   }
 
   private showSnack(message: string): void {
