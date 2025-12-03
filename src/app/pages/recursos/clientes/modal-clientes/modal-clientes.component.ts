@@ -105,7 +105,15 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
 
   private buildForm() {
     this.form = this.fb.group({
-      cuit: ['', [Validators.maxLength(11)]],
+      cuit: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(11),
+          Validators.maxLength(11),
+          Validators.pattern('^[0-9]*$'),
+        ],
+      ],
       nombre: ['', [Validators.required, Validators.maxLength(200)]],
       telefono: ['', [Validators.maxLength(50)]],
       email: ['', [Validators.email, Validators.maxLength(150)]],
@@ -116,8 +124,14 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
 
   private patchForm(data: any) {
     if (!this.form) this.buildForm();
+    const rawCuit =
+      data?.cuit ?? data?.Cuit ?? data?.Cuit ?? data?.Cuit ?? data?.Cuit ?? '';
+    const normalizedCuit = String(rawCuit ?? '')
+      .replace(/\D+/g, '')
+      .slice(0, 11);
+
     const mapped = {
-      cuit: data?.cuit ?? data?.Cuit ?? '',
+      cuit: normalizedCuit,
       nombre: data?.nombre ?? data?.Nombre ?? '',
       telefono: data?.telefono ?? data?.Telefono ?? '',
       email: data?.email ?? data?.Email ?? '',
@@ -286,5 +300,17 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
     // revertir modo edición al cerrar: por defecto create = editable, edit = lectura
     this.editingEnabled = this.mode !== 'edit';
     this.setControlsDisabled(!this.editingEnabled);
+  }
+
+  onCuitInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input) return;
+    const cleaned = input.value.replace(/\D+/g, '').slice(0, 11);
+    const control = this.form?.get('cuit');
+    if (control && control.value !== cleaned) {
+      control.setValue(cleaned, { emitEvent: false });
+    }
+    // Reflect the cleaned value back to the native input (keeps cursor/visual consistent)
+    if (input.value !== cleaned) input.value = cleaned;
   }
 }

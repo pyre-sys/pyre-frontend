@@ -19,57 +19,91 @@
         <div class="compact-form-grid">
           <div class="field-group">
             <label>Código</label>
-            <div class="optional-text">{{ data.codigoHerramienta || data.codigo || '-' }}</div>
+            <div class="optional-text">
+              {{ data.codigoHerramienta || data.codigo || "-" }}
+            </div>
           </div>
 
           <div class="field-group">
             <label>Nombre</label>
-            <div class="optional-text">{{ data.nombreHerramienta || data.nombre || '-' }}</div>
+            <div class="optional-text">
+              {{ data.nombreHerramienta || data.nombre || "-" }}
+            </div>
           </div>
 
           <div class="field-group">
             <label>Movimiento</label>
-            <div class="optional-text">{{ data.tipoMovimiento || data.nombreTipoMovimiento || data.idTipoMovimiento || '-' }}</div>
+            <div class="optional-text">
+              {{
+                data.tipoMovimiento ||
+                  data.nombreTipoMovimiento ||
+                  data.idTipoMovimiento ||
+                  "-"
+              }}
+            </div>
           </div>
 
           <div class="field-group">
             <label>Fecha</label>
-            <div class="optional-text">{{ data.fecha | date:'EEE dd MMM yyyy, HH:mm':'es' }}</div>
+            <div class="optional-text">
+              {{ data.fecha | date : "EEE dd MMM yyyy, HH:mm" : "es" }}
+            </div>
           </div>
 
           <div class="field-group">
             <label>Usuario Genera</label>
-            <div class="optional-text">{{ data.nombreUsuarioGenera || data.usuarioGenera || '-' }}</div>
+            <div class="optional-text">
+              {{ data.nombreUsuarioGenera || data.usuarioGenera || "-" }}
+            </div>
           </div>
 
           <div class="field-group">
             <label>Usuario Responsable</label>
-            <div class="optional-text">{{ data.nombreUsuarioResponsable || data.usuarioResponsable || '-' }}</div>
+            <div class="optional-text">
+              {{
+                data.nombreUsuarioResponsable || data.usuarioResponsable || "-"
+              }}
+            </div>
           </div>
 
           <div class="field-group">
             <label>Obra</label>
-            <div class="optional-text">{{ data.nombreObra || data.obra || '-' }}</div>
+            <div class="optional-text">
+              {{ data.nombreObra || data.obra || "-" }}
+            </div>
           </div>
 
           <div class="field-group">
             <label>Proveedor</label>
-            <div class="optional-text">{{ data.nombreProveedor || data.proveedor || '-' }}</div>
+            <div class="optional-text">
+              {{ data.nombreProveedor || data.proveedor || "-" }}
+            </div>
           </div>
 
           <div class="field-group full-width">
             <label>Estado Físico</label>
-            <div class="optional-text">{{ data.estadoFisico || data.nombreEstadoFisico || '-' }}</div>
+            <div class="optional-text">
+              {{
+                data.estadoDevolucion ||
+                  data.estadoFisico ||
+                  data.nombreEstadoFisico ||
+                  "-"
+              }}
+            </div>
           </div>
 
           <div class="field-group full-width">
             <label>Observaciones</label>
-            <div class="optional-text">{{ data.observaciones || data.observacion || '-' }}</div>
+            <div class="optional-text">
+              {{ data.observaciones || data.observacion || "-" }}
+            </div>
           </div>
         </div>
 
         <div class="actions">
-          <button type="button" class="btn-cancel" (click)="onClose()">Cerrar</button>
+          <button type="button" class="btn-cancel" (click)="onClose()">
+            Cerrar
+          </button>
         </div>
       </div>
     </div>

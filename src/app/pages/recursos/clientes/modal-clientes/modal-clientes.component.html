@@ -50,16 +50,34 @@
               form.get('cuit')?.invalid && form.get('cuit')?.touched
             "
           >
-            <label>CUIT <span class="optional-text">(opcional)</span></label>
-            <input formControlName="cuit" placeholder="20301234567" />
+            <label class="required">CUIT</label>
+            <input
+              formControlName="cuit"
+              placeholder="20301234567"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="11"
+              (input)="onCuitInput($event)"
+            />
             <div *ngIf="serverErrors['cuit']" class="error-text">
               {{ serverErrors["cuit"] }}
             </div>
             <div
-              *ngIf="form.get('cuit')?.errors?.['maxlength']"
+              *ngIf="form.get('cuit')?.errors && form.get('cuit')?.touched"
               class="error-text"
             >
-              Máximo 11 caracteres
+              <span *ngIf="form.get('cuit')?.errors?.['required']"
+                >El CUIT es requerido</span
+              >
+              <span *ngIf="form.get('cuit')?.errors?.['minlength']"
+                >Se requieren 11 dígitos</span
+              >
+              <span *ngIf="form.get('cuit')?.errors?.['maxlength']"
+                >Máximo 11 caracteres</span
+              >
+              <span *ngIf="form.get('cuit')?.errors?.['pattern']"
+                >Sólo se permiten números</span
+              >
             </div>
           </div>
 

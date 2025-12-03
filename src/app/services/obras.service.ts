@@ -12,6 +12,8 @@ export interface ObraDto {
   fechaInicio?: string; // ISO string
   fechaFin?: string; // ISO string
   activa?: boolean;
+  activo?: boolean; // añadido: alias booleano usado en templates
+  _pending?: boolean; // añadido: flag temporal para operaciones en curso (UI)
   idCliente?: number;
   clienteNombre?: string;
 }
@@ -172,5 +174,14 @@ export class ObrasService {
       data: ObraDto[];
       message?: string;
     }>(`${this.baseUrl}/getObrasCombo`, { params });
+  }
+
+  // Nuevo: togglear activo/inactivo de una obra (PATCH /api/obra/{id}/toggle-activo)
+  toggleObraActivo(id: number) {
+    return this.http.patch<{
+      success: boolean;
+      data: boolean;
+      message?: string;
+    }>(`${this.baseUrl}/${id}/toggle-activo`, null);
   }
 }

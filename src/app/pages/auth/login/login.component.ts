@@ -161,10 +161,11 @@ export class LoginComponent implements OnInit {
       return false;
     }
 
-    // Validar que el legajo solo contenga números
-    if (!/^\d+$/.test(legajoControl.value)) {
+    // Validar formato: hasta 5 caracteres alfanuméricos (letras y/o números)
+    const legajoVal = String(legajoControl.value).trim();
+    if (!/^[A-Za-z0-9]{1,5}$/.test(legajoVal)) {
       this.showValidationToast(
-        'El legajo debe contener solo números',
+        'El legajo debe contener hasta 5 caracteres alfanuméricos',
         'legajo'
       );
       this.isLoading = false;

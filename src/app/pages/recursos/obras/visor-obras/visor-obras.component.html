@@ -89,7 +89,8 @@
             <th>Descripcion</th>
             <th>Fecha Inicio</th>
             <th>Fecha Fin</th>
-            <!-- <th>Estado</th> -->
+            <th>Estado</th>
+            <!-- nueva columna -->
             <th>Acciones</th>
           </tr>
         </thead>
@@ -101,7 +102,37 @@
             <td>{{ obra.nombreObra }}</td>
             <td>{{ obra.descripcion }}</td>
             <td>{{ obra.fechaInicio | date : "dd/MM/yyyy" }}</td>
-            <td>{{ obra.fechaFin | date : "dd/MM/yyyy" }}</td>
+            <td>
+              {{
+                obra.fechaFin
+                  ? (obra.fechaFin | date : "dd/MM/yyyy")
+                  : "Sin declarar"
+              }}
+            </td>
+
+            <!-- Nueva celda: toggle estado -->
+            <td>
+              <div class="estado-toggle">
+                <label
+                  class="toggle-switch"
+                  [ngbTooltip]="obra.activo ? 'Activo' : 'Inactivo'"
+                  placement="top"
+                  container="body"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="obra.activo"
+                    (click)="toggleObraActive($event, obra)"
+                    [disabled]="obra._pending || !isSuperAdmin"
+                  />
+                  <span
+                    class="toggle-slider modern"
+                    [class.active]="obra.activo"
+                  ></span>
+                </label>
+              </div>
+            </td>
+
             <td>
               <div class="action-buttons">
                 <button
@@ -129,7 +160,7 @@
             </td>
           </tr>
           <tr *ngIf="getPaginatedObras().length === 0">
-            <td colspan="6" class="empty-message">No se encontraron obras.</td>
+            <td colspan="7" class="empty-message">No se encontraron obras.</td>
           </tr>
         </tbody>
       </table>

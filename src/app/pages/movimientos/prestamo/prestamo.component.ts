@@ -252,7 +252,8 @@ export class PrestamoComponent implements OnInit {
       idUsuarioResponsable: formData.responsableId,
       idUsuarioGenera: currentUserId,
       idTipoMovimiento: 1, // Préstamo
-      fechaMovimiento: new Date().toISOString(),
+      // usar hora local en formato ISO sin 'Z' para evitar desfase horario
+      fechaMovimiento: this.getLocalIsoNow(),
       fechaEstimadaDevolucion: formData.fechaEstimadaDevolucion,
       estadoHerramientaAlDevolver: formData.estadoFisicoHerramientaId,
       idObra: formData.obraId,
@@ -288,6 +289,30 @@ export class PrestamoComponent implements OnInit {
         console.error('Error al crear préstamos:', error);
       },
     });
+  }
+
+  // Helper: devuelve la fecha/hora local en formato ISO con offset (YYYY-MM-DDTHH:mm:ss.SSS±HH:MM)
+  private getLocalIsoNow(): string {
+    const d = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const ms = d.getMilliseconds().toString().padStart(3, '0');
+
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const minutes = pad(d.getMinutes());
+    const seconds = pad(d.getSeconds());
+
+    // getTimezoneOffset: minutes to add to local time to get UTC
+    // tzOffset = -getTimezoneOffset -> minutes offset from UTC to local
+    const tzMinutes = -d.getTimezoneOffset();
+    const tzSign = tzMinutes >= 0 ? '+' : '-';
+    const tzAbs = Math.abs(tzMinutes);
+    const tzH = pad(Math.floor(tzAbs / 60));
+    const tzM = pad(tzAbs % 60);
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${ms}${tzSign}${tzH}:${tzM}`;
   }
 
   private formatDate(dateString: string): string {

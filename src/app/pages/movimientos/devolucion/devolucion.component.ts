@@ -221,8 +221,17 @@ export class DevolucionComponent implements OnInit {
                   const movimiento = movResp?.data || {};
                   return {
                     id: item.idHerramienta,
-                    codigo: item.codigoHerramienta,
-                    nombre: item.nombreHerramienta,
+                    // Normalizar claves de código/nombre según lo que venga del backend
+                    codigo:
+                      item.codigo ??
+                      item.codigoHerramienta ??
+                      item.Codigo ??
+                      '',
+                    nombre:
+                      item.nombreHerramienta ??
+                      item.nombre ??
+                      item.NombreHerramienta ??
+                      '',
                     marca: item.marca || 'N/A',
                     fechaPrestamo: movimiento.fecha || item.fechaPrestamo,
                     fechaEstimadaDevolucion:
@@ -241,8 +250,16 @@ export class DevolucionComponent implements OnInit {
                   // En caso de error, usar datos básicos
                   return {
                     id: item.idHerramienta,
-                    codigo: item.codigoHerramienta,
-                    nombre: item.nombreHerramienta,
+                    codigo:
+                      item.codigo ??
+                      item.codigoHerramienta ??
+                      item.Codigo ??
+                      '',
+                    nombre:
+                      item.nombreHerramienta ??
+                      item.nombre ??
+                      item.NombreHerramienta ??
+                      '',
                     marca: item.marca || 'N/A',
                     fechaPrestamo: item.fechaPrestamo,
                     fechaEstimadaDevolucion: item.fechaEstimadaDevolucion,
@@ -297,8 +314,17 @@ export class DevolucionComponent implements OnInit {
                   const movimiento = movResp?.data || {};
                   return {
                     id: item.idHerramienta,
-                    codigo: item.codigoHerramienta,
-                    nombre: item.nombreHerramienta,
+                    // Normalizar claves de código/nombre según lo que venga del backend
+                    codigo:
+                      item.codigo ??
+                      item.codigoHerramienta ??
+                      item.Codigo ??
+                      '',
+                    nombre:
+                      item.nombreHerramienta ??
+                      item.nombre ??
+                      item.NombreHerramienta ??
+                      '',
                     marca: item.marca || 'N/A',
                     fechaPrestamo:
                       movimiento.fecha ||
@@ -319,8 +345,16 @@ export class DevolucionComponent implements OnInit {
                 .catch(() => {
                   return {
                     id: item.idHerramienta,
-                    codigo: item.codigoHerramienta,
-                    nombre: item.nombreHerramienta,
+                    codigo:
+                      item.codigo ??
+                      item.codigoHerramienta ??
+                      item.Codigo ??
+                      '',
+                    nombre:
+                      item.nombreHerramienta ??
+                      item.nombre ??
+                      item.NombreHerramienta ??
+                      '',
                     marca: item.marca || 'N/A',
                     fechaPrestamo: item.fechaReparacion || item.fechaIngreso,
                     fechaEstimadaDevolucion: item.fechaEstimadaFinalizacion,
@@ -483,26 +517,38 @@ export class DevolucionComponent implements OnInit {
       return;
     }
 
-    // Create confirmation message
-    const herramientasText = selectedHerramientas
-      .map((h) => h.codigo)
+    // Mensaje compacto: igual que el modal de préstamo.
+    // Formato:
+    // ¿Confirmar registro de devolución?
+    //
+    // Herramientas (4): ARCO DE SIERRA 2, ASADON, ASADON, ASPIRADORA
+    // Responsable: Sebastian Arce
+
+    const total = selectedHerramientas.length;
+    const herramientasList = selectedHerramientas
+      .map((h) => this.escapeHtml(h.nombre || h.codigo || ''))
       .join(', ');
+
     const responsableName =
       this.tipoOperacion === 'prestamo'
-        ? `${this.selectedUsuarioInfo?.nombre} ${this.selectedUsuarioInfo?.apellido}`
-        : this.selectedProveedorInfo?.nombreProveedor;
+        ? `${this.selectedUsuarioInfo?.nombre || ''} ${
+            this.selectedUsuarioInfo?.apellido || ''
+          }`.trim()
+        : this.selectedProveedorInfo?.nombreProveedor || '';
 
     const operacionText =
-      this.tipoOperacion === 'prestamo' ? 'préstamo' : 'reparación';
+      this.tipoOperacion === 'prestamo' ? 'de préstamo' : 'de reparación';
 
-    const confirmMessage = `¿Confirmar registro de devolución de ${operacionText}?<br><br>Herramientas (${
-      selectedHerramientas.length
-    }): ${herramientasText}<br>${
-      this.tipoOperacion === 'prestamo' ? 'Usuario' : 'Proveedor'
-    }: ${responsableName}`;
+    const confirmBody = `
+      <div>
+        <p>¿Confirmar registro de devolución ${operacionText}?</p>
+        <p><strong>Herramientas (${total}):</strong> ${herramientasList}</p>
+        <p><strong>Responsable:</strong> ${this.escapeHtml(responsableName)}</p>
+      </div>
+    `;
 
     this.alertService
-      .confirm(confirmMessage, 'Confirmar Devolución')
+      .confirm(confirmBody, 'Confirmar Devolución')
       .then((result) => {
         if (result.isConfirmed) {
           this.registrarDevoluciones();
@@ -530,7 +576,8 @@ export class DevolucionComponent implements OnInit {
       const baseMovimiento: any = {
         idHerramienta: herramienta.id,
         idUsuarioGenera: currentUserId,
-        fechaMovimiento: new Date().toISOString(),
+        // usar hora local en formato ISO sin sufijo 'Z' para evitar desfases de zona horaria
+        fechaMovimiento: this.getLocalIsoNow(),
         estadoHerramientaAlDevolver: herramienta.estadoFisicoId,
         observaciones: herramienta.observaciones || undefined,
         fechaEstimadaDevolucion: null,
@@ -608,5 +655,45 @@ export class DevolucionComponent implements OnInit {
       return this.selectedProveedorInfo.nombreProveedor;
     }
     return '';
+  }
+
+  // Nuevo: devuelve el nombre del estado físico por id
+  private getEstadoNombre(id: number | null): string {
+    if (id == null) return 'N/D';
+    const e = this.estadoFisicoOptions.find((s) => s.id === id);
+    return e ? e.nombre : 'N/D';
+  }
+
+  // Nuevo: escape básico para evitar inyección de HTML en los valores mostrados
+  private escapeHtml(input: string | undefined | null): string {
+    if (!input) return '';
+    return String(input)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // Helper: devuelve la fecha/hora local en formato ISO con offset (YYYY-MM-DDTHH:mm:ss.SSS±HH:MM)
+  private getLocalIsoNow(): string {
+    const d = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const ms = d.getMilliseconds().toString().padStart(3, '0');
+
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const minutes = pad(d.getMinutes());
+    const seconds = pad(d.getSeconds());
+
+    const tzMinutes = -d.getTimezoneOffset();
+    const tzSign = tzMinutes >= 0 ? '+' : '-';
+    const tzAbs = Math.abs(tzMinutes);
+    const tzH = pad(Math.floor(tzAbs / 60));
+    const tzM = pad(tzAbs % 60);
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${ms}${tzSign}${tzH}:${tzM}`;
   }
 }
