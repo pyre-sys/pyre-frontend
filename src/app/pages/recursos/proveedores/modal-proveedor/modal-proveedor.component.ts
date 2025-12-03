@@ -63,7 +63,7 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     private fb: FormBuilder,
     private elementRef: ElementRef,
     private alertService: AlertaService
-  ) {}
+  ) { }
 
   @HostListener('document:keydown.escape')
   onEscapeKey() {
@@ -129,9 +129,9 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
     this.form = this.fb.group({
       nombreProveedor: ['', [Validators.required, Validators.maxLength(100)]],
       contacto: ['', [Validators.required, Validators.maxLength(100)]],
-      cuit: ['', [Validators.maxLength(20)]],
+      cuit: ['', [Validators.maxLength(11), Validators.required]],
       telefono: ['', [Validators.maxLength(50)]],
-      email: ['', [Validators.email, Validators.maxLength(150)]],
+      email: ['', [Validators.email, Validators.required, Validators.maxLength(150)]],
       direccion: ['', [Validators.maxLength(200)]],
       descripcion: ['', [Validators.maxLength(1000)]],
       activo: [true, [Validators.required]],
@@ -223,8 +223,7 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
       data: value,
       onSuccess: () => {
         this.alertService.success(
-          `El proveedor ha sido ${
-            this.mode === 'create' ? 'creado' : 'actualizado'
+          `El proveedor ha sido ${this.mode === 'create' ? 'creado' : 'actualizado'
           } exitosamente`,
           `¡Proveedor ${this.mode === 'create' ? 'Creado' : 'Actualizado'}!`
         );
@@ -238,11 +237,9 @@ export class ModalProveedorComponent implements OnInit, OnChanges {
           error?.message ||
           'Ocurrió un error inesperado';
         this.alertService.error(
-          `Error al ${
-            this.mode === 'create' ? 'crear' : 'actualizar'
+          `Error al ${this.mode === 'create' ? 'crear' : 'actualizar'
           } el proveedor: ${errorMessage}`,
-          `Error al ${
-            this.mode === 'create' ? 'Crear' : 'Actualizar'
+          `Error al ${this.mode === 'create' ? 'Crear' : 'Actualizar'
           } Proveedor`
         );
         this.handleServerErrors(error);

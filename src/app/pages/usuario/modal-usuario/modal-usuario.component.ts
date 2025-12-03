@@ -68,7 +68,7 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
     private fb: FormBuilder,
     private elementRef: ElementRef,
     private alertService: AlertaService
-  ) {}
+  ) { }
 
   @HostListener('document:keydown.escape')
   onEscapeKey() {
@@ -165,7 +165,7 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
       Nombre: ['', [Validators.required, Validators.maxLength(100)]],
       Apellido: ['', [Validators.required, Validators.maxLength(100)]],
       Legajo: ['', [Validators.required, Validators.maxLength(5)]],
-      Dni: ['', [Validators.required, Validators.maxLength(20)]],
+      Dni: ['', [Validators.required, Validators.maxLength(8), Validators.minLength(7), Validators.pattern('^[0-9]+$')]],
       Email: ['', [Validators.email, Validators.maxLength(150)]],
       Telefono: ['', [Validators.maxLength(50)]],
       // Inicialmente vacío para forzar la selección por parte del usuario
@@ -528,8 +528,7 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
       data: value,
       onSuccess: () => {
         this.alertService.success(
-          `El usuario ha sido ${
-            this.mode === 'create' ? 'creado' : 'actualizado'
+          `El usuario ha sido ${this.mode === 'create' ? 'creado' : 'actualizado'
           } exitosamente`,
           `¡Usuario ${this.mode === 'create' ? 'Creado' : 'Actualizado'}!`
         );
@@ -545,8 +544,7 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
           error?.message ||
           'Ocurrió un error inesperado';
         this.alertService.error(
-          `Error al ${
-            this.mode === 'create' ? 'crear' : 'actualizar'
+          `Error al ${this.mode === 'create' ? 'crear' : 'actualizar'
           } el usuario: ${errorMessage}`,
           `Error al ${this.mode === 'create' ? 'Crear' : 'Actualizar'} Usuario`
         );
