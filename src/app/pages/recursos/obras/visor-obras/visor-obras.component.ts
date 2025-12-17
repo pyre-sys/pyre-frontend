@@ -99,12 +99,10 @@ export class VisorObrasComponent implements OnInit {
             descripcion: o.descripcion,
             fechaInicio: o.fechaInicio,
             fechaFin: o.fechaFin,
-            // Normalizar estado booleano para uso en el toggle
             activo:
               o.activo ??
               o.activa ??
               String(o.estado || 'Activo').toLowerCase() === 'activo',
-            // mantener también cadena legible si se necesita
             estado: o.estado ?? (o.activo || o.activa ? 'Activo' : 'Inactivo'),
           }));
           this.filteredObras = [...this.obras];
@@ -339,10 +337,9 @@ export class VisorObrasComponent implements OnInit {
   // Nuevo: toggle activo/inactivo de obra desde la UI
   toggleObraActive(event: Event, obra: any): void {
     event.stopPropagation();
-    if (!this.isSuperAdmin) return; // controlar permisos en UI (endpoint requiere SuperAdmin)
+    if (!this.isSuperAdmin) return;
     const id = obra?.idObra ?? null;
     if (!id) return;
-    // indicar operación en progreso para deshabilitar controles
     obra._pending = true;
     this.obrasService.toggleObraActivo(Number(id)).subscribe({
       next: (resp: any) => {

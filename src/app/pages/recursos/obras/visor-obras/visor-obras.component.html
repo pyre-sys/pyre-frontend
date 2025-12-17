@@ -100,7 +100,12 @@
               <span class="codigo-badge">{{ obra.codigo }}</span>
             </td>
             <td>{{ obra.nombreObra }}</td>
-            <td>{{ obra.descripcion }}</td>
+            <td class="column-descripcion">
+              {{ obra.descripcion | slice : 0 : 50 }}
+              <span *ngIf="!!obra.descripcion && obra.descripcion.length > 50"
+                >...</span
+              >
+            </td>
             <td>{{ obra.fechaInicio | date : "dd/MM/yyyy" }}</td>
             <td>
               {{

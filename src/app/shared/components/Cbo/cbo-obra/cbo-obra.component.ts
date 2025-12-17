@@ -25,6 +25,7 @@ import {
   catchError,
 } from 'rxjs';
 import { ObrasService } from '../../../../services/obras.service';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 export interface ObraOption {
   idObra: number;
@@ -40,7 +41,7 @@ export interface ObraOption {
 @Component({
   selector: 'app-cbo-obra',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgbTooltipModule],
   templateUrl: './cbo-obra.component.html',
   styleUrls: [
     '../cbo.component.css',
@@ -205,9 +206,9 @@ export class CboObraComponent
   }
 
   private buildDisplayText(obra: any): string {
-    const codigo = obra.codigo;
-    const nombre = obra.nombreObra || obra.nombre;
-    const descripcion = obra.descripcion;
+    const codigo = obra?.codigo ?? '';
+    const nombre = obra?.nombreObra ?? obra?.nombre ?? '';
+    const descripcion = obra?.descripcion ?? '';
 
     let text = '';
     if (codigo) {
@@ -346,24 +347,21 @@ export class CboObraComponent
   }
 
   private findObraById(id: number): void {
-    // First check if it's in current list
     const found = this.obras.find((o) => o.idObra === id);
     if (found) {
       this.selectObra(found);
       return;
     }
 
-    // If not found, make a specific request
     this.obrasService.getObraById(id).subscribe({
       next: (response) => {
-        const obraData = response.data || response;
+        const obraData = response?.data || response;
         if (obraData) {
           const obra = this.mapObrasToOptions([obraData])[0];
           this.selectObra(obra);
         }
       },
       error: () => {
-        // If request fails, just set the ID
         this.onChange(id);
       },
     });

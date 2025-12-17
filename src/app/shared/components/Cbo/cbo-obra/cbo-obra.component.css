@@ -1,5 +1,6 @@
 /* Import generic combo styles */
 @import "../cbo.component.css";
+@import "../cbo-movimientos.css";
 
 /* Specific styles for obra combo */
 .dropdown-content {
@@ -11,7 +12,7 @@
   padding: 0.5rem 0.75rem;
   cursor: pointer;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  white-space: nowrap; /* ensure single-line layout to avoid vertical overflow */
+  white-space: nowrap; /* asegurar diseño en una sola línea para evitar desbordamiento vertical */
 }
 
 .dropdown-option:last-child {
@@ -33,7 +34,7 @@
   flex: 1 1 auto;
 }
 
-/* codigo: fixed small column, truncated if needed */
+/* codigo: columna pequeña fija, truncada si es necesario */
 .option-codigo {
   flex: 0 0 90px;
   max-width: 90px;
@@ -44,7 +45,7 @@
   color: var(--color-primary, #3b82f6);
 }
 
-/* nombre: takes remaining space and truncates with ellipsis */
+/* nombre: ocupa el espacio restante y se trunca con ellipsis */
 .option-nombre {
   flex: 1 1 auto;
   min-width: 0;
@@ -56,13 +57,15 @@
   font-weight: 500;
 }
 
-/* descripcion: smaller fixed column on the right, truncated */
+/* descripcion: columna fija más pequeña a la derecha, truncada */
 .option-details {
   flex: 0 0 240px;
   max-width: 240px;
   display: flex;
   justify-content: flex-end;
   min-width: 0;
+  padding-right: 12px; /* Agregar espacio interno a la derecha */
+  box-sizing: border-box; /* Asegurar que el padding se incluya en el ancho */
 }
 
 .option-descripcion {
@@ -74,6 +77,7 @@
   font-size: 0.85rem;
   font-style: italic;
   text-align: right;
+  padding-right: 6px; /* Espacio adicional para evitar corte */
 }
 
 .dropdown-option.selected .option-codigo {
@@ -109,9 +113,6 @@
     padding: 1px 4px;
   }
 }
-
-/* El componente de obras reutiliza los estilos comunes de cbo-movimientos.css */
-@import "../cbo-movimientos.css";
 
 /* Usar exclusivamente estilos compartidos desde cbo-movimientos.css.
    Mantener wrapper mínimo para posicionamiento si fuera necesario. */

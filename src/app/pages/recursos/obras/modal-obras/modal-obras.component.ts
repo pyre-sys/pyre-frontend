@@ -157,8 +157,8 @@ export class ObraEditModalComponent implements OnInit, OnChanges {
       idCliente: ['', [Validators.required]], // Campo para el cliente
       NombreObra: ['', [Validators.required, Validators.maxLength(150)]],
       Codigo: ['', [Validators.required, Validators.maxLength(20)]],
-      // Descripción ahora obligatoria
-      Descripcion: ['', [Validators.required, Validators.maxLength(500)]],
+      // Descripción opcional
+      Descripcion: ['', [Validators.maxLength(500)]],
       // FechaInicio ahora obligatoria
       FechaInicio: ['', [Validators.required]],
       FechaFin: [''],

@@ -171,7 +171,9 @@
               serverErrors['Descripcion']
             "
           >
-            <label class="required">Descripción</label>
+            <label
+              >Descripción <span class="optional-text">(opcional)</span></label
+            >
             <textarea
               formControlName="Descripcion"
               rows="3"
@@ -193,9 +195,6 @@
               "
               class="error-text"
             >
-              <span *ngIf="form.get('Descripcion')?.errors?.['required']"
-                >La descripción es requerida</span
-              >
               <span *ngIf="form.get('Descripcion')?.errors?.['maxlength']"
                 >Máximo 500 caracteres</span
               >
