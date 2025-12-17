@@ -246,13 +246,11 @@ export class PrestamoComponent implements OnInit {
       return;
     }
 
-    // Crear un préstamo por cada herramienta seleccionada
     const prestamos = this.selectedHerramientas.map((herramienta) => ({
       idHerramienta: herramienta.id,
       idUsuarioResponsable: formData.responsableId,
       idUsuarioGenera: currentUserId,
-      idTipoMovimiento: 1, // Préstamo
-      // usar hora local en formato ISO sin 'Z' para evitar desfase horario
+      idTipoMovimiento: 1,
       fechaMovimiento: this.getLocalIsoNow(),
       fechaEstimadaDevolucion: formData.fechaEstimadaDevolucion,
       estadoHerramientaAlDevolver: formData.estadoFisicoHerramientaId,
@@ -261,12 +259,6 @@ export class PrestamoComponent implements OnInit {
       observaciones: formData.observaciones || undefined,
     }));
 
-    // Registrar todos los préstamos
-    const prestamoRequests = prestamos.map((prestamo) =>
-      this.movimientoService.registrarPrestamo(prestamo)
-    );
-
-    // Usar forkJoin para ejecutar todas las peticiones en paralelo
     this.movimientoService.registrarMultiplesPrestamos(prestamos).subscribe({
       next: (responses: any[]) => {
         this.isLoading = false;
@@ -282,7 +274,7 @@ export class PrestamoComponent implements OnInit {
       error: (error) => {
         this.isLoading = false;
         this.alertService.error(
-          error.error?.message ||
+          error?.error?.message ||
             'Ha ocurrido un error inesperado. Por favor, intente nuevamente.',
           '✗ Error al Registrar'
         );
@@ -393,10 +385,7 @@ export class PrestamoComponent implements OnInit {
 
   // Handler llamado desde <app-cbo-cliente (clienteSelected)="onClienteSelected($event)">
   onClienteSelected(event: any): void {
-    // event = ClienteOption | null
-    // Resetear obra seleccionado al cambiar cliente
     try {
-      // si el form existe, setear clienteId (ControlValueAccessor ya lo hará, pero aseguramos coherencia)
       if (this.prestamoForm) {
         const id = event?.idCliente ?? null;
         this.prestamoForm.patchValue(
@@ -407,8 +396,5 @@ export class PrestamoComponent implements OnInit {
     } catch (e) {
       console.warn('[Prestamo] onClienteSelected error', e);
     }
-
-    // TODO: aquí puedes llamar a un servicio para recargar obras filtradas por cliente
-    // p.ej. this.obrasService.getObrasPorCliente(id).subscribe(...)
   }
 }
