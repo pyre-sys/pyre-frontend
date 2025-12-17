@@ -42,7 +42,11 @@ export interface ObraOption {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './cbo-obra.component.html',
-  styleUrls: ['../cbo.component.css', '../cbo-movimientos.css'],
+  styleUrls: [
+    '../cbo.component.css',
+    '../cbo-movimientos.css',
+    './cbo-obra.component.css',
+  ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

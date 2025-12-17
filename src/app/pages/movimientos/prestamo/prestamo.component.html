@@ -44,10 +44,133 @@
             (ngSubmit)="onSubmit()"
             class="flex-grow-1"
           >
-            <!-- SECCIÓN 1: Selección de Herramientas -->
+            <!-- SECCIÓN 1: Selección de la obra destino -->
             <div class="mb-4">
               <h6 class="form-section-title">
                 <i class="bi bi-1-circle-fill text-primary me-2"></i>
+                Selección de la obra destino
+              </h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label soft-label"
+                    >Seleccionar Cliente</label
+                  >
+                  <div
+                    class="form-field-wrapper"
+                    [class.has-value]="prestamoForm.get('clienteId')?.value"
+                  >
+                    <app-cbo-cliente
+                      [isId]="'clienteSelect'"
+                      [showOnlyActive]="true"
+                      formControlName="clienteId"
+                      (clienteSelected)="onClienteSelected($event)"
+                    >
+                    </app-cbo-cliente>
+                    <span
+                      class="field-check-icon"
+                      *ngIf="prestamoForm.get('clienteId')?.value"
+                    >
+                      <i class="bi bi-check-circle-fill text-success"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label soft-label">Seleccionar Obra</label>
+                  <div
+                    class="form-field-wrapper"
+                    [class.disabled]="!prestamoForm.get('clienteId')?.value"
+                    [class.has-value]="prestamoForm.get('obraId')?.value"
+                  >
+                    <app-cbo-obra
+                      [isId]="'obraSelect'"
+                      [showOnlyActive]="true"
+                      [isDisabled]="!prestamoForm.get('clienteId')?.value"
+                      [idCliente]="prestamoForm.get('clienteId')?.value"
+                      formControlName="obraId"
+                      (obraSelected)="onObraSelected($event)"
+                    >
+                    </app-cbo-obra>
+                    <span
+                      class="field-check-icon"
+                      *ngIf="prestamoForm.get('obraId')?.value"
+                    >
+                      <i class="bi bi-check-circle-fill text-success"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="col-12">
+                  <label class="form-label soft-label">
+                    Observaciones (Opcional)
+                  </label>
+                  <textarea
+                    class="form-control modern-textarea"
+                    rows="4"
+                    formControlName="observaciones"
+                    placeholder=""
+                    maxlength="500"
+                    (focus)="onTextareaFocus()"
+                    (blur)="onTextareaBlur()"
+                  >
+                  </textarea>
+                  <div class="form-text text-end">
+                    {{ prestamoForm.get("observaciones")?.value?.length || 0 }}
+                    / 500 caracteres
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="soft-divider" />
+
+            <!-- SECCIÓN 2: Selección del Responsable -->
+            <div class="mb-4">
+              <h6 class="form-section-title">
+                <i class="bi bi-2-circle-fill text-primary me-2"></i>
+                Selección del Responsable que retira
+              </h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label soft-label">
+                    Seleccionar Responsable
+                    <span class="text-danger">*</span>
+                  </label>
+                  <div
+                    class="form-field-wrapper"
+                    [class.has-value]="prestamoForm.get('responsableId')?.value"
+                    [class.has-error]="
+                      prestamoForm.get('responsableId')?.invalid &&
+                      prestamoForm.get('responsableId')?.touched
+                    "
+                  >
+                    <app-cbo-usuario
+                      [isId]="'responsableSelect'"
+                      [showOnlyActive]="true"
+                      [objectErrors]="prestamoForm.get('responsableId')?.errors"
+                      [isTouched]="!!prestamoForm.get('responsableId')?.touched"
+                      formControlName="responsableId"
+                      (usuarioSelected)="onUsuarioSelected($event)"
+                    >
+                    </app-cbo-usuario>
+                    <span
+                      class="field-check-icon"
+                      *ngIf="prestamoForm.get('responsableId')?.valid"
+                    >
+                      <i class="bi bi-check-circle-fill text-success"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="soft-divider" />
+
+            <!-- SECCIÓN 3: Selección de Herramientas -->
+            <div class="mb-4">
+              <h6 class="form-section-title">
+                <i class="bi bi-3-circle-fill text-primary me-2"></i>
                 Selección de Herramientas
               </h6>
 
@@ -138,52 +261,10 @@
 
             <hr class="soft-divider" />
 
-            <!-- SECCIÓN 2: Responsable -->
+            <!-- SECCIÓN 4: Selección de la fecha de retorno -->
             <div class="mb-4">
               <h6 class="form-section-title">
-                <i class="bi bi-2-circle-fill text-primary me-2"></i>
-                Selección del Responsable que retira
-              </h6>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label soft-label">
-                    Seleccionar Responsable
-                    <span class="text-danger">*</span>
-                  </label>
-                  <div
-                    class="form-field-wrapper"
-                    [class.has-value]="prestamoForm.get('responsableId')?.value"
-                    [class.has-error]="
-                      prestamoForm.get('responsableId')?.invalid &&
-                      prestamoForm.get('responsableId')?.touched
-                    "
-                  >
-                    <app-cbo-usuario
-                      [isId]="'responsableSelect'"
-                      [showOnlyActive]="true"
-                      [objectErrors]="prestamoForm.get('responsableId')?.errors"
-                      [isTouched]="!!prestamoForm.get('responsableId')?.touched"
-                      formControlName="responsableId"
-                      (usuarioSelected)="onUsuarioSelected($event)"
-                    >
-                    </app-cbo-usuario>
-                    <span
-                      class="field-check-icon"
-                      *ngIf="prestamoForm.get('responsableId')?.valid"
-                    >
-                      <i class="bi bi-check-circle-fill text-success"></i>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <hr class="soft-divider" />
-
-            <!-- SECCIÓN 3: Fechas -->
-            <div class="mb-4">
-              <h6 class="form-section-title">
-                <i class="bi bi-2-circle-fill text-primary me-2"></i>
+                <i class="bi bi-4-circle-fill text-primary me-2"></i>
                 Elija la fecha de retorno de la herramienta
               </h6>
               <div class="row g-3">
@@ -236,87 +317,6 @@
                     >
                       La fecha de devolución no puede ser anterior a hoy
                     </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <hr class="soft-divider" />
-
-            <!-- SECCIÓN 4: Cliente y Obra -->
-            <div class="mb-4">
-              <h6 class="form-section-title">
-                <i class="bi bi-3-circle-fill text-primary me-2"></i>
-                Selección de la obra destino
-              </h6>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label soft-label"
-                    >Seleccionar Cliente</label
-                  >
-                  <div
-                    class="form-field-wrapper"
-                    [class.has-value]="prestamoForm.get('clienteId')?.value"
-                  >
-                    <app-cbo-cliente
-                      [isId]="'clienteSelect'"
-                      [showOnlyActive]="true"
-                      formControlName="clienteId"
-                      (clienteSelected)="onClienteSelected($event)"
-                    >
-                    </app-cbo-cliente>
-                    <span
-                      class="field-check-icon"
-                      *ngIf="prestamoForm.get('clienteId')?.value"
-                    >
-                      <i class="bi bi-check-circle-fill text-success"></i>
-                    </span>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <label class="form-label soft-label">Seleccionar Obra</label>
-                  <div
-                    class="form-field-wrapper"
-                    [class.disabled]="!prestamoForm.get('clienteId')?.value"
-                    [class.has-value]="prestamoForm.get('obraId')?.value"
-                  >
-                    <app-cbo-obra
-                      [isId]="'obraSelect'"
-                      [showOnlyActive]="true"
-                      [isDisabled]="!prestamoForm.get('clienteId')?.value"
-                      [idCliente]="prestamoForm.get('clienteId')?.value"
-                      formControlName="obraId"
-                      (obraSelected)="onObraSelected($event)"
-                    >
-                    </app-cbo-obra>
-                    <span
-                      class="field-check-icon"
-                      *ngIf="prestamoForm.get('obraId')?.value"
-                    >
-                      <i class="bi bi-check-circle-fill text-success"></i>
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Observaciones -->
-                <div class="col-12">
-                  <label class="form-label soft-label">
-                    Observaciones (Opcional)
-                  </label>
-                  <textarea
-                    class="form-control modern-textarea"
-                    rows="4"
-                    formControlName="observaciones"
-                    placeholder=""
-                    maxlength="500"
-                    (focus)="onTextareaFocus()"
-                    (blur)="onTextareaBlur()"
-                  >
-                  </textarea>
-                  <div class="form-text text-end">
-                    {{ prestamoForm.get("observaciones")?.value?.length || 0 }}
-                    / 500 caracteres
                   </div>
                 </div>
               </div>

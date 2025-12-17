@@ -71,15 +71,25 @@
             <!-- Left side: codigo + nombreObra -->
             <div class="option-main">
               <span class="option-codigo">{{ obra.codigo || "S/C" }}</span>
-              <span class="option-nombre" [title]="obra.nombreObra">{{
-                obra.nombreObra
-              }}</span>
+              <span class="option-nombre" [title]="obra.nombreObra">
+                {{ obra.nombreObra | slice : 0 : 45
+                }}<span *ngIf="obra.nombreObra && obra.nombreObra.length > 45"
+                  >...</span
+                >
+              </span>
             </div>
-            <!-- Right side: descripcion -->
+            <!-- Right side: descripcion (truncada) -->
             <div class="option-details">
-              <span class="option-descripcion" *ngIf="obra.descripcion">{{
-                obra.descripcion
-              }}</span>
+              <span
+                class="option-descripcion"
+                *ngIf="obra.descripcion"
+                [title]="obra.descripcion"
+              >
+                {{ obra.descripcion | slice : 0 : 60
+                }}<span *ngIf="obra.descripcion && obra.descripcion.length > 60"
+                  >...</span
+                >
+              </span>
             </div>
           </div>
         </div>
