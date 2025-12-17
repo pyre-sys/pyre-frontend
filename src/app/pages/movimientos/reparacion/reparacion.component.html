@@ -44,10 +44,51 @@
             (ngSubmit)="onSubmit()"
             class="flex-grow-1"
           >
-            <!-- SECCIÓN 1: Selección de Herramientas -->
+            <!-- SECCIÓN 1: Proveedor (moved to top to match Prestamo) -->
             <div class="mb-4">
               <h6 class="form-section-title">
                 <i class="bi bi-1-circle-fill text-primary me-2"></i>
+                Selección del Proveedor que reparará la herramienta
+              </h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label soft-label">
+                    Proveedor
+                    <span class="text-danger">*</span>
+                  </label>
+                  <div
+                    class="form-field-wrapper"
+                    [class.has-value]="reparacionForm.get('proveedorId')?.value"
+                    [class.has-error]="
+                      reparacionForm.get('proveedorId')?.invalid &&
+                      reparacionForm.get('proveedorId')?.touched
+                    "
+                  >
+                    <app-cbo-proveedor
+                      [isLabel]="''"
+                      [isId]="'proveedorSelect'"
+                      [objectErrors]="reparacionForm.get('proveedorId')?.errors"
+                      formControlName="proveedorId"
+                      (proveedorSelected)="onProveedorSelected($event)"
+                    >
+                    </app-cbo-proveedor>
+                    <span
+                      class="field-check-icon"
+                      *ngIf="reparacionForm.get('proveedorId')?.valid"
+                    >
+                      <i class="bi bi-check-circle-fill text-success"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="soft-divider" />
+
+            <!-- SECCIÓN 2: Selección de Herramientas -->
+            <div class="mb-4">
+              <h6 class="form-section-title">
+                <i class="bi bi-2-circle-fill text-primary me-2"></i>
                 Selección de Herramientas
               </h6>
 
@@ -140,51 +181,10 @@
 
             <hr class="soft-divider" />
 
-            <!-- SECCIÓN 2: Proveedor -->
-            <div class="mb-4">
-              <h6 class="form-section-title">
-                <i class="bi bi-2-circle-fill text-primary me-2"></i>
-                Selección del Proveedor que reparará la herramienta
-              </h6>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label soft-label">
-                    Proveedor
-                    <span class="text-danger">*</span>
-                  </label>
-                  <div
-                    class="form-field-wrapper"
-                    [class.has-value]="reparacionForm.get('proveedorId')?.value"
-                    [class.has-error]="
-                      reparacionForm.get('proveedorId')?.invalid &&
-                      reparacionForm.get('proveedorId')?.touched
-                    "
-                  >
-                    <app-cbo-proveedor
-                      [isLabel]="''"
-                      [isId]="'proveedorSelect'"
-                      [objectErrors]="reparacionForm.get('proveedorId')?.errors"
-                      formControlName="proveedorId"
-                      (proveedorSelected)="onProveedorSelected($event)"
-                    >
-                    </app-cbo-proveedor>
-                    <span
-                      class="field-check-icon"
-                      *ngIf="reparacionForm.get('proveedorId')?.valid"
-                    >
-                      <i class="bi bi-check-circle-fill text-success"></i>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <hr class="soft-divider" />
-
             <!-- SECCIÓN 3: Fechas -->
             <div class="mb-4">
               <h6 class="form-section-title">
-                <i class="bi bi-2-circle-fill text-primary me-2"></i>
+                <i class="bi bi-3-circle-fill text-primary me-2"></i>
                 Fecha estimada de la finalización de la reparación
               </h6>
               <div class="row g-3">
