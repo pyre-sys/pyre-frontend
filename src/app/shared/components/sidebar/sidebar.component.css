@@ -236,10 +236,10 @@
   box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3); /* Sombra más intensa */
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 1002; /* Mayor que el topbar para estar por encima */
-  overflow-y: auto; /* Scroll solo en el sidebar */
-  overflow-x: hidden;
+  overflow: hidden; /* Sin scroll en el contenedor principal */
   padding-top: 70px; /* Espacio para que el contenido no se oculte detrás del topbar */
-  padding-bottom: 20px; /* Espacio reducido en la parte inferior */
+  display: flex;
+  flex-direction: column;
 
   /* Aplicar Inter solo al menú y submenú del sidebar */
   .sidebar .sidebar-menu,
@@ -250,23 +250,6 @@
       "Helvetica Neue", Arial;
     font-weight: 400; /* peso normal, menos grueso */
   }
-}
-
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
 }
 
 /* Estados del sidebar */
@@ -355,6 +338,36 @@
 
 .perfil-usuario .profile-content i {
   color: var(--info-color); /* 🎯 ¡Azul información! */
+}
+
+/* ==========================================================
+   Contenedor de navegación scrolleable
+   ========================================================== */
+.sidebar-navigation {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding-bottom: 1rem;
+}
+
+.sidebar-navigation::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-navigation::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.sidebar-navigation::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-navigation::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.6);
 }
 
 /* ==========================================================
@@ -555,10 +568,35 @@
   .sidebar {
     transform: translateX(-100%);
     z-index: 1002;
-    top: 0; /* Comenzar desde arriba en móviles también */
-    height: 100vh; /* Altura completa */
-    padding-top: 70px; /* Espacio para el topbar */
-    padding-bottom: 20px; /* Espacio reducido */
+    top: 0 !important;
+    height: 100vh !important;
+    padding-top: 70px !important;
+    padding-bottom: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar-navigation {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+  }
+
+  .sidebar-user-info {
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    position: static !important;
+  }
+
+  .sidebar-img {
+    padding: 0.75rem 1rem !important;
+    margin-top: -60px !important;
+  }
+
+  .sidebar-img img {
+    height: 58px !important;
   }
 
   .sidebar.visible {
@@ -574,12 +612,39 @@
 
 @media (max-width: 575.98px) {
   .sidebar {
-    width: 100%;
-    max-width: 100vw;
-    top: 0; /* Comenzar desde arriba */
-    height: 100vh; /* Altura completa */
-    padding-top: 60px; /* Espacio para topbar más pequeño en móviles */
-    padding-bottom: 20px; /* Espacio reducido */
+    width: 85% !important;
+    max-width: 320px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    padding-top: 60px !important;
+    padding-bottom: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar-navigation {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+  }
+
+  .sidebar-user-info {
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    position: static !important;
+    width: 100% !important;
+  }
+
+  .sidebar-img {
+    padding: 0.75rem 1rem !important;
+    margin-top: -50px !important;
+    height: 60px !important;
+  }
+
+  .sidebar-img img {
+    height: 55px !important;
   }
 
   .top-bar {
@@ -830,10 +895,7 @@
 
 /* Información del usuario logueado - Rediseñada para sidebar oscuro */
 .sidebar-user-info {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: var(--sidebar-width, 260px);
+  flex-shrink: 0; /* No se contrae */
   background: linear-gradient(
     135deg,
     rgba(0, 0, 0, 0.3) 0%,
@@ -847,6 +909,7 @@
   justify-content: space-between;
   gap: 0.75rem;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+  margin-top: auto; /* Se empuja hacia abajo */
 }
 
 /* Contenedor principal del pill del usuario */
@@ -979,7 +1042,33 @@
 
 /* Responsive: ajustar para móviles */
 @media (max-width: 768px) {
+  .sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+  }
+
+  .sidebar-navigation {
+    flex: 1 !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+  }
+
+  .sidebar-img {
+    padding: 0.75rem 1rem !important;
+    margin-top: -55px !important;
+  }
+
+  .sidebar-img img {
+    height: 55px !important;
+  }
+
   .sidebar-user-info {
+    flex-shrink: 0 !important; /* No se contrae */
+    margin-top: auto !important; /* Se empuja hacia abajo */
+    position: relative !important;
+    bottom: 0;
     padding: 0.75rem;
     gap: 0.5rem;
   }

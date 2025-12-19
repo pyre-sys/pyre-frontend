@@ -35,54 +35,58 @@
       />
     </div>
 
-    <!-- Lista de menús principales -->
-    <ul class="nav flex-column">
-      <li *ngFor="let menu of visibleMenuItems" class="nav-item">
-        <!-- Enlace del menú principal -->
-        <a class="nav-link" (click)="toggleSubMenu(menu)">
-          <i class="{{ menu.icono }}"></i>
-          <!-- Icono del menú principal -->
-          <span>{{ menu.descripcion }}</span>
-          <i
-            class="arrow"
-            [ngClass]="{ rotate: isMenuExpanded(menu) }"
+    <!-- Contenedor scrolleable para los menús -->
+    <div class="sidebar-navigation">
+      <!-- Lista de menús principales -->
+      <ul class="nav flex-column">
+        <li *ngFor="let menu of visibleMenuItems" class="nav-item">
+          <!-- Enlace del menú principal -->
+          <a class="nav-link" (click)="toggleSubMenu(menu)">
+            <i class="{{ menu.icono }}"></i>
+            <!-- Icono del menú principal -->
+            <span>{{ menu.descripcion }}</span>
+            <i
+              class="arrow"
+              [ngClass]="{ rotate: isMenuExpanded(menu) }"
+              *ngIf="getSubMenus(menu).length > 0"
+            ></i>
+          </a>
+
+          <!-- Submenús -->
+          <ul
+            [ngClass]="{ 'sub-menu': true, expanded: isMenuExpanded(menu) }"
             *ngIf="getSubMenus(menu).length > 0"
-          ></i>
-        </a>
+          >
+            <li *ngFor="let subMenu of getSubMenus(menu)" class="nav-item">
+              <a
+                class="nav-link"
+                [routerLink]="subMenu.link"
+                routerLinkActive="active"
+                (click)="navigateToSubMenu(subMenu)"
+              >
+                <i class="{{ subMenu.icono }}" *ngIf="subMenu.icono"></i>
+                <span>{{ subMenu.descripcion }}</span>
+              </a>
+            </li>
+          </ul>
+        </li>
 
-        <!-- Submenús -->
-        <ul
-          [ngClass]="{ 'sub-menu': true, expanded: isMenuExpanded(menu) }"
-          *ngIf="getSubMenus(menu).length > 0"
-        >
-          <li *ngFor="let subMenu of getSubMenus(menu)" class="nav-item">
-            <a
-              class="nav-link"
-              [routerLink]="subMenu.link"
-              routerLinkActive="active"
-              (click)="navigateToSubMenu(subMenu)"
-            >
-              <i class="{{ subMenu.icono }}" *ngIf="subMenu.icono"></i>
-              <span>{{ subMenu.descripcion }}</span>
-            </a>
-          </li>
-        </ul>
-      </li>
-
-      <!-- Nuevo ítem "Perfil" visible solo para roles distintos a SuperAdmin -->
-      <li class="nav-item" *ngIf="!isRole('SuperAdmin')">
-        <a
-          class="nav-link"
-          routerLink="/perfil"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
-          (click)="onPerfilLinkClick()"
-        >
-          <i class="bx bx-user" aria-hidden="true"></i>
-          <span>Perfil</span>
-        </a>
-      </li>
-    </ul>
+        <!-- Nuevo ítem "Perfil" visible solo para roles distintos a SuperAdmin -->
+        <li class="nav-item" *ngIf="!isRole('SuperAdmin')">
+          <a
+            class="nav-link"
+            routerLink="/perfil"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="onPerfilLinkClick()"
+          >
+            <i class="bx bx-user" aria-hidden="true"></i>
+            <span>Perfil</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <!-- Fin del contenedor scrolleable -->
 
     <!-- Información del usuario logueado -->
     <div class="sidebar-user-info" *ngIf="isLoggedIn">
