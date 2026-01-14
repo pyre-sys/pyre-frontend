@@ -105,15 +105,7 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
 
   private buildForm() {
     this.form = this.fb.group({
-      cuit: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(11),
-          Validators.maxLength(11),
-          Validators.pattern('^[0-9]*$'),
-        ],
-      ],
+      cuit: ['', [Validators.maxLength(11), Validators.pattern('^[0-9]*$')]],
       nombre: ['', [Validators.required, Validators.maxLength(200)]],
       telefono: ['', [Validators.maxLength(50)]],
       email: ['', [Validators.email, Validators.maxLength(150)]],
@@ -141,10 +133,12 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
     this.form.patchValue(mapped);
   }
 
-  private handleServerErrors(error: any) {
+  private handleServerErrors(error: any): void {
     try {
       this.serverErrors = {};
       const payload = error?.error ?? error;
+
+      // Si hay errores estructurados por campo
       if (payload?.errors && typeof payload.errors === 'object') {
         Object.keys(payload.errors).forEach((k: string) => {
           const val = payload.errors[k];
@@ -157,29 +151,9 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
             control.markAsTouched();
           }
         });
-        return;
-      }
-
-      const msg = payload?.message || payload?.detail || payload?.error;
-      if (msg && typeof msg === 'string') {
-        // intentar mapear mensajes comunes a campos
-        if (/cuit/i.test(msg)) {
-          this.serverErrors['cuit'] = msg;
-          this.form.get('cuit')?.setErrors({ server: true });
-          this.form.get('cuit')?.markAsTouched();
-        } else if (/nombre/i.test(msg)) {
-          this.serverErrors['nombre'] = msg;
-          this.form.get('nombre')?.setErrors({ server: true });
-          this.form.get('nombre')?.markAsTouched();
-        } else {
-          this.alertService.error(msg);
-        }
       }
     } catch (e) {
       console.warn('handleServerErrors parse failed', e, error);
-      this.alertService.error(
-        'Ocurrió un error al procesar la respuesta del servidor'
-      );
     }
   }
 
@@ -243,14 +217,13 @@ export class ModalClientesComponent implements OnInit, OnChanges, OnDestroy {
       },
       onError: (error: any) => {
         this.handleServerErrors(error);
+
         const errorMessage =
           error?.error?.message ||
           error?.message ||
           'Ocurrió un error inesperado';
         this.alertService.error(
-          `Error al ${
-            this.mode === 'create' ? 'crear' : 'actualizar'
-          } el cliente: ${errorMessage}`,
+          errorMessage,
           `Error al ${this.mode === 'create' ? 'Crear' : 'Actualizar'} Cliente`
         );
       },

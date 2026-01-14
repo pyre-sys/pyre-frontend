@@ -151,9 +151,11 @@ export class ClienteService {
 
           if (err.status === 400) {
             const details = err.error ?? null;
+            const backendMessage =
+              details?.message || 'Error de validación en los datos enviados.';
             return throwError(() => ({
               type: 'validation',
-              message: 'Error de validación en los datos enviados.',
+              message: backendMessage,
               details,
             }));
           }
@@ -174,9 +176,12 @@ export class ClienteService {
 
           if (err.status === 409) {
             const details = err.error ?? null;
+            const backendMessage =
+              details?.message ||
+              'Conflicto: recurso existente (p. ej. CUIT duplicado).';
             return throwError(() => ({
               type: 'conflict',
-              message: 'Conflicto: recurso existente (p. ej. CUIT duplicado).',
+              message: backendMessage,
               details,
             }));
           }
@@ -290,9 +295,11 @@ export class ClienteService {
 
           if (err.status === 400) {
             const details = err.error ?? null;
+            const backendMessage =
+              details?.message || 'Error de validación en los datos enviados.';
             return throwError(() => ({
               type: 'validation',
-              message: 'Error de validación en los datos enviados.',
+              message: backendMessage,
               details,
             }));
           }
@@ -320,9 +327,13 @@ export class ClienteService {
           }
 
           if (err.status === 409) {
+            const details = err.error ?? null;
+            const backendMessage =
+              details?.message ||
+              'Conflicto: restricción única (p. ej. CUIT duplicado).';
             return throwError(() => ({
               type: 'conflict',
-              message: 'Conflicto: restricción única (p. ej. CUIT duplicado).',
+              message: backendMessage,
               details: err.error ?? null,
             }));
           }
