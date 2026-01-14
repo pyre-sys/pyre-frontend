@@ -181,7 +181,7 @@ export class UsuariosModalComponent implements OnInit, OnChanges {
       Apellido: ['', [Validators.required, Validators.maxLength(100)]],
       Legajo: ['', [Validators.required, Validators.maxLength(5)]],
       Dni: ['', [Validators.required, Validators.maxLength(8), Validators.minLength(7), Validators.pattern('^[0-9]+$')]],
-      Email: ['', [Validators.email, Validators.maxLength(150)]],
+      Email: ['', [Validators.email, Validators.maxLength(150)]], // solo validación de formato y longitud
       Telefono: ['', [Validators.maxLength(50)]],
       // Inicialmente vacío para forzar la selección por parte del usuario
       RolId: ['', [Validators.required]],
