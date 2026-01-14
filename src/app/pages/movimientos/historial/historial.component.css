@@ -48,6 +48,26 @@
   text-align: center;
 }
 
+/* Columna CÓDIGO - badge ocupa todo el espacio */
+.custom-table th:nth-child(1),
+.custom-table td:nth-child(1) {
+  width: 120px;
+  padding: 8px 12px;
+}
+
+.custom-table td:nth-child(1) .codigo-badge {
+  width: 100%;
+  text-align: center;
+  display: block;
+}
+
+/* Columna MOV. más estrecha */
+.custom-table th:nth-child(3),
+.custom-table td:nth-child(3) {
+  width: 60px;
+  text-align: center;
+}
+
 /* Estilos para los iconos de movimiento */
 .movimiento-icon {
   font-size: 1.2rem;
@@ -270,4 +290,14 @@
 .pyre-filter-bar .row > div {
   flex: 1 1 calc(25% - 1rem); /* Cada columna ocupa el 25% del ancho */
   min-width: 200px; /* Asegurar un ancho mínimo */
+}
+
+/* Estilos para truncado del nombre con tooltip */
+.nombre-truncado {
+  display: block;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help;
 }

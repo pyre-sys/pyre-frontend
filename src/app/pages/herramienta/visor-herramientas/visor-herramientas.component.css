@@ -1,0 +1,13 @@
+/* Columna CÓDIGO - badge ocupa todo el espacio */
+.custom-table th:nth-child(1),
+.custom-table td:nth-child(1) {
+  width: 120px !important;
+  padding: 8px 12px !important;
+}
+
+.custom-table td:nth-child(1) .codigo-badge {
+  width: 100% !important;
+  text-align: center !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}

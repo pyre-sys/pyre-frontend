@@ -8,7 +8,7 @@ import { DatePipe } from '@angular/common';
 import { MovimientoService } from '../../../services/movimiento.service';
 import { AlertaService } from '../../../services/alerta.service';
 import { CboTipoMovimientoHerramientaComponent } from '../../../shared/components/Cbo/cbo-tipo-movimiento-herramienta/cbo-tipo-movimiento-herramienta.component';
-import { CboProveedorComponent } from '../../../shared/components/Cbo/cbo-proveedor/cbo-proveedor.component';
+import { CboObraComponent } from '../../../shared/components/Cbo/cbo-obra/cbo-obra.component';
 import { CboFamiliaHerramientaComponent } from '../../../shared/components/Cbo/cbo-familia-herramienta/cbo-familia-herramienta.component';
 import { CboUsuarioComponent } from '../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component';
 import { ModalHistorialComponent } from '../modal-historial/modal-historial.component';
@@ -24,7 +24,7 @@ import { PageTitleService } from '../../../services/page-title.service';
     PaginatorComponent,
     DatePipe,
     CboTipoMovimientoHerramientaComponent,
-    CboProveedorComponent,
+    CboObraComponent,
     CboFamiliaHerramientaComponent,
     CboUsuarioComponent,
     ModalHistorialComponent,
@@ -49,7 +49,7 @@ export class HistorialComponent implements OnInit {
   filtroIdUsuarioGenera: number | null = null;
   filtroIdUsuarioResponsable: number | null = null;
   filtroIdTipoMovimiento: number | null = null;
-  filtroProveedor: number | null = null;
+  filtroObra: number | null = null;
   filtroFechaDesde = '';
   filtroFechaHasta = '';
 
@@ -74,7 +74,7 @@ export class HistorialComponent implements OnInit {
       idUsuarioGenera: this.filtroIdUsuarioGenera ?? undefined,
       idUsuarioResponsable: this.filtroIdUsuarioResponsable ?? undefined,
       idTipoMovimiento: this.filtroIdTipoMovimiento ?? undefined,
-      idProveedor: this.filtroProveedor ?? undefined,
+      idObra: this.filtroObra ?? undefined,
       fechaDesde: this.filtroFechaDesde,
       fechaHasta: this.filtroFechaHasta,
     };
@@ -171,7 +171,7 @@ export class HistorialComponent implements OnInit {
       this.filtroIdUsuarioGenera !== null ||
       this.filtroIdUsuarioResponsable !== null ||
       this.filtroIdTipoMovimiento !== null ||
-      this.filtroProveedor !== null ||
+      this.filtroObra !== null ||
       this.filtroFechaDesde ||
       this.filtroFechaHasta
     );
@@ -192,8 +192,8 @@ export class HistorialComponent implements OnInit {
     this.fetchMovimientos();
   }
 
-  onProveedorSelected(proveedor: any): void {
-    this.filtroProveedor = proveedor?.idProveedor || null;
+  onObraSelected(obra: any): void {
+    this.filtroObra = obra?.idObra || null;
     this.fetchMovimientos();
   }
 
@@ -208,7 +208,7 @@ export class HistorialComponent implements OnInit {
     this.filtroIdUsuarioGenera = null;
     this.filtroIdUsuarioResponsable = null;
     this.filtroIdTipoMovimiento = null;
-    this.filtroProveedor = null;
+    this.filtroObra = null;
     this.filtroFechaDesde = '';
     this.filtroFechaHasta = '';
     this.currentPage = 1;
@@ -233,8 +233,8 @@ export class HistorialComponent implements OnInit {
       case 'usuarioResponsable':
         this.filtroIdUsuarioResponsable = null;
         break;
-      case 'proveedor':
-        this.filtroProveedor = null;
+      case 'obra':
+        this.filtroObra = null;
         break;
       case 'fechas':
         this.filtroFechaDesde = '';
@@ -329,5 +329,27 @@ export class HistorialComponent implements OnInit {
     }
 
     return 'pi pi-question-circle';
+  }
+
+  /**
+   * Trunca el nombre completo a "Nombre L." para mostrar en la tabla
+   * Funciona tanto para usuarios responsables como proveedores
+   */
+  truncateResponsableName(nombreCompleto: string): string {
+    if (!nombreCompleto || !nombreCompleto.trim()) {
+      return '-';
+    }
+
+    const partes = nombreCompleto.trim().split(' ');
+    if (partes.length < 2) {
+      // Solo un nombre, retornar tal como está
+      return partes[0];
+    }
+
+    // Primer nombre + primera letra del segundo nombre/apellido
+    const primerNombre = partes[0];
+    const primeraLetraApellido = partes[1].charAt(0).toUpperCase();
+
+    return `${primerNombre} ${primeraLetraApellido}.`;
   }
 }

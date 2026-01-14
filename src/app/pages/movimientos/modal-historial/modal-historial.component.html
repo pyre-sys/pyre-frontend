@@ -16,86 +16,140 @@
       </div>
 
       <div *ngIf="data" class="modal-form">
-        <div class="compact-form-grid">
-          <div class="field-group">
-            <label>Código</label>
-            <div class="optional-text">
-              {{ data.codigoHerramienta || data.codigo || "-" }}
+        <!-- Información del Movimiento -->
+        <div class="section">
+          <h4 class="section-title">Información del Movimiento</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Tipo de Movimiento</label>
+                <div class="optional-text">
+                  {{ data.tipoMovimiento || "N/A" }}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Fecha de Salida</label>
+                <div class="optional-text">
+                  {{ data.fecha | date : "EEE dd MMM yyyy, HH:mm" : "es" }}
+                </div>
+              </div>
             </div>
           </div>
-
-          <div class="field-group">
-            <label>Nombre</label>
-            <div class="optional-text">
-              {{ data.nombreHerramienta || data.nombre || "-" }}
+          <div class="row">
+            <div class="col-12">
+              <div class="field-group">
+                <label>Fecha Estimada de Devolución</label>
+                <div class="optional-text">
+                  {{
+                    data.fechaEstimadaDevolucion
+                      ? (data.fechaEstimadaDevolucion
+                        | date : "EEE dd MMM yyyy" : "es")
+                      : "N/A"
+                  }}
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="field-group">
-            <label>Movimiento</label>
-            <div class="optional-text">
-              {{
-                data.tipoMovimiento ||
-                  data.nombreTipoMovimiento ||
-                  data.idTipoMovimiento ||
-                  "-"
-              }}
+        <!-- Información de la Herramienta -->
+        <div class="section">
+          <h4 class="section-title">Información de la Herramienta</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Código</label>
+                <div class="optional-text">
+                  {{ data.codigoHerramienta || "N/A" }}
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="field-group">
+                <label>Nombre</label>
+                <div class="optional-text">
+                  {{ data.nombreHerramienta || "N/A" }}
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="field-group">
-            <label>Fecha</label>
-            <div class="optional-text">
-              {{ data.fecha | date : "EEE dd MMM yyyy, HH:mm" : "es" }}
+        <!-- Usuarios -->
+        <div class="section">
+          <h4 class="section-title">Usuarios</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Usuario Genera</label>
+                <div class="optional-text">
+                  {{ data.nombreUsuarioGenera || "N/A" }}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Usuario Responsable</label>
+                <div class="optional-text">
+                  {{ data.nombreUsuarioResponsable || "N/A" }}
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="field-group">
-            <label>Usuario Genera</label>
-            <div class="optional-text">
-              {{ data.nombreUsuarioGenera || data.usuarioGenera || "-" }}
+        <!-- Ubicación -->
+        <div class="section">
+          <h4 class="section-title">Ubicación</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Obra</label>
+                <div class="optional-text">{{ data.nombreObra || "N/A" }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Proveedor</label>
+                <div class="optional-text">
+                  {{ data.nombreProveedor || "N/A" }}
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="field-group">
-            <label>Usuario Responsable</label>
-            <div class="optional-text">
-              {{
-                data.nombreUsuarioResponsable || data.usuarioResponsable || "-"
-              }}
+        <!-- Estado y Observaciones -->
+        <div class="section">
+          <h4 class="section-title">Estado y Observaciones</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Estado al Devolver</label>
+                <div class="optional-text">
+                  {{ data.estadoHerramientaAlDevolver || "N/A" }}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Estado Devolución</label>
+                <div class="optional-text">
+                  {{ data.estadoDevolucion || "N/A" }}
+                </div>
+              </div>
             </div>
           </div>
-
-          <div class="field-group">
-            <label>Obra</label>
-            <div class="optional-text">
-              {{ data.nombreObra || data.obra || "-" }}
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label>Proveedor</label>
-            <div class="optional-text">
-              {{ data.nombreProveedor || data.proveedor || "-" }}
-            </div>
-          </div>
-
-          <div class="field-group full-width">
-            <label>Estado Físico</label>
-            <div class="optional-text">
-              {{
-                data.estadoDevolucion ||
-                  data.estadoFisico ||
-                  data.nombreEstadoFisico ||
-                  "-"
-              }}
-            </div>
-          </div>
-
-          <div class="field-group full-width">
-            <label>Observaciones</label>
-            <div class="optional-text">
-              {{ data.observaciones || data.observacion || "-" }}
+          <div class="row">
+            <div class="col-12">
+              <div class="field-group">
+                <label>Observaciones</label>
+                <div class="optional-text">
+                  {{ data.observaciones || "Sin observaciones" }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -109,4 +163,3 @@
     </div>
   </div>
 </div>
-<p>modal-historial works!</p>

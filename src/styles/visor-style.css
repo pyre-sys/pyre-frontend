@@ -267,7 +267,7 @@
 }
 
 .user-list-container .custom-table tbody td {
-  padding: 15px 16px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--color-border-light, #e0e0e0);
   text-align: center;
   color: #4b5563;
@@ -311,7 +311,7 @@
 }
 
 .pyre-table tbody td {
-  padding: 15px 16px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--color-border-light, #e0e0e0);
   text-align: center;
   color: #4b5563;
@@ -830,11 +830,11 @@ input:checked + .toggle-slider::before {
 .codigo-badge {
   background: #e3f2fd !important;
   color: #1976d2 !important;
-  padding: 0.35rem 0.85rem !important;
+  padding: 0.45rem 0.65rem !important;
   border-radius: 6px !important;
   font-family: "Courier New", monospace !important;
   font-weight: 600 !important;
-  font-size: 0.85rem !important;
+  font-size: 0.9rem !important;
   display: inline-block !important;
   border: none !important;
 }

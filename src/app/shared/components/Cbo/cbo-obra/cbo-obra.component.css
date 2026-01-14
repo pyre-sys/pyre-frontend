@@ -24,73 +24,48 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
+  width: 100%;
 }
 
-.option-main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-/* codigo: columna pequeña fija, truncada si es necesario */
+/* codigo: ancho fijo, no se encoge */
 .option-codigo {
-  flex: 0 0 140px;
-  max-width: 140px;
+  flex: 0 0 120px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
   color: var(--color-primary, #3b82f6);
+  font-family: monospace;
+  font-size: 0.85rem;
+  background: rgba(59, 130, 246, 0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-/* nombre: ocupa el espacio restante y se trunca con ellipsis */
+/* nombre: ocupa el espacio restante, se trunca */
 .option-nombre {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  display: inline-block;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
-}
-
-/* descripcion: columna fija más pequeña a la derecha, truncada */
-.option-details {
-  flex: 0 0 240px;
-  max-width: 240px;
-  display: flex;
-  justify-content: flex-end;
-  min-width: 0;
-  padding-right: 12px; /* Agregar espacio interno a la derecha */
-  box-sizing: border-box; /* Asegurar que el padding se incluya en el ancho */
-}
-
-.option-descripcion {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: inline-block;
-  color: var(--color-text-secondary, #6b7280);
-  font-size: 0.85rem;
-  font-style: italic;
-  text-align: right;
-  padding-right: 6px; /* Espacio adicional para evitar corte */
+  color: var(--color-text, #374151);
 }
 
 .dropdown-option.selected .option-codigo {
-  color: var(--color-white, #ffffff);
+  color: var(--color-primary, #3b82f6) !important;
+  background: rgba(59, 130, 246, 0.08) !important;
 }
 
-.dropdown-option.selected .option-ubicacion {
-  color: rgba(255, 255, 255, 0.9);
+.dropdown-option.selected .option-nombre {
+  color: var(--color-text, #374151) !important;
 }
 
-.dropdown-option.selected .option-fecha {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--color-white, #ffffff);
+.dropdown-option.selected .option-descripcion {
+  color: var(--color-text-secondary, #6b7280) !important;
 }
 
 /* Responsive adjustments for obra-specific elements */
