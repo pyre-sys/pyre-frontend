@@ -1,0 +1,59 @@
+.cbo-obra-historial-wrapper .option-content {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-width: 0; /* Permite el truncado correcto */
+}
+
+.cbo-obra-historial-wrapper .option-codigo {
+  font-weight: 600;
+  color: var(--color-primary, #3b82f6);
+  font-size: 0.85rem;
+  text-align: center;
+  background: var(--color-background-light, #f1f5f9);
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  min-width: max-content;
+}
+
+.cbo-obra-historial-wrapper .option-nombre {
+  font-weight: 500;
+  color: var(--color-text-primary, #1f2937);
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0; /* Importante para el truncado */
+  flex: 1;
+}
+
+.cbo-obra-historial-wrapper .option-cliente {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #6b7280);
+  font-style: italic;
+  text-align: right;
+  white-space: nowrap;
+  min-width: max-content;
+  max-width: 100px; /* Limitar el ancho máximo del cliente */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .cbo-obra-historial-wrapper .option-content {
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+  }
+
+  .cbo-obra-historial-wrapper .option-cliente {
+    display: none; /* Ocultar cliente en móviles */
+  }
+
+  .cbo-obra-historial-wrapper .option-codigo {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+  }
+}
