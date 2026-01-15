@@ -1,101 +1,123 @@
-<div class="modal fade show" tabindex="-1" role="dialog" style="display: block;" *ngIf="isOpen">
-  <div class="modal-dialog modal-lg" role="document">
+<div class="modal-overlay" *ngIf="isOpen" role="dialog" aria-modal="true">
+  <div class="modal-wrapper">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Agregar Herramienta al Movimiento</h5>
-        <button type="button" class="btn-close" (click)="onClose()"></button>
+        <div class="header-controls">
+          <h3 class="modal-title">Agregar Herramienta al Movimiento</h3>
+        </div>
+        <button class="close-btn" (click)="onClose()" aria-label="Cerrar">
+          <span class="pi pi-times" aria-hidden="true"></span>
+        </button>
       </div>
 
-      <div class="modal-body" *ngIf="movimiento">
-        <!-- Datos del movimiento base -->
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label class="form-label"><strong>Fecha:</strong></label>
-            <p class="form-control-plaintext">{{ movimiento.fecha | date: 'dd/MM/yyyy HH:mm' }}</p>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label"><strong>Tipo Movimiento:</strong></label>
-            <p class="form-control-plaintext">{{ movimiento.tipoMovimiento || movimiento.nombreTipoMovimiento || 'N/A' }}</p>
-          </div>
-        </div>
+      <div *ngIf="!movimiento" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Cargando movimiento...</p>
+      </div>
 
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label class="form-label"><strong>Usuario Genera:</strong></label>
-            <p class="form-control-plaintext">{{ movimiento.nombreUsuarioGenera || 'N/A' }}</p>
+      <div *ngIf="movimiento" class="modal-form">
+        <div class="section">
+          <h4 class="section-title">Información del Movimiento</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Fecha</label>
+                <div class="optional-text">
+                  {{
+                    movimiento.fecha | date : "EEE dd MMM yyyy, HH:mm" : "es"
+                  }}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="field-group">
+                <label>Tipo de Movimiento</label>
+                <div class="optional-text">
+                  {{
+                    movimiento.tipoMovimiento ||
+                      movimiento.nombreTipoMovimiento ||
+                      "N/A"
+                  }}
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="col-md-6">
-            <label class="form-label"><strong>Responsable:</strong></label>
-            <p class="form-control-plaintext">{{ movimiento.nombreUsuarioResponsable || movimiento.nombreProveedor || 'N/A' }}</p>
-          </div>
-        </div>
 
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label class="form-label"><strong>Obra:</strong></label>
-            <p class="form-control-plaintext">{{ movimiento.nombreObra || 'N/A' }}</p>
-          </div>
-        </div>
-
-        <!-- Selector de herramienta -->
-        <div class="row mb-3">
-          <div class="col-12">
-            <label class="form-label"><strong>Seleccionar Herramienta:</strong></label>
-            <app-cbo-herramientas
-              class="w-100"
-              [isId]="'herramientaSelect'"
-              (herramientaSelected)="onHerramientaSelected($event)"
-            >
-            </app-cbo-herramientas>
-          </div>
-        </div>
-
-        <!-- Herramienta seleccionada -->
-        <div class="row mb-3" *ngIf="herramientaSeleccionada">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body">
-                <h6 class="card-title">Herramienta Seleccionada:</h6>
-                <p class="card-text">
-                  <strong>Código:</strong> {{ herramientaSeleccionada.codigo }}<br>
-                  <strong>Nombre:</strong> {{ herramientaSeleccionada.nombre }}<br>
-                  <strong>Familia:</strong> {{ herramientaSeleccionada.nombreFamilia || 'N/A' }}
-                </p>
+          <div class="row">
+            <div class="col-12">
+              <div class="field-group">
+                <label>Fecha Estimada de Devolución</label>
+                <div class="optional-text">
+                  {{
+                    movimiento.fechaEstimadaDevolucion
+                      ? (movimiento.fechaEstimadaDevolucion
+                        | date : "EEE dd MMM yyyy" : "es")
+                      : "Fecha por defecto (mañana)"
+                  }}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Observaciones adicionales -->
-        <div class="row mb-3">
-          <div class="col-12">
-            <label class="form-label"><strong>Observaciones:</strong></label>
-            <textarea 
-              class="form-control" 
-              rows="3" 
-              [(ngModel)]="observacionesAdicionales"
-              placeholder="Observaciones adicionales...">
-            </textarea>
+        <div class="section">
+          <h4 class="section-title">Seleccionar Herramienta</h4>
+          <div class="row">
+            <div class="col-12">
+              <app-cbo-herramientas
+                class="w-100"
+                [isId]="'herramientaSelect'"
+                (herramientaSelected)="onHerramientaSelected($event)"
+              ></app-cbo-herramientas>
+            </div>
+          </div>
+
+          <div class="row" *ngIf="herramientaSeleccionada">
+            <div class="col-12">
+              <div class="field-group full-width">
+                <label>Herramienta Seleccionada</label>
+                <div class="optional-text">
+                  <strong>Código:</strong>
+                  {{ herramientaSeleccionada.codigo || "N/A" }}<br />
+                  <strong>Nombre:</strong>
+                  {{ herramientaSeleccionada.nombre || "N/A" }}<br />
+                  <strong>Familia:</strong>
+                  {{ herramientaSeleccionada.nombreFamilia || "N/A" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="field-group full-width">
+                <label>Observaciones</label>
+                <textarea
+                  class="form-control"
+                  rows="3"
+                  [(ngModel)]="observacionesAdicionales"
+                  placeholder="Observaciones adicionales..."
+                ></textarea>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="onClose()">
-          Cancelar
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-primary" 
-          (click)="onProcesar()"
-          [disabled]="!herramientaSeleccionada || loading">
-          <i class="pi pi-spin pi-spinner me-2" *ngIf="loading"></i>
-          Procesar
-        </button>
+        <div class="actions">
+          <button type="button" class="btn-cancel" (click)="onClose()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn-confirm"
+            (click)="onProcesar()"
+            [disabled]="!herramientaSeleccionada || loading"
+          >
+            <i class="pi pi-spin pi-spinner me-2" *ngIf="loading"></i>
+            Agregar
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-<div class="modal-backdrop fade show" *ngIf="isOpen"></div>
-

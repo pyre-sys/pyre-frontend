@@ -9,7 +9,7 @@ import { MovimientoService } from '../../../services/movimiento.service';
 import { AlertaService } from '../../../services/alerta.service';
 import { AuthService } from '../../../services/auth.service';
 import { CboTipoMovimientoHerramientaComponent } from '../../../shared/components/Cbo/cbo-tipo-movimiento-herramienta/cbo-tipo-movimiento-herramienta.component';
-import { CboObraComponent } from '../../../shared/components/Cbo/cbo-obra/cbo-obra.component';
+import { CboObraHistorialComponent } from '../../../shared/components/Cbo/cbo-obra-historial/cbo-obra-historial.component';
 import { CboFamiliaHerramientaComponent } from '../../../shared/components/Cbo/cbo-familia-herramienta/cbo-familia-herramienta.component';
 import { CboUsuarioComponent } from '../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component';
 import { ModalHistorialComponent } from '../components/modal-historial/modal-historial.component';
@@ -26,7 +26,7 @@ import { PageTitleService } from '../../../services/page-title.service';
     PaginatorComponent,
     DatePipe,
     CboTipoMovimientoHerramientaComponent,
-    CboObraComponent,
+    CboObraHistorialComponent,
     CboFamiliaHerramientaComponent,
     CboUsuarioComponent,
     ModalHistorialComponent,
@@ -382,44 +382,162 @@ export class HistorialComponent implements OnInit {
    * Condiciones:
    * 1. idTipoMovimiento = 1 (Préstamo)
    * 2. El usuario genera debe ser el usuario logueado
-   * 3. Debe haber pasado menos de 15 minutos desde la creación
+   * 3. Debe haber pasado menos de 15 minutos desde el PRIMER movimiento del grupo
    */
   shouldShowAddButton(movimiento: any): boolean {
     // Condición 1: Solo para préstamos (idTipoMovimiento = 1)
-    const tipoMovimiento = movimiento.idTipoMovimiento || movimiento.tipoMovimiento?.id;
+    const tipoMovimiento =
+      movimiento.idTipoMovimiento || movimiento.tipoMovimiento?.id;
     if (tipoMovimiento !== 1) {
       return false;
     }
 
     // Condición 2: El usuario genera debe ser el usuario logueado
     const currentUserId = this.authService.getUserId();
-    const usuarioGenera = movimiento.idUsuarioGenera || movimiento.usuarioGenera?.id;
+    const usuarioGenera =
+      movimiento.idUsuarioGenera || movimiento.usuarioGenera?.id;
     if (!currentUserId || usuarioGenera !== currentUserId) {
       return false;
     }
 
-    // Condición 3: Menos de 15 minutos desde la creación
-    if (!movimiento.fecha) {
+    // Condición 3: Menos de 15 minutos desde el PRIMER movimiento del grupo
+    const fechaPrimerMovimiento =
+      this.obtenerFechaPrimerMovimientoDelGrupo(movimiento);
+    if (!fechaPrimerMovimiento) {
       return false;
     }
 
-    const fechaMovimiento = new Date(movimiento.fecha);
-    const ahora = new Date();
-    const diferenciaMinutos = (ahora.getTime() - fechaMovimiento.getTime()) / (1000 * 60);
+    const fechaInicial = new Date(fechaPrimerMovimiento);
+    if (isNaN(fechaInicial.getTime())) return false;
 
-    return diferenciaMinutos <= 15;
+    // Permitir hasta las 23:59:59.999 del mismo día del primer movimiento
+    const finDelDia = new Date(fechaInicial);
+    finDelDia.setHours(23, 59, 59, 999);
+
+    const ahora = new Date();
+    return ahora.getTime() <= finDelDia.getTime();
   }
 
   /**
-   * Calcula los minutos restantes para mostrar el botón
+   * Devuelve la hora límite (formateada) hasta la cual se puede agregar herramienta
+   * Basado en la fecha del primer movimiento del grupo (hasta las 23:59:59.999 de ese día)
    */
-  getMinutosRestantes(movimiento: any): number {
-    if (!movimiento.fecha) return 0;
+  getFinAgregar(movimiento: any): string {
+    const fechaPrimerMovimiento =
+      this.obtenerFechaPrimerMovimientoDelGrupo(movimiento);
+    if (!fechaPrimerMovimiento) return 'N/A';
 
-    const fechaMovimiento = new Date(movimiento.fecha);
-    const ahora = new Date();
-    const diferenciaMinutos = (ahora.getTime() - fechaMovimiento.getTime()) / (1000 * 60);
+    const fechaInicial = new Date(fechaPrimerMovimiento);
+    if (isNaN(fechaInicial.getTime())) return 'N/A';
 
-    return Math.max(0, Math.ceil(15 - diferenciaMinutos));
+    const finDelDia = new Date(fechaInicial);
+    finDelDia.setHours(23, 59, 59, 999);
+
+    try {
+      return finDelDia.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return (
+        finDelDia.getHours() +
+        ':' +
+        String(finDelDia.getMinutes()).padStart(2, '0')
+      );
+    }
+  }
+
+  /**
+   * Obtiene la fecha del primer movimiento del grupo (mismo usuario, obra, responsable y tipo)
+   */
+  private obtenerFechaPrimerMovimientoDelGrupo(movimiento: any): string | null {
+    if (!movimiento) return null;
+
+    // Filtrar movimientos del mismo grupo
+    const movimientosDelGrupo = this.movimientos.filter((m) => {
+      return (
+        m.idUsuarioGenera === movimiento.idUsuarioGenera &&
+        m.idUsuarioResponsable === movimiento.idUsuarioResponsable &&
+        m.idObra === movimiento.idObra &&
+        m.idTipoMovimiento === movimiento.idTipoMovimiento
+      );
+    });
+
+    // Ordenar por fecha y obtener el primero
+    movimientosDelGrupo.sort((a, b) => {
+      const fechaA = new Date(a.fecha);
+      const fechaB = new Date(b.fecha);
+      return fechaA.getTime() - fechaB.getTime();
+    });
+
+    return movimientosDelGrupo.length > 0
+      ? movimientosDelGrupo[0].fecha
+      : movimiento.fecha;
+  }
+
+  // Determina si un movimiento es una devolución
+  isDevolucion(movimiento: any): boolean {
+    if (!movimiento) return false;
+    const tipo =
+      movimiento.idTipoMovimiento ||
+      movimiento.tipoMovimiento ||
+      movimiento.nombreTipoMovimiento ||
+      '';
+    if (typeof tipo === 'number') return tipo === 2;
+    if (typeof tipo === 'string') {
+      const normalized = tipo
+        .toString()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .toLowerCase();
+      return normalized.includes('devol');
+    }
+    return false;
+  }
+
+  // Intenta obtener la fecha/hora real de devolución desde varios campos posibles
+  getFechaDevolucionReal(movimiento: any): string | null {
+    if (!movimiento) return null;
+    const candidates = [
+      'fechaDevolucion',
+      'fechaDevolucionReal',
+      'fechaRealDevolucion',
+      'fechaRetorno',
+      'fechaRegistroDevolucion',
+      'fechaDevolucionRegistrada',
+      'fecha',
+    ];
+    for (const key of candidates) {
+      const v = movimiento[key];
+      if (v) return v;
+    }
+
+    // Si el movimiento contiene un array de movimientos, buscar el movimiento de devolución
+    if (Array.isArray(movimiento.movimientos)) {
+      const movDev = movimiento.movimientos.find((m: any) => {
+        const t =
+          m.idTipoMovimiento ||
+          m.tipoMovimiento ||
+          m.nombreTipoMovimiento ||
+          '';
+        if (typeof t === 'number') return t === 2;
+        if (typeof t === 'string') return t.toLowerCase().includes('devol');
+        return false;
+      });
+      if (movDev && movDev.fecha) return movDev.fecha;
+    }
+
+    // Como fallback, buscar dentro del listado general de movimientos por uno que parezca devolución
+    const movDevGlobal = this.movimientos.find((m) => {
+      const sameTool = m.codigoHerramienta === movimiento.codigoHerramienta;
+      const t =
+        m.idTipoMovimiento || m.tipoMovimiento || m.nombreTipoMovimiento || '';
+      const isDev =
+        typeof t === 'number'
+          ? t === 2
+          : ('' + t).toLowerCase().includes('devol');
+      return sameTool && isDev && m.fecha;
+    });
+    return movDevGlobal ? movDevGlobal.fecha : null;
   }
 }

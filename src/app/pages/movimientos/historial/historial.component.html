@@ -67,12 +67,13 @@
 
         <div class="col-lg-3 col-md-6 col-sm-12">
           <label class="date-label">Obra:</label>
-          <app-cbo-obra
+          <app-cbo-obra-historial
             class="w-100"
-            [isId]="'obraSelect'"
+            [isId]="'obraHistorialSelect'"
+            [showOnlyActive]="false"
             (obraSelected)="onObraSelected($event)"
           >
-          </app-cbo-obra>
+          </app-cbo-obra-historial>
         </div>
       </div>
 
@@ -203,12 +204,29 @@
               {{ movimiento.fecha | date : "EEE dd MMM yyyy" }}
             </td>
             <td style="white-space: nowrap">
-              {{
-                movimiento.fechaEstimadaDevolucion
-                  ? (movimiento.fechaEstimadaDevolucion
-                    | date : "EEE dd MMM yyyy")
-                  : "-"
-              }}
+              <ng-container *ngIf="isDevolucion(movimiento); else notDevuelta">
+                <span
+                  class="badge-devuelta"
+                  [ngbTooltip]="
+                    getFechaDevolucionReal(movimiento)
+                      ? (getFechaDevolucionReal(movimiento)
+                        | date : 'EEE dd MMM yyyy HH:mm')
+                      : 'Fecha desconocida'
+                  "
+                  placement="top"
+                  container="body"
+                >
+                  Devuelta
+                </span>
+              </ng-container>
+              <ng-template #notDevuelta>
+                {{
+                  movimiento.fechaEstimadaDevolucion
+                    ? (movimiento.fechaEstimadaDevolucion
+                      | date : "EEE dd MMM yyyy")
+                    : "-"
+                }}
+              </ng-template>
             </td>
             <td>
               {{
@@ -249,9 +267,9 @@
                   class="btn-icon btn-add ms-1"
                   (click)="abrirModalAgregar(movimiento)"
                   [ngbTooltip]="
-                    'Agregar herramienta al movimiento (disponible por ' +
-                    getMinutosRestantes(movimiento) +
-                    ' minutos más)'
+                    'Agregar herramienta al movimiento (disponible hasta ' +
+                    getFinAgregar(movimiento) +
+                    ')'
                   "
                   placement="top"
                   container="body"

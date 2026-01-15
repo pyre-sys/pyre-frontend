@@ -40,14 +40,29 @@
           <div class="row">
             <div class="col-12">
               <div class="field-group">
-                <label>Fecha Estimada de Devolución</label>
+                <label *ngIf="isDevolucion()">Fecha de Devolución</label>
+                <label *ngIf="!isDevolucion()"
+                  >Fecha Estimada de Devolución</label
+                >
                 <div class="optional-text">
-                  {{
-                    data.fechaEstimadaDevolucion
-                      ? (data.fechaEstimadaDevolucion
-                        | date : "EEE dd MMM yyyy" : "es")
-                      : "N/A"
-                  }}
+                  <ng-container *ngIf="isDevolucion()">
+                    {{
+                      getFechaDevolucionReal()
+                        ? (getFechaDevolucionReal()
+                          | date : "EEE dd MMM yyyy, HH:mm" : "es")
+                        : data.fecha
+                        ? (data.fecha | date : "EEE dd MMM yyyy, HH:mm" : "es")
+                        : "N/A"
+                    }}
+                  </ng-container>
+                  <ng-container *ngIf="!isDevolucion()">
+                    {{
+                      data.fechaEstimadaDevolucion
+                        ? (data.fechaEstimadaDevolucion
+                          | date : "EEE dd MMM yyyy" : "es")
+                        : "N/A"
+                    }}
+                  </ng-container>
                 </div>
               </div>
             </div>

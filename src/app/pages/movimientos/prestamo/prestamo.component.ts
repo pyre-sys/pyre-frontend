@@ -389,9 +389,14 @@ export class PrestamoComponent implements OnInit {
       if (this.prestamoForm) {
         const id = event?.idCliente ?? null;
         this.prestamoForm.patchValue(
-          { clienteId: id, obraId: null },
+          {
+            clienteId: id,
+            obraId: null, // Limpiar obra cuando cambia el cliente
+          },
           { emitEvent: false }
         );
+        // Limpiar información de obra seleccionada
+        this.selectedObraInfo = null;
       }
     } catch (e) {
       console.warn('[Prestamo] onClienteSelected error', e);
