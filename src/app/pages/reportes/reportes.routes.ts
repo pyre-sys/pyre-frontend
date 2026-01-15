@@ -50,4 +50,19 @@ export const reportesRoutes: Routes = [
       ],
     },
   },
+  {
+    path: 'herramientas-usuario',
+    loadComponent: () =>
+      import('./herramienta-usuario/herramienta-usuario.component').then(
+        (m) => m.HerramientaUsuarioComponent
+      ),
+    data: {
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrativo,
+      ],
+    },
+  },
 ];

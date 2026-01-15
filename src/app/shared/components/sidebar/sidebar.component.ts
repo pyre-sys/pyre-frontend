@@ -302,6 +302,22 @@ export class SidebarComponent implements OnInit, OnDestroy {
         Roles.Administrador,
       ],
     },
+    {
+      id: 65,
+      descripcion: 'Herramientas por usuario',
+      icono: 'bi bi-calendar-range',
+      link: '/reportes/herramientas-usuario',
+      grupo: 'GM06',
+      principal: false,
+      orden: 5,
+      estado: true,
+      requiredAccess: [
+        Roles.SuperAdmin,
+        Roles.Operario,
+        Roles.Supervisor,
+        Roles.Administrador,
+      ],
+    },
 
     // 8. Configuración (solo SuperAdmin, con submenús)
     {
@@ -506,8 +522,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         mappedRoleId != null
           ? mappedRoleId
           : user.id_acceso != null
-          ? Number(user.id_acceso)
-          : 0;
+            ? Number(user.id_acceso)
+            : 0;
 
       const nombre = user.nombre || '';
       const apellido = user.apellido || '';
