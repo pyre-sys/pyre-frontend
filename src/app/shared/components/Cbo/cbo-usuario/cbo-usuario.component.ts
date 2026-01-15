@@ -126,7 +126,7 @@ export class CboUsuarioComponent
 
   private loadInitialUsuarios(): void {
     this.loadInitialData().subscribe((usuarios) => {
-      this.usuarios = usuarios;
+      this.usuarios = this.applyShowOnlyActiveFilter(usuarios);
     });
   }
 
@@ -137,7 +137,8 @@ export class CboUsuarioComponent
     return this.usuarioService.getUsers(1, 10, filters).pipe(
       switchMap((response) => {
         const rawList = response.data || [];
-        const usuarios = this.mapUsuariosToOptions(rawList);
+        let usuarios = this.mapUsuariosToOptions(rawList);
+        usuarios = this.applyShowOnlyActiveFilter(usuarios);
         this.isLoading = false;
         return of(usuarios);
       }),
@@ -162,8 +163,16 @@ export class CboUsuarioComponent
       // Numeric search - likely legajo or DNI
       filters.legajo = searchTerm;
     } else {
-      // Text search - try nombre first
-      filters.nombre = searchTerm;
+      // Text search - support full name (e.g. "ALEJANDRO ALVAREZ")
+      // If the user types multiple words, assume first is nombre and last is apellido.
+      const parts = searchTerm.split(/\s+/).filter((p) => p.length > 0);
+      if (parts.length >= 2) {
+        filters.nombre = parts[0];
+        filters.apellido = parts[parts.length - 1];
+      } else {
+        // Single word: try nombre first (fallback logic below will try apellido if no results)
+        filters.nombre = searchTerm;
+      }
     }
 
     return this.usuarioService.getUsers(1, 20, filters).pipe(
@@ -178,7 +187,8 @@ export class CboUsuarioComponent
           return this.usuarioService.getUsers(1, 20, filters).pipe(
             switchMap((secondResponse) => {
               rawList = secondResponse.data || [];
-              const usuarios = this.mapUsuariosToOptions(rawList);
+              let usuarios = this.mapUsuariosToOptions(rawList);
+              usuarios = this.applyShowOnlyActiveFilter(usuarios);
               this.isLoading = false;
               return of(usuarios);
             }),
@@ -190,7 +200,8 @@ export class CboUsuarioComponent
           );
         }
 
-        const usuarios = this.mapUsuariosToOptions(rawList);
+        let usuarios = this.mapUsuariosToOptions(rawList);
+        usuarios = this.applyShowOnlyActiveFilter(usuarios);
         this.isLoading = false;
         return of(usuarios);
       }),
@@ -213,6 +224,12 @@ export class CboUsuarioComponent
       activo: u.activo !== undefined ? u.activo : true,
       displayText: this.buildDisplayText(u),
     }));
+  }
+
+  // Aplicar filtrado por estado según la propiedad `showOnlyActive`
+  private applyShowOnlyActiveFilter(users: UsuarioOption[]): UsuarioOption[] {
+    if (!this.showOnlyActive) return users;
+    return users.filter((u) => !!u.activo);
   }
 
   private buildDisplayText(usuario: any): string {
