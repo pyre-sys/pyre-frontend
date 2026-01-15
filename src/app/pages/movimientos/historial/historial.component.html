@@ -212,6 +212,22 @@
                 >
                   <i class="pi pi-eye"></i>
                 </button>
+                <button
+                  *ngIf="shouldShowAddButton(movimiento)"
+                  type="button"
+                  class="btn-icon btn-add ms-1"
+                  (click)="abrirModalAgregar(movimiento)"
+                  [ngbTooltip]="
+                    'Agregar herramienta al movimiento (disponible por ' +
+                    getMinutosRestantes(movimiento) +
+                    ' minutos más)'
+                  "
+                  placement="top"
+                  container="body"
+                  aria-label="Agregar herramienta"
+                >
+                  <i class="pi pi-plus"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -241,5 +257,14 @@
       [data]="detalleMovimiento"
       (close)="cerrarModalDetalle()"
     ></app-modal-historial>
+
+    <!-- Modal agregar herramienta -->
+    <app-modal-agregar
+      *ngIf="showModalAgregar"
+      [isOpen]="showModalAgregar"
+      [movimiento]="movimientoSeleccionado"
+      (close)="cerrarModalAgregar()"
+      (movimientoCreado)="onMovimientoCreado($event)"
+    ></app-modal-agregar>
   </div>
 </div>

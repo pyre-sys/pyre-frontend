@@ -7,11 +7,13 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
 import { DatePipe } from '@angular/common';
 import { MovimientoService } from '../../../services/movimiento.service';
 import { AlertaService } from '../../../services/alerta.service';
+import { AuthService } from '../../../services/auth.service';
 import { CboTipoMovimientoHerramientaComponent } from '../../../shared/components/Cbo/cbo-tipo-movimiento-herramienta/cbo-tipo-movimiento-herramienta.component';
 import { CboProveedorComponent } from '../../../shared/components/Cbo/cbo-proveedor/cbo-proveedor.component';
 import { CboFamiliaHerramientaComponent } from '../../../shared/components/Cbo/cbo-familia-herramienta/cbo-familia-herramienta.component';
 import { CboUsuarioComponent } from '../../../shared/components/Cbo/cbo-usuario/cbo-usuario.component';
-import { ModalHistorialComponent } from '../modal-historial/modal-historial.component';
+import { ModalHistorialComponent } from '../components/modal-historial/modal-historial.component';
+import { ModalAgregarComponent } from '../components/modal-agregar/modal-agregar.component';
 import { PageTitleService } from '../../../services/page-title.service';
 
 @Component({
@@ -28,6 +30,7 @@ import { PageTitleService } from '../../../services/page-title.service';
     CboFamiliaHerramientaComponent,
     CboUsuarioComponent,
     ModalHistorialComponent,
+    ModalAgregarComponent,
   ],
   templateUrl: './historial.component.html',
   styleUrls: [
@@ -56,6 +59,7 @@ export class HistorialComponent implements OnInit {
   constructor(
     private movimientoService: MovimientoService,
     private alertaService: AlertaService,
+    private authService: AuthService,
     private pageTitleService: PageTitleService
   ) {
     registerLocaleData(localeEs, 'es');
@@ -254,16 +258,36 @@ export class HistorialComponent implements OnInit {
   showDetalleModal: boolean = false;
   detalleMovimiento: any = null;
 
+  // Control para el modal de agregar
+  showModalAgregar: boolean = false;
+  movimientoSeleccionado: any = null;
+
   abrirModalDetalle(movimiento: any): void {
     this.detalleMovimiento = movimiento;
     this.showDetalleModal = true;
-    // Si más adelante se integra un componente modal, aquí se podría abrirlo.
     console.debug('[Historial] abrirModalDetalle', movimiento);
   }
 
   cerrarModalDetalle(): void {
     this.showDetalleModal = false;
     this.detalleMovimiento = null;
+  }
+
+  abrirModalAgregar(movimiento: any): void {
+    this.movimientoSeleccionado = movimiento;
+    this.showModalAgregar = true;
+    console.debug('[Historial] abrirModalAgregar', movimiento);
+  }
+
+  cerrarModalAgregar(): void {
+    this.showModalAgregar = false;
+    this.movimientoSeleccionado = null;
+  }
+
+  onMovimientoCreado(nuevoMovimiento: any): void {
+    console.log('Nuevo movimiento creado:', nuevoMovimiento);
+    // Refrescar la lista de movimientos
+    this.fetchMovimientos();
   }
 
   /**
@@ -329,5 +353,51 @@ export class HistorialComponent implements OnInit {
     }
 
     return 'pi pi-question-circle';
+  }
+
+  /**
+   * Verifica si se debe mostrar el botón de agregar herramienta
+   * Condiciones:
+   * 1. idTipoMovimiento = 1 (Préstamo)
+   * 2. El usuario genera debe ser el usuario logueado
+   * 3. Debe haber pasado menos de 15 minutos desde la creación
+   */
+  shouldShowAddButton(movimiento: any): boolean {
+    // Condición 1: Solo para préstamos (idTipoMovimiento = 1)
+    const tipoMovimiento = movimiento.idTipoMovimiento || movimiento.tipoMovimiento?.id;
+    if (tipoMovimiento !== 1) {
+      return false;
+    }
+
+    // Condición 2: El usuario genera debe ser el usuario logueado
+    const currentUserId = this.authService.getUserId();
+    const usuarioGenera = movimiento.idUsuarioGenera || movimiento.usuarioGenera?.id;
+    if (!currentUserId || usuarioGenera !== currentUserId) {
+      return false;
+    }
+
+    // Condición 3: Menos de 15 minutos desde la creación
+    if (!movimiento.fecha) {
+      return false;
+    }
+
+    const fechaMovimiento = new Date(movimiento.fecha);
+    const ahora = new Date();
+    const diferenciaMinutos = (ahora.getTime() - fechaMovimiento.getTime()) / (1000 * 60);
+
+    return diferenciaMinutos <= 15;
+  }
+
+  /**
+   * Calcula los minutos restantes para mostrar el botón
+   */
+  getMinutosRestantes(movimiento: any): number {
+    if (!movimiento.fecha) return 0;
+
+    const fechaMovimiento = new Date(movimiento.fecha);
+    const ahora = new Date();
+    const diferenciaMinutos = (ahora.getTime() - fechaMovimiento.getTime()) / (1000 * 60);
+
+    return Math.max(0, Math.ceil(15 - diferenciaMinutos));
   }
 }

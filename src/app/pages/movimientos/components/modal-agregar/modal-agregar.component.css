@@ -1,0 +1,31 @@
+.modal {
+    display: block !important;
+}
+
+.btn-add {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-add:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.form-control-plaintext {
+    padding: 0.375rem 0;
+    margin-bottom: 0;
+    background-color: transparent;
+    border: solid transparent;
+    border-width: 1px 0;
+}
