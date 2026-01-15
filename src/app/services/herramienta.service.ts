@@ -535,5 +535,23 @@ export class HerramientaService {
     );
   }
 
+  /**
+   * Obtiene el reporte general de herramientas por usuario y proveedor
+   * Endpoint: GET /api/Herramienta/herramientas-usuario
+   */
+  getReporteHerramientasUsuario(): Observable<any> {
+    const url = `${this.baseUrl}/herramientas-usuario`;
+    console.debug('[HerramientaService] getReporteHerramientasUsuario desde', url);
+
+    return this.http.get<any>(url).pipe(
+      tap((response) =>
+        console.debug('[HerramientaService] getReporteHerramientasUsuario response:', response)
+      ),
+      catchError((error) => {
+        console.error('[HerramientaService] getReporteHerramientasUsuario error:', error);
+        throw error;
+      })
+    );
+  }
 
 }
