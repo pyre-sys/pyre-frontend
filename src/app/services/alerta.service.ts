@@ -176,6 +176,13 @@ export class AlertaService {
     }
   }
 
+  // Public wrapper para obtener el mensaje formateado de error HTTP
+  // Usar este método desde otros servicios/componentes en lugar de
+  // invocar directamente al método privado.
+  public getHttpErrorMessage(err: any): string {
+    return this.formatHttpError(err);
+  }
+
   // Nuevo: mostrar el modal y re-lanzar el error como Observable
   private handleAndThrow(err: any) {
     const mensaje =

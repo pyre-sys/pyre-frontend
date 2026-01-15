@@ -153,14 +153,15 @@ export class ObrasService {
 
   /**
    * Obtiene obras activas para combos/autocomplete con filtros opcionales.
-   * Limita a 5 resultados por defecto para eficiencia.
    * @param idCliente - ID del cliente para filtrar (opcional).
    * @param search - Término de búsqueda parcial sobre nombreObra o codigo (opcional).
+   * @param limit - Número máximo de resultados (opcional, por defecto 50 para combos completos).
    * @returns Observable con BaseResponse<ObraDto[]>.
    */
   getObrasCombo(
     idCliente?: number,
-    search?: string
+    search?: string,
+    limit?: number
   ): Observable<{ success: boolean; data: ObraDto[]; message?: string }> {
     let params = new HttpParams();
     if (idCliente !== undefined) {
@@ -168,6 +169,9 @@ export class ObrasService {
     }
     if (search && search.trim()) {
       params = params.set('search', search.trim());
+    }
+    if (limit !== undefined) {
+      params = params.set('limit', limit.toString());
     }
     return this.http.get<{
       success: boolean;

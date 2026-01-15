@@ -53,10 +53,10 @@
             class="pi pi-search"
             style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5"
           ></i>
-          <span *ngIf="searchControl.value && searchControl.value.length < 3">
-            Ingrese al menos 3 caracteres para buscar
+          <span *ngIf="searchControl.value && searchControl.value.length < 1">
+            Ingrese al menos 1 caracter para buscar
           </span>
-          <span *ngIf="searchControl.value && searchControl.value.length >= 3">
+          <span *ngIf="searchControl.value && searchControl.value.length >= 1">
             No se encontraron obras
           </span>
           <span *ngIf="!searchControl.value"> No hay obras disponibles </span>
@@ -70,36 +70,20 @@
           (click)="onOptionClick(obra)"
         >
           <div class="option-content">
-            <!-- Left side: codigo + nombreObra -->
-            <div class="option-main">
-              <span class="option-codigo">{{ obra.codigo || "S/C" }}</span>
-              <span
-                class="option-nombre"
-                [ngbTooltip]="obra.nombreObra"
-                placement="top"
-                container="body"
+            <!-- Left side: codigo -->
+            <span class="option-codigo">{{ obra.codigo || "S/C" }}</span>
+            <!-- Right side: nombre truncado con tooltip -->
+            <span
+              class="option-nombre"
+              [ngbTooltip]="obra.nombreObra"
+              placement="top"
+              container="body"
+            >
+              {{ obra.nombreObra | slice : 0 : 35
+              }}<span *ngIf="obra.nombreObra && obra.nombreObra.length > 35"
+                >...</span
               >
-                {{ obra.nombreObra | slice : 0 : 45
-                }}<span *ngIf="obra.nombreObra && obra.nombreObra.length > 45"
-                  >...</span
-                >
-              </span>
-            </div>
-            <!-- Right side: mostrar ahora el NOMBRE de la obra (en lugar de descripción) -->
-            <div class="option-details">
-              <span
-                class="option-descripcion"
-                *ngIf="obra.nombreObra"
-                [ngbTooltip]="obra.nombreObra"
-                placement="top"
-                container="body"
-              >
-                {{ obra.nombreObra | slice : 0 : 60
-                }}<span *ngIf="obra.nombreObra && obra.nombreObra.length > 60"
-                  >...</span
-                >
-              </span>
-            </div>
+            </span>
           </div>
         </div>
       </div>

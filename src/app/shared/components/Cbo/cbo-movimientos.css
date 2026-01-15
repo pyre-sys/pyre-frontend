@@ -172,6 +172,21 @@
   box-shadow: none !important;
 }
 
+.cbo-herramientas-wrapper .dropdown-option.selected .option-codigo,
+.cbo-usuario-wrapper .dropdown-option.selected .option-codigo,
+.cbo-obra-wrapper .dropdown-option.selected .option-codigo,
+.cbo-cliente-wrapper .dropdown-option.selected .option-codigo {
+  color: var(--color-primary, #3b82f6) !important;
+  background: rgba(59, 130, 246, 0.08) !important;
+}
+
+.cbo-herramientas-wrapper .dropdown-option.selected .option-nombre,
+.cbo-usuario-wrapper .dropdown-option.selected .option-nombre,
+.cbo-obra-wrapper .dropdown-option.selected .option-nombre,
+.cbo-cliente-wrapper .dropdown-option.selected .option-nombre {
+  color: var(--color-text, #374151) !important;
+}
+
 .cbo-herramientas-wrapper .dropdown-option.selected:hover,
 .cbo-usuario-wrapper .dropdown-option.selected:hover,
 .cbo-obra-wrapper .dropdown-option.selected:hover,

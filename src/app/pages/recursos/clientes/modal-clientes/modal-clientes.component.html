@@ -50,7 +50,7 @@
               form.get('cuit')?.invalid && form.get('cuit')?.touched
             "
           >
-            <label class="required">CUIT</label>
+            <label>CUIT <span class="optional-text">(opcional)</span></label>
             <input
               formControlName="cuit"
               placeholder="20301234567"
@@ -66,12 +66,7 @@
               *ngIf="form.get('cuit')?.errors && form.get('cuit')?.touched"
               class="error-text"
             >
-              <span *ngIf="form.get('cuit')?.errors?.['required']"
-                >El CUIT es requerido</span
-              >
-              <span *ngIf="form.get('cuit')?.errors?.['minlength']"
-                >Se requieren 11 dígitos</span
-              >
+              <!-- El campo CUIT ahora es opcional -->
               <span *ngIf="form.get('cuit')?.errors?.['maxlength']"
                 >Máximo 11 caracteres</span
               >

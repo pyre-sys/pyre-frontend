@@ -66,13 +66,13 @@
         </div>
 
         <div class="col-lg-3 col-md-6 col-sm-12">
-          <label class="date-label">Proveedor:</label>
-          <app-cbo-proveedor
+          <label class="date-label">Obra:</label>
+          <app-cbo-obra
             class="w-100"
-            [isId]="'proveedorSelect'"
-            (proveedorSelected)="onProveedorSelected($event)"
+            [isId]="'obraSelect'"
+            (obraSelected)="onObraSelected($event)"
           >
-          </app-cbo-proveedor>
+          </app-cbo-obra>
         </div>
       </div>
 
@@ -155,9 +155,9 @@
           <tr>
             <th>Código</th>
             <th>Nombre</th>
-            <th>Movimiento</th>
-            <th style="width: 180px">Fecha</th>
-            <th>Genera</th>
+            <th>Mov.</th>
+            <th style="width: 180px">Fecha Salida</th>
+            <th style="width: 180px">Fecha Est. Devol.</th>
             <th>Responsable</th>
             <th>Obra</th>
             <th>Acciones</th>
@@ -165,9 +165,22 @@
         </thead>
         <tbody>
           <tr *ngFor="let movimiento of movimientos">
-            <td>{{ movimiento.codigoHerramienta }}</td>
-            <td>{{ movimiento.nombreHerramienta }}</td>
-            <td style="text-align: center">
+            <td>
+              <span class="codigo-badge">{{
+                movimiento.codigoHerramienta
+              }}</span>
+            </td>
+            <td>
+              <span
+                class="nombre-truncado"
+                [ngbTooltip]="movimiento.nombreHerramienta"
+                placement="top"
+                container="body"
+              >
+                {{ movimiento.nombreHerramienta }}
+              </span>
+            </td>
+            <td style="text-align: center; vertical-align: middle">
               <i
                 [ngClass]="[
                   getMovimientoIcon(
@@ -187,18 +200,36 @@
               ></i>
             </td>
             <td style="white-space: nowrap">
-              {{ movimiento.fecha | date : "EEE dd MMM yyyy, HH:mm" }}
+              {{ movimiento.fecha | date : "EEE dd MMM yyyy" }}
             </td>
-            <td>{{ movimiento.nombreUsuarioGenera }}</td>
-            <td>
+            <td style="white-space: nowrap">
               {{
-                (movimiento.nombreUsuarioResponsable &&
-                  movimiento.nombreUsuarioResponsable.trim()) ||
-                  movimiento.nombreProveedor ||
-                  "-"
+                movimiento.fechaEstimadaDevolucion
+                  ? (movimiento.fechaEstimadaDevolucion
+                    | date : "EEE dd MMM yyyy")
+                  : "-"
               }}
             </td>
-            <td>{{ movimiento.nombreObra || "N/A" }}</td>
+            <td>
+              {{
+                movimiento.nombreUsuarioResponsable &&
+                movimiento.nombreUsuarioResponsable.trim()
+                  ? truncateResponsableName(movimiento.nombreUsuarioResponsable)
+                  : movimiento.nombreProveedor
+                  ? truncateResponsableName(movimiento.nombreProveedor)
+                  : "-"
+              }}
+            </td>
+            <td>
+              <span
+                class="nombre-truncado"
+                [ngbTooltip]="movimiento.nombreObra || 'N/A'"
+                placement="top"
+                container="body"
+              >
+                {{ movimiento.nombreObra || "N/A" }}
+              </span>
+            </td>
             <td>
               <div class="action-buttons">
                 <button

@@ -119,19 +119,13 @@ export class CboObraComponent
         debounceTime(300),
         distinctUntilChanged(),
         switchMap((term) => {
-          // Only search when dropdown is open
-          if (!this.isOpen) {
-            return of([]);
-          }
-
           const searchTerm = (term || '').toString().trim();
 
-          if (searchTerm.length >= 2) {
+          // Siempre cargar datos, sin importar si el dropdown está abierto
+          if (searchTerm.length >= 1) {
             return this.searchObras(searchTerm);
-          } else if (searchTerm.length === 0) {
-            return this.loadInitialData();
           } else {
-            return of([]);
+            return this.loadInitialData();
           }
         })
       )
@@ -151,10 +145,10 @@ export class CboObraComponent
   private loadInitialData() {
     this.isLoading = true;
 
-    return this.obrasService.getObrasCombo(this.idCliente).pipe(
+    return this.obrasService.getObrasPaged(1, 1000, {}).pipe(
       switchMap((response) => {
-        if (response.success && response.data) {
-          const obras = this.mapObrasToOptions(response.data);
+        if (response.data && response.data.data) {
+          const obras = this.mapObrasToOptions(response.data.data);
           this.isLoading = false;
           return of(obras);
         } else {
@@ -173,23 +167,25 @@ export class CboObraComponent
   private searchObras(searchTerm: string) {
     this.isLoading = true;
 
-    return this.obrasService.getObrasCombo(this.idCliente, searchTerm).pipe(
-      switchMap((response) => {
-        if (response.success && response.data) {
-          const obras = this.mapObrasToOptions(response.data);
-          this.isLoading = false;
-          return of(obras);
-        } else {
+    return this.obrasService
+      .getObrasPaged(1, 1000, { nombre: searchTerm })
+      .pipe(
+        switchMap((response) => {
+          if (response.data && response.data.data) {
+            const obras = this.mapObrasToOptions(response.data.data);
+            this.isLoading = false;
+            return of(obras);
+          } else {
+            this.isLoading = false;
+            return of([]);
+          }
+        }),
+        catchError((error) => {
+          console.error('Error searching obras combo:', error);
           this.isLoading = false;
           return of([]);
-        }
-      }),
-      catchError((error) => {
-        console.error('Error searching obras combo:', error);
-        this.isLoading = false;
-        return of([]);
-      })
-    );
+        })
+      );
   }
 
   private mapObrasToOptions(obras: any[]): ObraOption[] {
@@ -227,6 +223,9 @@ export class CboObraComponent
 
     if (!this.isOpen) {
       this.openDropdown();
+    } else {
+      // Si ya está abierto, volver a cargar los datos para asegurar que estén completos
+      this.loadInitialObras();
     }
   }
 
@@ -235,6 +234,9 @@ export class CboObraComponent
 
     if (!this.isOpen) {
       this.openDropdown();
+    } else {
+      // Asegurar que los datos estén cargados cuando se enfoca
+      this.loadInitialObras();
     }
   }
 
@@ -274,12 +276,10 @@ export class CboObraComponent
   private openDropdown(): void {
     this.isOpen = true;
 
-    // Load initial data only if not already loaded
-    if (this.obras.length === 0) {
-      this.loadInitialData().subscribe((obras) => {
-        this.obras = obras;
-      });
-    }
+    // Siempre cargar datos cuando se abre el dropdown para asegurar que estén actualizados
+    this.loadInitialData().subscribe((obras) => {
+      this.obras = obras;
+    });
 
     // Clear search when opening if no selection
     if (!this.selectedObra) {

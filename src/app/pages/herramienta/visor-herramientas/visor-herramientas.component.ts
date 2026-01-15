@@ -40,7 +40,10 @@ interface DisplayHerramienta {
     SpinnerComponent,
   ],
   templateUrl: './visor-herramientas.component.html',
-  styleUrls: ['../../../../styles/visor-style.css'], // Usar visor-style.css
+  styleUrls: [
+    '../../../../styles/visor-style.css',
+    './visor-herramientas.component.css',
+  ],
   providers: [HerramientaService, AlertaService],
 })
 export class VisorHerramientasComponent implements OnInit {
