@@ -102,6 +102,11 @@ export class CboObraComponent
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['idCliente']) {
+      // Limpiar selección actual cuando cambia el cliente
+      if (this.selectedObra) {
+        this.selectObra(null);
+      }
+      // Recargar obras para el nuevo cliente
       this.loadInitialObras();
     }
     if (changes['isDisabled']) {
@@ -145,34 +150,49 @@ export class CboObraComponent
   private loadInitialData() {
     this.isLoading = true;
 
-    return this.obrasService.getObrasPaged(1, 1000, {}).pipe(
-      switchMap((response) => {
-        if (response.data && response.data.data) {
-          const obras = this.mapObrasToOptions(response.data.data);
-          this.isLoading = false;
-          return of(obras);
-        } else {
+    // Si no hay cliente seleccionado, no cargar obras
+    if (!this.idCliente) {
+      this.isLoading = false;
+      return of([]);
+    }
+
+    // Usar getObrasCombo con filtro por cliente
+    return this.obrasService
+      .getObrasCombo(this.idCliente, undefined, 1000)
+      .pipe(
+        switchMap((response) => {
+          if (response.success && response.data) {
+            const obras = this.mapObrasToOptions(response.data);
+            this.isLoading = false;
+            return of(obras);
+          } else {
+            this.isLoading = false;
+            return of([]);
+          }
+        }),
+        catchError((error) => {
+          console.error('Error loading obras combo:', error);
           this.isLoading = false;
           return of([]);
-        }
-      }),
-      catchError((error) => {
-        console.error('Error loading obras combo:', error);
-        this.isLoading = false;
-        return of([]);
-      })
-    );
+        })
+      );
   }
 
   private searchObras(searchTerm: string) {
     this.isLoading = true;
 
+    // Si no hay cliente seleccionado, no buscar obras
+    if (!this.idCliente) {
+      this.isLoading = false;
+      return of([]);
+    }
+
     return this.obrasService
-      .getObrasPaged(1, 1000, { nombre: searchTerm })
+      .getObrasCombo(this.idCliente, searchTerm, 1000)
       .pipe(
         switchMap((response) => {
-          if (response.data && response.data.data) {
-            const obras = this.mapObrasToOptions(response.data.data);
+          if (response.success && response.data) {
+            const obras = this.mapObrasToOptions(response.data);
             this.isLoading = false;
             return of(obras);
           } else {

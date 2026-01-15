@@ -47,19 +47,25 @@
     <!-- Dropdown options -->
     <div *ngIf="isOpen && !isDisabled" class="dropdown-panel">
       <div class="dropdown-content">
+        <!-- Loading indicator -->
+        <div *ngIf="isLoading" class="dropdown-loading">
+          <span>Cargando obras...</span>
+        </div>
+
+        <!-- No client selected message -->
+        <div *ngIf="!isLoading && !idCliente" class="no-results">
+          <span>Primero seleccione un cliente</span>
+        </div>
+
         <!-- No results message -->
-        <div *ngIf="obras.length === 0 && !isLoading" class="no-results">
-          <i
-            class="pi pi-search"
-            style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5"
-          ></i>
-          <span *ngIf="searchControl.value && searchControl.value.length < 1">
-            Ingrese al menos 1 caracter para buscar
-          </span>
-          <span *ngIf="searchControl.value && searchControl.value.length >= 1">
-            No se encontraron obras
-          </span>
-          <span *ngIf="!searchControl.value"> No hay obras disponibles </span>
+        <div
+          *ngIf="!isLoading && idCliente && obras.length === 0"
+          class="no-results"
+        >
+          <span *ngIf="searchControl.value">No se encontraron obras</span>
+          <span *ngIf="!searchControl.value"
+            >No hay obras disponibles para este cliente</span
+          >
         </div>
 
         <!-- Options list -->
