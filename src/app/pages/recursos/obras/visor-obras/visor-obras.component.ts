@@ -99,6 +99,7 @@ export class VisorObrasComponent implements OnInit {
             descripcion: o.descripcion,
             fechaInicio: o.fechaInicio,
             fechaFin: o.fechaFin,
+            clienteNombre: o.clienteNombre, // Agregar nombre del cliente
             activo:
               o.activo ??
               o.activa ??
@@ -178,7 +179,7 @@ export class VisorObrasComponent implements OnInit {
   }
 
   hasActiveFilters(): boolean {
-    return !!(this.filtroNombre?.trim() || this.filtroCodigo?.trim());
+    return !!(this.filtroNombre?.trim() || this.filtroCodigo?.trim() || false);
   }
 
   onPageChange(page: number): void {

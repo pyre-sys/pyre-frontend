@@ -13,7 +13,7 @@
     <!-- Filter bar: estructura unificada con otros visores -->
     <div class="pyre-filter-bar container-fluid">
       <div class="row g-3 align-items-end">
-        <!-- Código (nuevo, primero) -->
+        <!-- Código -->
         <div class="col-lg-3 col-md-4 col-sm-12">
           <div class="filter-item">
             <div class="filter-input-group">
@@ -28,8 +28,8 @@
           </div>
         </div>
 
-        <!-- Nombre de la obra (ya existía, ahora segundo) -->
-        <div class="col-lg-5 col-md-6 col-sm-12">
+        <!-- Nombre de la obra -->
+        <div class="col-lg-7 col-md-6 col-sm-12">
           <div class="filter-item">
             <div class="filter-input-group">
               <input
@@ -43,11 +43,8 @@
           </div>
         </div>
 
-        <!-- Ajuste: eliminar filtro Estado y dejar espacio flexible -->
-        <div class="col-lg-2 col-md-2 col-sm-6 d-none d-md-block"></div>
-
         <!-- Reset + Buscar -->
-        <div class="col-lg-2 col-md-12 col-sm-12 d-flex justify-content-end">
+        <div class="col-lg-2 col-md-2 col-sm-12 d-flex justify-content-end">
           <div class="d-flex gap-2">
             <button
               type="button"
@@ -86,6 +83,7 @@
           <tr>
             <th>Código</th>
             <th>Nombre</th>
+            <th>Cliente</th>
             <th>Descripcion</th>
             <th>Fecha Inicio</th>
             <th>Fecha Fin</th>
@@ -100,6 +98,10 @@
               <span class="codigo-badge">{{ obra.codigo }}</span>
             </td>
             <td>{{ obra.nombreObra }}</td>
+            <!-- Nueva celda para cliente -->
+            <td class="column-cliente">
+              {{ obra.clienteNombre || "Sin asignar" }}
+            </td>
             <td class="column-descripcion">
               {{ obra.descripcion | slice : 0 : 50 }}
               <span *ngIf="!!obra.descripcion && obra.descripcion.length > 50"
@@ -165,7 +167,7 @@
             </td>
           </tr>
           <tr *ngIf="getPaginatedObras().length === 0">
-            <td colspan="7" class="empty-message">No se encontraron obras.</td>
+            <td colspan="8" class="empty-message">No se encontraron obras.</td>
           </tr>
         </tbody>
       </table>

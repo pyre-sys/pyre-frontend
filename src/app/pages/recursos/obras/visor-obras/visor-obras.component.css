@@ -1,1 +1,15 @@
 /* Este archivo debe estar vacío. Los estilos del visor se encuentran en styles/visor-style.css */
+
+/* Estilos específicos para la columna de cliente */
+.column-cliente {
+  max-width: 150px;
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .column-cliente {
+    display: none; /* Ocultar en móviles para ahorrar espacio */
+  }
+}

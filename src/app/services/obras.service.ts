@@ -126,7 +126,7 @@ export class ObrasService {
   getObrasPaged(
     page: number = 1,
     pageSize: number = 10,
-    filters?: { nombre?: string; codigo?: string }
+    filters?: { nombre?: string; codigo?: string; idCliente?: number }
   ): Observable<any> {
     // El backend devuelve un objeto con 'data' que contiene 'data', 'page', 'pageSize', etc.
     let params = new HttpParams()
@@ -146,6 +146,14 @@ export class ObrasService {
         String(filters.codigo).trim() !== ''
       ) {
         params = params.set('codigo', String(filters.codigo).trim());
+      }
+      // Nuevo filtro por cliente
+      if (
+        filters.idCliente !== undefined &&
+        filters.idCliente !== null &&
+        filters.idCliente > 0
+      ) {
+        params = params.set('idCliente', String(filters.idCliente));
       }
     }
     return this.http.get<any>(`${this.baseUrl}`, { params });
