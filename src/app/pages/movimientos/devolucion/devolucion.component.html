@@ -121,7 +121,7 @@
                     <app-cbo-usuario
                       *ngIf="isPrestamoOperation()"
                       [isId]="'usuarioSelect'"
-                      [showOnlyActive]="true"
+                      [showOnlyActive]="false"
                       [objectErrors]="
                         devolucionForm.get('responsableId')?.errors
                       "

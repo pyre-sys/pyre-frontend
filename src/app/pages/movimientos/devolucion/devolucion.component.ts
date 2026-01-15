@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {
@@ -70,7 +70,7 @@ type TipoOperacion = 'prestamo' | 'reparacion';
     ]),
   ],
 })
-export class DevolucionComponent implements OnInit {
+export class DevolucionComponent implements OnInit, AfterViewInit {
   devolucionForm!: FormGroup;
   selectedUsuarioInfo: UsuarioOption | null = null;
   selectedProveedorInfo: ProveedorOption | null = null;
@@ -122,6 +122,26 @@ export class DevolucionComponent implements OnInit {
   ngOnInit(): void {
     this.pageTitleService.setTitle('Registrar Devolución');
     this.buildForm();
+  }
+
+  ngAfterViewInit(): void {
+    // Evitar desplazamiento automático al abrir la vista:
+    // 1) desenfocar cualquier elemento activo
+    try {
+      const active = document.activeElement as HTMLElement | null;
+      if (active && typeof active.blur === 'function') {
+        active.blur();
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    // 2) asegurar que el scroll quede arriba
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    } catch (e) {
+      // ignore
+    }
   }
 
   private buildForm(): void {

@@ -15,22 +15,26 @@
   height: auto !important;
   min-height: 100%;
   overflow: visible;
+  margin-bottom: 2rem; /* Espacio inferior para el card */
 }
 
 .prestamo-form-card .card-body {
   overflow: visible;
+  padding-bottom: 3rem; /* Espacio adicional para dropdowns */
 }
 
 /* Fix for combo dropdown overflow */
 .form-field-wrapper {
   position: relative;
   z-index: auto;
+  overflow: visible;
 }
 
 .form-field-wrapper app-cbo-usuario,
 .form-field-wrapper app-cbo-proveedor {
   position: relative;
   z-index: 10;
+  overflow: visible;
 }
 
 /* Ensure container allows dropdown expansion */
@@ -51,11 +55,14 @@
 .devolucion-container,
 .prestamo-container {
   overflow: visible !important;
+  min-height: calc(100vh - 100px); /* Asegurar altura mínima */
+  padding-bottom: 350px !important; /* Espacio inferior para dropdowns */
 }
 
 .devolucion-container .card-body,
 .prestamo-container .card-body {
   overflow: visible !important;
+  padding-bottom: 3rem !important; /* Espacio adicional dentro del card */
 }
 
 /* Fix para combos específicos en devolución */
