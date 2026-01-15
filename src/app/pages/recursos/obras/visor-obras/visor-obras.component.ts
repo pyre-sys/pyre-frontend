@@ -57,6 +57,7 @@ export class VisorObrasComponent implements OnInit {
   detailsData: any = null;
 
   isSuperAdmin: boolean = false; // Nueva propiedad para controlar el rol
+  canToggleEstado: boolean = false; // Permite a SuperAdmin y Administrador cambiar estado
 
   constructor(
     private obrasService: ObrasService,
@@ -72,6 +73,8 @@ export class VisorObrasComponent implements OnInit {
     const user = this.authService.getUser?.() ?? null;
     const roleId = Number(user?.id_rol ?? user?.idRol ?? user?.id_acceso ?? 0);
     this.isSuperAdmin = roleId === 1;
+    // Permitir toggle de estado a SuperAdmin (1) y Administrador (2)
+    this.canToggleEstado = roleId === 1 || roleId === 2;
 
     this.fetchObras();
   }
@@ -338,7 +341,7 @@ export class VisorObrasComponent implements OnInit {
   // Nuevo: toggle activo/inactivo de obra desde la UI
   toggleObraActive(event: Event, obra: any): void {
     event.stopPropagation();
-    if (!this.isSuperAdmin) return;
+    if (!this.canToggleEstado) return;
     const id = obra?.idObra ?? null;
     if (!id) return;
     obra._pending = true;

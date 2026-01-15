@@ -194,6 +194,7 @@ select.form-select {
   gap: 4px; /* Espaciado uniforme entre ítems */
   overflow-y: auto; /* Scroll solo si es necesario */
   padding: 4px 0;
+  max-height: 300px; /* Limitar altura máxima del dropdown */
 }
 
 /* No results message */

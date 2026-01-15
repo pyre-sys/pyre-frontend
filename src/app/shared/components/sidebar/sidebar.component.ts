@@ -279,12 +279,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       principal: false,
       orden: 2,
       estado: true,
-      requiredAccess: [
-        Roles.SuperAdmin,
-        Roles.Operario,
-        Roles.Supervisor,
-        Roles.Administrador,
-      ],
+      requiredAccess: [Roles.SuperAdmin],
     },
     {
       id: 64,

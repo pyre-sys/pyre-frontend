@@ -114,6 +114,30 @@ export class AlertaService {
     });
   }
 
+  // Modal informativo
+  info(message: string, title: string = 'Información'): void {
+    Swal.fire({
+      title,
+      text: message,
+      icon: 'info',
+      confirmButtonText: 'Aceptar',
+      focusConfirm: false,
+      didOpen: () => {
+        try {
+          setTimeout(() => {
+            const active = document.activeElement as HTMLElement | null;
+            if (active && typeof active.blur === 'function') active.blur();
+          }, 0);
+        } catch (e) {}
+      },
+      customClass: {
+        popup: 'swal2-popup swal2-themed',
+        title: 'swal2-title',
+        confirmButton: 'swal2-confirm',
+      },
+    });
+  }
+
   // Modal de error
   error(message: string, title: string = 'Error'): void {
     Swal.fire({

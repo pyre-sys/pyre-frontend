@@ -176,7 +176,11 @@ export class ObrasService {
       params = params.set('idCliente', idCliente.toString());
     }
     if (search && search.trim()) {
-      params = params.set('search', search.trim());
+      const term = search.trim();
+      // Enviar 'nombre' para que el backend filtre por nombre de obra
+      params = params.set('nombre', term);
+      // Mantener 'search' por compatibilidad con implementaciones previas
+      params = params.set('search', term);
     }
     if (limit !== undefined) {
       params = params.set('limit', limit.toString());

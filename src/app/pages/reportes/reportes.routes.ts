@@ -27,12 +27,7 @@ export const reportesRoutes: Routes = [
         (m) => m.ValorizacionComponent
       ),
     data: {
-      requiredAccess: [
-        Roles.SuperAdmin,
-        Roles.Operario,
-        Roles.Supervisor,
-        Roles.Administrativo,
-      ],
+      requiredAccess: [Roles.SuperAdmin],
     },
   },
   {

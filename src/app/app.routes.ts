@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { Roles } from './shared/enums/roles';
 
 export const routes: Routes = [
   {
@@ -55,7 +56,7 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./pages/reportes/reportes.routes').then((m) => m.reportesRoutes),
     canActivate: [authGuard],
-    data: { requiredAccess: [1] }, // Solo administradores
+    data: { requiredAccess: [Roles.SuperAdmin, Roles.Administrador] }, // SuperAdmin y Administrador pueden entrar al módulo de reportes
   },
   {
     path: 'recursos',

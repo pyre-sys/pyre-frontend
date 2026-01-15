@@ -130,7 +130,7 @@
                     type="checkbox"
                     [checked]="obra.activo"
                     (click)="toggleObraActive($event, obra)"
-                    [disabled]="obra._pending || !isSuperAdmin"
+                    [disabled]="obra._pending || !canToggleEstado"
                   />
                   <span
                     class="toggle-slider modern"
