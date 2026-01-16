@@ -59,7 +59,7 @@
 }
 
 /* Improve spacing in card headers with export buttons */
-.card-header .btn-link .d-flex.align-items-center.gap-2 > .btn {
+.card-header .btn-link .d-flex.align-items-center.gap-2>.btn {
     margin-left: 0.5rem;
 }
 
@@ -105,6 +105,11 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }

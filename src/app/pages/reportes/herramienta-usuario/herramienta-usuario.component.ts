@@ -204,7 +204,7 @@ export class HerramientaUsuarioComponent implements OnInit {
   // Método para exportar reporte general solamente
   exportarReporteGeneral(): void {
     this.loadingExport = true;
-    
+
     this.srvHerramienta.reporteUsuariosProveedores().subscribe({
       next: (blob: Blob) => {
         this.loadingExport = false;

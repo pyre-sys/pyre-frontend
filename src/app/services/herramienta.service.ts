@@ -542,17 +542,17 @@ export class HerramientaService {
   reporteUsuariosProveedores(usuarioId?: number, proveedorId?: number): Observable<Blob> {
     const url = `${this.baseUrl}/reporteUsuariosProveedores`;
     let params = new HttpParams();
-    
+
     if (usuarioId !== undefined && usuarioId !== null) {
       params = params.set('usuarioId', usuarioId.toString());
     }
-    
+
     if (proveedorId !== undefined && proveedorId !== null) {
       params = params.set('proveedorId', proveedorId.toString());
     }
-    
+
     console.debug('[HerramientaService] solicitando reporteUsuariosProveedores desde', url, 'params:', params.toString());
-    
+
     return this.http.get(url, { responseType: 'blob', params }).pipe(
       tap(() => console.debug('[HerramientaService] reporteUsuariosProveedores: respuesta recibida')),
       catchError((err) => {
