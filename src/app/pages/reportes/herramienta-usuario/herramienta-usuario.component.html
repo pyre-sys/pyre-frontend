@@ -6,11 +6,23 @@
         type="button"
         class="btn btn-outline-primary btn-sm"
         (click)="cargarReporte()"
-        [disabled]="loading"
+        [disabled]="loading || loadingExport"
         ngbTooltip="Actualizar reporte"
       >
         <i class="bi bi-arrow-clockwise me-1"></i>
         Actualizar
+      </button>
+
+      <!-- Botón de exportar reporte general -->
+      <button
+        type="button"
+        class="btn btn-outline-success btn-sm"
+        (click)="exportarReporteGeneral()"
+        [disabled]="loading || loadingExport"
+        ngbTooltip="Descargar reporte completo en Excel"
+      >
+        <i class="bi bi-file-earmark-excel me-1"></i>
+        Exportar General
       </button>
     </div>
 
@@ -46,6 +58,13 @@
   <div class="pyre-table-shell">
     <!-- Spinner global -->
     <app-spinner [isLoading]="loading"></app-spinner>
+
+    <!-- Excel Export Spinner -->
+    <div class="loader-overlay" *ngIf="loadingExport">
+      <div class="loader">
+        <span>Generando Excel...</span>
+      </div>
+    </div>
 
     <!-- Resumen estadísticas -->
     <div *ngIf="!loading && resumen" class="estado-filters-row mb-4">

@@ -81,6 +81,7 @@ interface ReporteData {
 })
 export class HerramientaUsuarioComponent implements OnInit {
   loading = false;
+  loadingExport = false; // Add loading state for Excel export
   reporteData: ReporteData | null = null;
   usuariosConHerramientas: UsuarioConHerramientas[] = [];
   proveedoresConHerramientas: ProveedorConHerramientas[] = [];
@@ -198,5 +199,35 @@ export class HerramientaUsuarioComponent implements OnInit {
     if (fam.includes('ferretería') || fam.includes('ferreteria')) return 'familia-ferreteria';
     if (fam.includes('mecánica') || fam.includes('mecanica')) return 'familia-mecanica';
     return 'familia-default';
+  }
+
+  // Método para exportar reporte general solamente
+  exportarReporteGeneral(): void {
+    this.loadingExport = true;
+
+    this.srvHerramienta.reporteUsuariosProveedores().subscribe({
+      next: (blob: Blob) => {
+        this.loadingExport = false;
+        const fileName = `Reporte_UsuariosProveedores_General_${new Date().toISOString().split('T')[0]}.xlsx`;
+        this.descargarArchivo(blob, fileName);
+        this.srvAlerta.success('Reporte general descargado correctamente.');
+      },
+      error: (error: any) => {
+        this.loadingExport = false;
+        console.error('Error al descargar reporte general:', error);
+        this.srvAlerta.error('Error al descargar el reporte general.');
+      }
+    });
+  }
+
+  private descargarArchivo(blob: Blob, fileName: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 }

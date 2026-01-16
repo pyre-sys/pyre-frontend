@@ -36,3 +36,80 @@
 .accordion .card:not(:last-child) {
     margin-bottom: 0.5rem;
 }
+
+/* Export button styling */
+.btn-outline-success.btn-sm {
+    min-width: 36px;
+    height: 32px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-outline-success.btn-sm:hover {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+}
+
+.btn-outline-success.btn-sm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Improve spacing in card headers with export buttons */
+.card-header .btn-link .d-flex.align-items-center.gap-2>.btn {
+    margin-left: 0.5rem;
+}
+
+/* Excel Export Spinner - similar to spinner component */
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loader {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 2px solid #007bff;
+}
+
+.loader span {
+    font-weight: 500;
+    color: #007bff;
+    font-size: 1.1rem;
+}
+
+.loader::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 1rem;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
