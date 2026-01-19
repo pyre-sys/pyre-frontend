@@ -1,55 +1,7 @@
 <!-- Título y controles principales -->
 <div class="container-fluid page-shell page-header-container">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="d-flex gap-2">
-      <button
-        type="button"
-        class="btn btn-outline-primary btn-sm"
-        (click)="cargarReporte()"
-        [disabled]="loading || loadingExport"
-        ngbTooltip="Actualizar reporte"
-      >
-        <i class="bi bi-arrow-clockwise me-1"></i>
-        Actualizar
-      </button>
-
-      <!-- Botón de exportar reporte general -->
-      <button
-        type="button"
-        class="btn btn-outline-success btn-sm"
-        (click)="exportarReporteGeneral()"
-        [disabled]="loading || loadingExport"
-        ngbTooltip="Descargar reporte completo en Excel"
-      >
-        <i class="bi bi-file-earmark-excel me-1"></i>
-        Exportar General
-      </button>
-    </div>
-
-    <div class="d-flex gap-2">
-      <div class="form-check">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="soloUsuarios"
-          [(ngModel)]="mostrarSoloUsuarios"
-        />
-        <label class="form-check-label" for="soloUsuarios">
-          Solo Usuarios
-        </label>
-      </div>
-      <div class="form-check">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="soloProveedores"
-          [(ngModel)]="mostrarSoloProveedores"
-        />
-        <label class="form-check-label" for="soloProveedores">
-          Solo Proveedores
-        </label>
-      </div>
-    </div>
+  <div class="d-flex justify-content-end align-items-center mb-3 gap-3">
+    <!-- Espacio reservado para acciones futuras -->
   </div>
 </div>
 
@@ -66,93 +18,98 @@
       </div>
     </div>
 
-    <!-- Resumen estadísticas -->
-    <div *ngIf="!loading && resumen" class="estado-filters-row mb-4">
-      <div class="row g-3">
-        <div class="col-md-3">
-          <div class="card text-center h-100 border-primary">
-            <div class="card-body">
-              <i
-                class="bi bi-people-fill text-primary mb-2"
-                style="font-size: 2rem"
-              ></i>
-              <h5 class="card-title">
-                {{ resumen.totalUsuariosConPrestamos }}
-              </h5>
-              <p class="card-text small">Usuarios con Préstamos</p>
-            </div>
-          </div>
+    <!-- Controles de acciones -->
+    <div *ngIf="!loading" class="filters-row mb-3">
+      <div class="row g-3 align-items-end">
+        <div class="col-auto">
+          <button
+            type="button"
+            class="btn btn-outline-primary btn-sm"
+            (click)="cargarReporte()"
+            [disabled]="loading || loadingExport"
+            ngbTooltip="Actualizar reporte"
+          >
+            <i class="bi bi-arrow-clockwise me-1"></i>
+            Actualizar
+          </button>
         </div>
-        <div class="col-md-3">
-          <div class="card text-center h-100 border-success">
-            <div class="card-body">
-              <i
-                class="bi bi-tools text-success mb-2"
-                style="font-size: 2rem"
-              ></i>
-              <h5 class="card-title">
-                {{ resumen.totalHerramientasPrestadas }}
-              </h5>
-              <p class="card-text small">Herramientas Prestadas</p>
-            </div>
-          </div>
+        <div class="col-auto">
+          <button
+            type="button"
+            class="btn btn-outline-success btn-sm"
+            (click)="exportarReporteGeneral()"
+            [disabled]="loading || loadingExport"
+            ngbTooltip="Descargar reporte completo en Excel"
+          >
+            <i class="bi bi-file-earmark-excel me-1"></i>
+            Exportar General
+          </button>
         </div>
-        <div class="col-md-3">
-          <div class="card text-center h-100 border-warning">
-            <div class="card-body">
-              <i
-                class="bi bi-building text-warning mb-2"
-                style="font-size: 2rem"
-              ></i>
-              <h5 class="card-title">
-                {{ resumen.totalProveedoresConMantenimiento }}
-              </h5>
-              <p class="card-text small">Proveedores con Herramientas</p>
-            </div>
+        <div class="col-auto ms-auto">
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="soloUsuarios"
+              [(ngModel)]="mostrarSoloUsuarios"
+            />
+            <label class="form-check-label" for="soloUsuarios">
+              Solo Usuarios
+            </label>
           </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-center h-100 border-danger">
-            <div class="card-body">
-              <i
-                class="bi bi-wrench-adjustable text-danger mb-2"
-                style="font-size: 2rem"
-              ></i>
-              <h5 class="card-title">
-                {{ resumen.totalHerramientasEnMantenimiento }}
-              </h5>
-              <p class="card-text small">En Mantenimiento</p>
-            </div>
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="soloProveedores"
+              [(ngModel)]="mostrarSoloProveedores"
+            />
+            <label class="form-check-label" for="soloProveedores">
+              Solo Proveedores
+            </label>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Filtros -->
+    <!-- Resumen estadísticas -->
+    <div *ngIf="!loading && resumen" class="estado-filters-row mb-3">
+      <div
+        *ngFor="let estado of estadosResumen"
+        class="btn-estado"
+        [class]="'btn-estado-' + estado.color"
+      >
+        <i [class]="estado.icon + ' me-2'"></i>
+        <span class="btn-text">{{ estado.nombre }}</span>
+        <span class="btn-count">{{ getResumenValue(estado.key) }}</span>
+      </div>
+    </div>
+
+    <!-- Filtros de búsqueda -->
     <div *ngIf="!loading" class="filters-row mb-3">
       <div class="row g-3 align-items-end">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <label class="form-label">Filtrar Usuarios</label>
           <input
             type="text"
-            class="form-control"
+            class="form-control form-control-sm"
             placeholder="Nombre o legajo..."
             [(ngModel)]="filtroUsuario"
           />
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <label class="form-label">Filtrar Proveedores</label>
           <input
             type="text"
-            class="form-control"
+            class="form-control form-control-sm"
             placeholder="Nombre o contacto..."
             [(ngModel)]="filtroProveedor"
           />
         </div>
-        <div class="col-md-4">
+        <div class="col-md-auto">
           <button
             type="button"
-            class="btn btn-outline-secondary btn-sm me-2"
+            class="btn btn-outline-secondary btn-sm"
             (click)="limpiarFiltros()"
           >
             <i class="bi bi-x-circle me-1"></i>
@@ -165,14 +122,19 @@
     <!-- Sección Usuarios con Herramientas -->
     <div *ngIf="!loading && !mostrarSoloProveedores" class="mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">
-          <i class="bi bi-people-fill me-2"></i>
-          Usuarios con Herramientas ({{ usuariosFiltrados.length }})
-        </h4>
         <div>
+          <h5 class="mb-0">
+            <i class="bi bi-people-fill me-2 text-primary"></i>
+            Usuarios con Herramientas
+            <span class="badge bg-primary ms-2">{{
+              usuariosFiltrados.length
+            }}</span>
+          </h5>
+        </div>
+        <div class="btn-group btn-group-sm" role="group">
           <button
             type="button"
-            class="btn btn-outline-primary btn-sm me-2"
+            class="btn btn-outline-primary"
             (click)="expandirTodosUsuarios()"
             ngbTooltip="Expandir todos"
           >
@@ -180,7 +142,7 @@
           </button>
           <button
             type="button"
-            class="btn btn-outline-secondary btn-sm"
+            class="btn btn-outline-primary"
             (click)="colapsarTodosUsuarios()"
             ngbTooltip="Colapsar todos"
           >
@@ -189,46 +151,53 @@
         </div>
       </div>
 
+      <div *ngIf="usuariosFiltrados.length === 0" class="alert alert-info mb-0">
+        <i class="bi bi-info-circle me-2"></i>
+        No hay usuarios con herramientas prestadas.
+      </div>
+
       <div class="accordion" id="accordionUsuarios">
         <div
           *ngFor="let usuarioData of usuariosFiltrados; let i = index"
-          class="card mb-2"
+          class="accordion-item"
         >
-          <div class="card-header p-0">
+          <h2 class="accordion-header">
             <button
-              class="btn btn-link w-100 d-flex justify-content-between align-items-center text-decoration-none"
+              class="accordion-button"
               type="button"
+              [class.collapsed]="usuarioData.collapsed === true"
               (click)="toggleUsuarioCollapse(usuarioData)"
               [attr.aria-expanded]="!usuarioData.collapsed"
             >
-              <div class="d-flex align-items-center">
-                <div class="badge bg-primary me-3">
+              <div class="d-flex align-items-center w-100">
+                <span class="badge bg-primary me-3">
                   {{ usuarioData.cantidadHerramientas }}
-                </div>
-                <div>
-                  <strong>{{ usuarioData.usuario.nombreCompleto }}</strong>
-                  <small class="d-block text-muted"
-                    >Legajo: {{ usuarioData.usuario.legajo }}</small
-                  >
+                </span>
+                <div class="flex-grow-1">
+                  <div class="fw-semibold">
+                    {{ usuarioData.usuario.nombreCompleto }}
+                  </div>
+                  <small class="text-muted d-block">
+                    Legajo: {{ usuarioData.usuario.legajo }}
+                  </small>
                 </div>
               </div>
-              <i
-                class="bi"
-                [class.bi-chevron-down]="usuarioData.collapsed === true"
-                [class.bi-chevron-up]="usuarioData.collapsed === false"
-              ></i>
             </button>
-          </div>
+          </h2>
 
-          <div [ngbCollapse]="usuarioData.collapsed === true" class="collapse">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-sm">
+          <div
+            class="accordion-collapse collapse"
+            [class.show]="usuarioData.collapsed === false"
+          >
+            <div class="accordion-body p-0">
+              <div class="custom-table-container">
+                <table class="custom-table">
                   <thead>
                     <tr>
-                      <th>Código</th>
-                      <th>Herramienta</th>
-                      <th>Fecha Préstamo</th>
+                      <th style="width: 12%">Código</th>
+                      <th style="width: 50%">Herramienta</th>
+                      <th style="width: 20%">Familia</th>
+                      <th style="width: 18%">Fecha Préstamo</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -239,6 +208,14 @@
                         }}</span>
                       </td>
                       <td>{{ herramienta.nombreHerramienta }}</td>
+                      <td>
+                        <span
+                          class="estado-badge"
+                          [ngClass]="'familia-' + getFamiliaClass(herramienta.familia)"
+                        >
+                          {{ herramienta.familia }}
+                        </span>
+                      </td>
                       <td>{{ formatearFecha(herramienta.fechaPrestamo) }}</td>
                     </tr>
                   </tbody>
@@ -253,14 +230,19 @@
     <!-- Sección Proveedores con Herramientas -->
     <div *ngIf="!loading && !mostrarSoloUsuarios" class="mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">
-          <i class="bi bi-building me-2"></i>
-          Proveedores con Herramientas ({{ proveedoresFiltrados.length }})
-        </h4>
         <div>
+          <h5 class="mb-0">
+            <i class="bi bi-building me-2 text-warning"></i>
+            Proveedores en Mantenimiento
+            <span class="badge bg-warning text-dark ms-2">{{
+              proveedoresFiltrados.length
+            }}</span>
+          </h5>
+        </div>
+        <div class="btn-group btn-group-sm" role="group">
           <button
             type="button"
-            class="btn btn-outline-primary btn-sm me-2"
+            class="btn btn-outline-warning"
             (click)="expandirTodosProveedores()"
             ngbTooltip="Expandir todos"
           >
@@ -268,7 +250,7 @@
           </button>
           <button
             type="button"
-            class="btn btn-outline-secondary btn-sm"
+            class="btn btn-outline-warning"
             (click)="colapsarTodosProveedores()"
             ngbTooltip="Colapsar todos"
           >
@@ -277,52 +259,60 @@
         </div>
       </div>
 
+      <div
+        *ngIf="proveedoresFiltrados.length === 0"
+        class="alert alert-info mb-0"
+      >
+        <i class="bi bi-info-circle me-2"></i>
+        No hay herramientas en mantenimiento con proveedores.
+      </div>
+
       <div class="accordion" id="accordionProveedores">
         <div
           *ngFor="let proveedorData of proveedoresFiltrados; let i = index"
-          class="card mb-2"
+          class="accordion-item"
         >
-          <div class="card-header p-0">
+          <h2 class="accordion-header">
             <button
-              class="btn btn-link w-100 d-flex justify-content-between align-items-center text-decoration-none"
+              class="accordion-button"
               type="button"
+              [class.collapsed]="proveedorData.collapsed === true"
               (click)="toggleProveedorCollapse(proveedorData)"
               [attr.aria-expanded]="!proveedorData.collapsed"
             >
-              <div class="d-flex align-items-center">
-                <div class="badge bg-warning me-3">
+              <div class="d-flex align-items-center w-100">
+                <span class="badge bg-warning text-dark me-3">
                   {{ proveedorData.cantidadHerramientas }}
-                </div>
-                <div>
-                  <strong>{{ proveedorData.proveedor.nombreProveedor }}</strong>
-                  <small class="d-block text-muted">
-                    Contacto: {{ proveedorData.proveedor.contacto }} | Tel:
+                </span>
+                <div class="flex-grow-1">
+                  <div class="fw-semibold">
+                    {{ proveedorData.proveedor.nombreProveedor }}
+                  </div>
+                  <small class="text-muted d-block">
+                    <i class="bi bi-person me-1"></i>
+                    {{ proveedorData.proveedor.contacto }} |
+                    <i class="bi bi-telephone me-1"></i>
                     {{ proveedorData.proveedor.telefono }}
                   </small>
                 </div>
               </div>
-              <i
-                class="bi"
-                [class.bi-chevron-down]="proveedorData.collapsed === true"
-                [class.bi-chevron-up]="proveedorData.collapsed === false"
-              ></i>
             </button>
-          </div>
+          </h2>
 
           <div
-            [ngbCollapse]="proveedorData.collapsed === true"
-            class="collapse"
+            class="accordion-collapse collapse"
+            [class.show]="proveedorData.collapsed === false"
           >
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-sm">
+            <div class="accordion-body p-0">
+              <div class="custom-table-container">
+                <table class="custom-table">
                   <thead>
                     <tr>
-                      <th>Código</th>
-                      <th>Herramienta</th>
-                      <th>Familia</th>
-                      <th>Fecha Mantenimiento</th>
-                      <th>Observaciones</th>
+                      <th style="width: 12%">Código</th>
+                      <th style="width: 35%">Herramienta</th>
+                      <th style="width: 20%">Familia</th>
+                      <th style="width: 15%">Fecha Mant.</th>
+                      <th style="width: 18%">Observaciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -335,17 +325,15 @@
                       <td>{{ herramienta.nombreHerramienta }}</td>
                       <td>
                         <span
-                          class="badge familia-badge"
-                          [ngClass]="getFamiliaClass(herramienta.familia)"
+                          class="estado-badge"
+                          [ngClass]="'familia-' + getFamiliaClass(herramienta.familia)"
                         >
                           {{ herramienta.familia }}
                         </span>
                       </td>
+                      <td>{{ formatearFecha(herramienta.fechaMantenimiento) }}</td>
                       <td>
-                        {{ formatearFecha(herramienta.fechaMantenimiento) }}
-                      </td>
-                      <td>
-                        <small>{{ herramienta.observaciones || "-" }}</small>
+                        {{ herramienta.observaciones || "-" }}
                       </td>
                     </tr>
                   </tbody>
@@ -367,9 +355,10 @@
       class="text-center py-5"
     >
       <i class="bi bi-inbox display-1 text-muted"></i>
-      <h5 class="mt-3">No se encontraron datos</h5>
-      <p class="text-muted">
-        No hay herramientas asignadas a usuarios o en mantenimiento.
+      <h5 class="mt-3 text-muted">No se encontraron datos</h5>
+      <p class="text-muted small">
+        Ajusta los filtros o verifica que haya herramientas asignadas a usuarios
+        en préstamo o en mantenimiento.
       </p>
     </div>
   </div>

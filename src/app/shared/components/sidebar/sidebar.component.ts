@@ -457,6 +457,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
               case 'disponibilidad':
                 this.pageTitle = 'Disponibilidad de Herramientas';
                 break;
+              case 'herramientas-usuario':
+                this.pageTitle = 'Herramientas por Usuario';
+                break;
               default:
                 this.pageTitle = 'Reportes';
             }

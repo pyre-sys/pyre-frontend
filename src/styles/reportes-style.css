@@ -627,3 +627,37 @@
     font-size: 0.75rem;
   }
 }
+
+/* ============================================
+   FAMILIA BADGES - Consistente con otros reportes
+   ============================================ */
+
+.familia-electrica {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border: none !important;
+}
+
+.familia-medicion {
+  background-color: #cfe2ff !important;
+  color: #084298 !important;
+  border: none !important;
+}
+
+.familia-ferreteria {
+  background-color: #d1e7dd !important;
+  color: #0f5132 !important;
+  border: none !important;
+}
+
+.familia-mecanica {
+  background-color: #e2e3e5 !important;
+  color: #383d41 !important;
+  border: none !important;
+}
+
+.familia-default {
+  background-color: #e7e7e7 !important;
+  color: #6c757d !important;
+  border: none !important;
+}

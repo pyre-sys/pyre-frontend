@@ -4,7 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { PageTitleService } from '../../../services/page-title.service';
 import { HerramientaService } from '../../../services/herramienta.service';
 import { AlertaService } from '../../../services/alerta.service';
-import { NgbTooltipModule, NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbTooltipModule,
+  NgbCollapseModule,
+} from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '../../../shared/components/spinner/spinner.component';
 
 // Interfaces para el tipado de datos
@@ -93,14 +96,46 @@ export class HerramientaUsuarioComponent implements OnInit {
   mostrarSoloUsuarios = false;
   mostrarSoloProveedores = false;
 
+  // Estados de resumen para mostrar estadísticas
+  estadosResumen = [
+    {
+      id: 'usuarios',
+      nombre: 'Usuarios con Préstamos',
+      icon: 'bi-people-fill',
+      color: 'primary',
+      key: 'totalUsuariosConPrestamos',
+    },
+    {
+      id: 'herramientas',
+      nombre: 'Prestadas',
+      icon: 'bi-tools',
+      color: 'success',
+      key: 'totalHerramientasPrestadas',
+    },
+    {
+      id: 'proveedores',
+      nombre: 'Proveedores',
+      icon: 'bi-building',
+      color: 'warning',
+      key: 'totalProveedoresConMantenimiento',
+    },
+    {
+      id: 'mantenimiento',
+      nombre: 'Mantenimiento',
+      icon: 'bi-wrench-adjustable',
+      color: 'danger',
+      key: 'totalHerramientasEnMantenimiento',
+    },
+  ];
+
   constructor(
     private pageTitleService: PageTitleService,
     private srvHerramienta: HerramientaService,
-    private srvAlerta: AlertaService
-  ) { }
+    private srvAlerta: AlertaService,
+  ) {}
 
   ngOnInit(): void {
-    this.pageTitleService.setTitle('Reporte Herramientas por Usuario');
+    this.pageTitleService.setTitle('Herramientas por Usuario');
     this.cargarReporte();
   }
 
@@ -112,13 +147,17 @@ export class HerramientaUsuarioComponent implements OnInit {
         this.loading = false;
         if (response.success && response.data) {
           this.reporteData = response.data;
-          this.usuariosConHerramientas = (response.data.usuariosConHerramientas || []).map((u: any) => ({
+          this.usuariosConHerramientas = (
+            response.data.usuariosConHerramientas || []
+          ).map((u: any) => ({
             ...u,
-            collapsed: true
+            collapsed: true,
           }));
-          this.proveedoresConHerramientas = (response.data.proveedoresConHerramientas || []).map((p: any) => ({
+          this.proveedoresConHerramientas = (
+            response.data.proveedoresConHerramientas || []
+          ).map((p: any) => ({
             ...p,
-            collapsed: true
+            collapsed: true,
           }));
           this.resumen = response.data.resumen || null;
         } else {
@@ -128,23 +167,33 @@ export class HerramientaUsuarioComponent implements OnInit {
       error: (error: any) => {
         this.loading = false;
         console.error('Error al cargar el reporte:', error);
-        this.srvAlerta.error('Error al cargar el reporte de herramientas por usuario.');
+        this.srvAlerta.error(
+          'Error al cargar el reporte de herramientas por usuario.',
+        );
       },
     });
   }
 
   // Filtros
   get usuariosFiltrados(): UsuarioConHerramientas[] {
-    return this.usuariosConHerramientas.filter(u =>
-      u.usuario.nombreCompleto.toLowerCase().includes(this.filtroUsuario.toLowerCase()) ||
-      u.usuario.legajo.includes(this.filtroUsuario)
+    return this.usuariosConHerramientas.filter(
+      (u) =>
+        u.usuario.nombreCompleto
+          .toLowerCase()
+          .includes(this.filtroUsuario.toLowerCase()) ||
+        u.usuario.legajo.includes(this.filtroUsuario),
     );
   }
 
   get proveedoresFiltrados(): ProveedorConHerramientas[] {
-    return this.proveedoresConHerramientas.filter(p =>
-      p.proveedor.nombreProveedor.toLowerCase().includes(this.filtroProveedor.toLowerCase()) ||
-      p.proveedor.contacto.toLowerCase().includes(this.filtroProveedor.toLowerCase())
+    return this.proveedoresConHerramientas.filter(
+      (p) =>
+        p.proveedor.nombreProveedor
+          .toLowerCase()
+          .includes(this.filtroProveedor.toLowerCase()) ||
+        p.proveedor.contacto
+          .toLowerCase()
+          .includes(this.filtroProveedor.toLowerCase()),
     );
   }
 
@@ -166,19 +215,25 @@ export class HerramientaUsuarioComponent implements OnInit {
 
   // Expandir/Colapsar todos
   expandirTodosUsuarios(): void {
-    this.usuariosConHerramientas.forEach(u => u.collapsed = false);
+    this.usuariosConHerramientas.forEach((u) => (u.collapsed = false));
   }
 
   colapsarTodosUsuarios(): void {
-    this.usuariosConHerramientas.forEach(u => u.collapsed = true);
+    this.usuariosConHerramientas.forEach((u) => (u.collapsed = true));
   }
 
   expandirTodosProveedores(): void {
-    this.proveedoresConHerramientas.forEach(p => p.collapsed = false);
+    this.proveedoresConHerramientas.forEach((p) => (p.collapsed = false));
   }
 
   colapsarTodosProveedores(): void {
-    this.proveedoresConHerramientas.forEach(p => p.collapsed = true);
+    this.proveedoresConHerramientas.forEach((p) => (p.collapsed = true));
+  }
+
+  // Obtener valor del resumen por clave
+  getResumenValue(key: string): number {
+    if (!this.resumen) return 0;
+    return (this.resumen as any)[key] || 0;
   }
 
   // Helpers para formateo
@@ -194,10 +249,14 @@ export class HerramientaUsuarioComponent implements OnInit {
 
   getFamiliaClass(familia: string): string {
     const fam = familia.toLowerCase();
-    if (fam.includes('eléctrica') || fam.includes('electrica')) return 'familia-electrica';
-    if (fam.includes('medición') || fam.includes('medicion')) return 'familia-medicion';
-    if (fam.includes('ferretería') || fam.includes('ferreteria')) return 'familia-ferreteria';
-    if (fam.includes('mecánica') || fam.includes('mecanica')) return 'familia-mecanica';
+    if (fam.includes('eléctrica') || fam.includes('electrica'))
+      return 'familia-electrica';
+    if (fam.includes('medición') || fam.includes('medicion'))
+      return 'familia-medicion';
+    if (fam.includes('ferretería') || fam.includes('ferreteria'))
+      return 'familia-ferreteria';
+    if (fam.includes('mecánica') || fam.includes('mecanica'))
+      return 'familia-mecanica';
     return 'familia-default';
   }
 
@@ -216,7 +275,7 @@ export class HerramientaUsuarioComponent implements OnInit {
         this.loadingExport = false;
         console.error('Error al descargar reporte general:', error);
         this.srvAlerta.error('Error al descargar el reporte general.');
-      }
+      },
     });
   }
 
