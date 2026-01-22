@@ -30,39 +30,19 @@
             </div>
             <div class="col-md-6">
               <div class="field-group">
-                <label>Fecha de Salida</label>
+                <label>Fecha de Movimiento</label>
                 <div class="optional-text">
                   {{ data.fecha | date : "EEE dd MMM yyyy, HH:mm" : "es" }}
                 </div>
               </div>
             </div>
           </div>
-          <div class="row">
-            <div class="col-12">
+          <div class="row" *ngIf="(data.tipoMovimiento && (data.tipoMovimiento.toLowerCase().includes('prestamo') || data.tipoMovimiento.toLowerCase().includes('reparacion'))) || data.idTipoMovimiento === 3">
+            <div class="col-md-6">
               <div class="field-group">
-                <label *ngIf="isDevolucion()">Fecha de Devolución</label>
-                <label *ngIf="!isDevolucion()"
-                  >Fecha Estimada de Devolución</label
-                >
+                <label>Fecha Estimada de Devolución</label>
                 <div class="optional-text">
-                  <ng-container *ngIf="isDevolucion()">
-                    {{
-                      getFechaDevolucionReal()
-                        ? (getFechaDevolucionReal()
-                          | date : "EEE dd MMM yyyy, HH:mm" : "es")
-                        : data.fecha
-                        ? (data.fecha | date : "EEE dd MMM yyyy, HH:mm" : "es")
-                        : "N/A"
-                    }}
-                  </ng-container>
-                  <ng-container *ngIf="!isDevolucion()">
-                    {{
-                      data.fechaEstimadaDevolucion
-                        ? (data.fechaEstimadaDevolucion
-                          | date : "EEE dd MMM yyyy" : "es")
-                        : "N/A"
-                    }}
-                  </ng-container>
+                  {{ data.fechaEstimadaDevolucion ? (data.fechaEstimadaDevolucion | date : 'EEE dd MMM yyyy' : 'es') : 'N/A' }}
                 </div>
               </div>
             </div>
@@ -81,7 +61,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-12">
+            <div class="col-md-6">
               <div class="field-group">
                 <label>Nombre</label>
                 <div class="optional-text">

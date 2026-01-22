@@ -1,3 +1,26 @@
+/* Reducir el alto de las filas de la tabla */
+.custom-table tr {
+  height: 28px;
+}
+.custom-table td, .custom-table th {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+  vertical-align: middle;
+}
+/* Estilo específico para la columna de nombres en historial */
+.nombre-historial {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #22223b;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  line-height: 1;
+  padding: 0 !important;
+  margin: 0 !important;
+}
 /* Estilos específicos para el componente de historial */
 /* Los estilos base vienen de visor-style.css */
 
@@ -42,10 +65,20 @@
 }
 
 /* Estilos para la tabla de historial */
+
 .custom-table th:nth-child(4),
-.custom-table td:nth-child(4) {
-  width: 180px;
+.custom-table td:nth-child(4),
+.custom-table th:nth-child(5),
+.custom-table td:nth-child(5) {
+  width: 110px;
+  min-width: 90px;
+  max-width: 120px;
   text-align: center;
+}
+
+.custom-table th:nth-child(2),
+.custom-table td:nth-child(2) {
+  width: 260px;
 }
 
 /* Columna CÓDIGO - badge ocupa todo el espacio */

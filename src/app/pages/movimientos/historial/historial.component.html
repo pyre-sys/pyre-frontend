@@ -157,8 +157,8 @@
             <th>Código</th>
             <th>Nombre</th>
             <th>Mov.</th>
-            <th style="width: 180px">Fecha Salida</th>
-            <th style="width: 180px">Fecha Est. Devol.</th>
+            <th style="width: 110px">Fecha Movimiento</th>
+            <th style="width: 110px">Fecha Est. Devol.</th>
             <th>Responsable</th>
             <th>Obra</th>
             <th>Acciones</th>
@@ -172,14 +172,7 @@
               }}</span>
             </td>
             <td>
-              <span
-                class="nombre-truncado"
-                [ngbTooltip]="movimiento.nombreHerramienta"
-                placement="top"
-                container="body"
-              >
-                {{ movimiento.nombreHerramienta }}
-              </span>
+              <span class="nombre-historial">{{ movimiento.nombreHerramienta }}</span>
             </td>
             <td style="text-align: center; vertical-align: middle">
               <i
@@ -201,31 +194,22 @@
               ></i>
             </td>
             <td style="white-space: nowrap">
-              {{ movimiento.fecha | date : "EEE dd MMM yyyy" }}
+              <span [ngbTooltip]="movimiento.fecha | date : 'full' : 'es'" placement="top" container="body">
+                {{ movimiento.fecha | date : "dd-MM-yyyy" }}
+              </span>
             </td>
             <td style="white-space: nowrap">
               <ng-container *ngIf="isDevolucion(movimiento); else notDevuelta">
-                <span
-                  class="badge-devuelta"
-                  [ngbTooltip]="
-                    getFechaDevolucionReal(movimiento)
-                      ? (getFechaDevolucionReal(movimiento)
-                        | date : 'EEE dd MMM yyyy HH:mm')
-                      : 'Fecha desconocida'
-                  "
-                  placement="top"
-                  container="body"
-                >
-                  Devuelta
-                </span>
+                <span class="badge-devuelta">Devuelta</span>
               </ng-container>
               <ng-template #notDevuelta>
-                {{
-                  movimiento.fechaEstimadaDevolucion
-                    ? (movimiento.fechaEstimadaDevolucion
-                      | date : "EEE dd MMM yyyy")
-                    : "-"
-                }}
+                <span *ngIf="movimiento.fechaEstimadaDevolucion; else noFechaEstimada"
+                  [ngbTooltip]="'Se espera que la herramienta retorne este día'"
+                  placement="top"
+                  container="body">
+                  {{ movimiento.fechaEstimadaDevolucion | date : "dd-MM-yyyy" }}
+                </span>
+                <ng-template #noFechaEstimada>-</ng-template>
               </ng-template>
             </td>
             <td>
@@ -239,14 +223,19 @@
               }}
             </td>
             <td>
-              <span
-                class="nombre-truncado"
-                [ngbTooltip]="movimiento.nombreObra || 'N/A'"
-                placement="top"
-                container="body"
-              >
-                {{ movimiento.nombreObra || "N/A" }}
-              </span>
+              <ng-container *ngIf="movimiento.idTipoMovimiento === 3 || (movimiento.tipoMovimiento && movimiento.tipoMovimiento.toLowerCase().includes('repar'))">
+                <span class="badge-devuelta" style="background:#e0e0e0;color:#333;">No aplica</span>
+              </ng-container>
+              <ng-container *ngIf="!(movimiento.idTipoMovimiento === 3 || (movimiento.tipoMovimiento && movimiento.tipoMovimiento.toLowerCase().includes('repar')))" >
+                <span
+                  class="nombre-truncado"
+                  [ngbTooltip]="movimiento.nombreObra || 'N/A'"
+                  placement="top"
+                  container="body"
+                >
+                  {{ movimiento.nombreObra || "N/A" }}
+                </span>
+              </ng-container>
             </td>
             <td>
               <div class="action-buttons">
