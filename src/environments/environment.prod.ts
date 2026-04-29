@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://test.forestdev.com.ar/api', // URL prod
+  apiUrl: 'https://pyre-backend.onrender.com', // URL prod
 };
